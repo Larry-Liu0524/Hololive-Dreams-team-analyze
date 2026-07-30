@@ -101,10 +101,11 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 
 <nav>
   <button data-tab="roster" class="active">① 我的角色庫</button>
-  <button data-tab="analyze">② 隊伍分析</button>
-  <button data-tab="roi">③ 抽卡 ROI 推薦</button>
-  <button data-tab="editor">④ 資料庫編輯</button>
-  <button data-tab="about">⑤ 方法論 / 資料來源</button>
+  <button data-tab="analyze">② 隊伍分析（依歌曲）</button>
+  <button data-tab="practice">③ 隊伍養成分析（不看歌曲）</button>
+  <button data-tab="roi">④ 抽卡 ROI 推薦</button>
+  <button data-tab="editor">⑤ 資料庫編輯</button>
+  <button data-tab="about">⑥ 方法論 / 資料來源</button>
 </nav>
 
 <main>
@@ -148,6 +149,28 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
   </div>
 
   <div id="resultArea"></div>
+</div>
+
+<!-- ============ TAB 2b: PRACTICE (no song length) ============ -->
+<div class="tab" id="tab-practice">
+  <div class="card">
+    <h2>Step 0 · 選擇隊長（不指定歌曲）</h2>
+    <p class="small">這一頁<b>不綁定任何特定歌曲</b>，系統會直接依你在①勾選的持有角色，找出技能節奏彼此重疊最少、空檔最少的隊伍。原因：短歌曲常常會把主動技能「攔腰截斷」——例如 Interval 29 秒的技能，在一首 24 秒的短歌裡根本來不及發動，導致覆蓋率分數看起來很差，但那其實是歌曲太短，不代表這隊搭配不好。這頁改用系統內部一個較長的評估區間，讓每張卡的主動技／必殺技都能跑完好幾輪週期，這樣才看得出這隊技能彼此的「間隔／重疊／空檔」本質上合不合，適合先在這裡練出一隊技能節奏鬆一點、重疊低的隊伍，之後再回到②依你實際要打的歌曲秒數驗證一次。</p>
+    <div class="grid cols2">
+      <div>
+        <label class="small">Leader（必須為持有角色）</label>
+        <select id="leaderSelectPractice"></select>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:8px;">
+        <button class="btn" onclick="runAutoBuildPractice()">🪄 自動建議最佳隊伍（不看歌曲）</button>
+        <button class="btn secondary" onclick="runAnalyzeManualPractice()">分析目前手動隊伍</button>
+      </div>
+    </div>
+    <p class="small" style="margin-top:8px;">手動隊伍：於下方「隊伍組成」直接於 5 個欄位選卡（可留空 by AI 自動補），按「分析目前手動隊伍」查看結果；或直接按「自動建議最佳隊伍」讓系統從你持有角色中窮舉／爬山演算法找出時間軸最順（覆蓋率高、重疊低）的 5 人隊。</p>
+    <div class="grid cols4" id="manualSlotsPractice" style="margin-top:10px;"></div>
+  </div>
+
+  <div id="resultAreaPractice"></div>
 </div>
 
 <!-- ============ TAB 3: ROI ============ -->
@@ -3569,15 +3592,34 @@ function populateSelectors(){
     wrap.appendChild(sel);
     slots.appendChild(wrap);
   }
+
+  // ---- 練習分頁（不看歌曲）用的 Leader 選單 / 手動隊伍插槽，內容與上方同步 ----
+  const leaderSelPractice=document.getElementById("leaderSelectPractice");
+  if(leaderSelPractice){
+    leaderSelPractice.innerHTML = `<option value="">（自動選擇最佳Leader）</option>` + owned.map(c=>`<option value="${c.id}">${c.holomem} - ${c.name}</option>`).join("");
+  }
+  const slotsPractice=document.getElementById("manualSlotsPractice");
+  if(slotsPractice){
+    slotsPractice.innerHTML="";
+    for(let i=0;i<TEAM_SIZE;i++){
+      const sel=document.createElement("select");
+      sel.id="pslot"+i;
+      sel.innerHTML = `<option value="">（空）</option>` + owned.map(c=>`<option value="${c.id}">${c.holomem} - ${c.name}</option>`).join("");
+      const wrap=document.createElement("div");
+      wrap.innerHTML=`<label class="small">位置 ${i+1}${i===0?"（預設Leader，可於上方Leader選單覆蓋）":""}</label>`;
+      wrap.appendChild(sel);
+      slotsPractice.appendChild(wrap);
+    }
+  }
 }
 
-function renderResult(result, song){
-  const el = document.getElementById("resultArea");
+function renderResult(result, song, targetId){
+  const el = document.getElementById(targetId||"resultArea");
   const leaderCard = result.team.find(m=>m.card.id===result.leaderId).card;
 
   let banner = result.leaderPass
-    ? `<div class="ok-banner">✅ Leader Outfit 已啟動：${leaderCard.name}（${leaderCard.outfit?leaderCard.outfit.desc:""}）</div>`
-    : `<div class="warn-banner">⚠️ Leader Outfit 條件未滿足（${result.leaderNote}）——依規格，整隊視為「不完整」，Overall Score 已大幅扣分，建議調整隊員屬性/期別組成。</div>`;
+    ? `<div class="ok-banner">✅ 隊長服裝已啟動：${leaderCard.name}（${leaderCard.outfit?leaderCard.outfit.desc:""}）</div>`
+    : `<div class="warn-banner">⚠️ 隊長服裝條件未滿足（${result.leaderNote}）——依規格，整隊視為「不完整」，總分已大幅扣分，建議調整隊員屬性/期別組成。</div>`;
 
   const condRows = result.conditionReport.map(r=>`
     <tr>
@@ -3607,31 +3649,31 @@ function renderResult(result, song){
         <div class="overall-score">${result.overall.toFixed(1)} <span style="font-size:14px;color:var(--sub);">/ 100</span></div>
       </div>
       ${banner}
-      <h3>Overall Score 組成（權重已正規化，原始105% → 100%）</h3>
-      ${scoreBar("Leader Outfit",WEIGHTS.leader,result.leaderScore)}
-      ${scoreBar("Member Passive",WEIGHTS.passive,result.passiveScore)}
-      ${scoreBar("Timeline (Coverage)",WEIGHTS.timeline,result.timelineScore)}
-      ${scoreBar("Coverage效率(非重疊)",WEIGHTS.coverage,result.coverageScore)}
-      ${scoreBar("Special Order",WEIGHTS.special,result.specialScore)}
-      ${scoreBar("Connect(board加成)",WEIGHTS.connect,result.connectScore)}
-      ${scoreBar("Board",WEIGHTS.board,result.boardScore)}
+      <h3>總分組成（各項權重已正規化，原始總和105% → 100%）</h3>
+      ${scoreBar("隊長服裝",WEIGHTS.leader,result.leaderScore)}
+      ${scoreBar("隊員被動",WEIGHTS.passive,result.passiveScore)}
+      ${scoreBar("時間軸覆蓋率",WEIGHTS.timeline,result.timelineScore)}
+      ${scoreBar("覆蓋效率（扣除重疊）",WEIGHTS.coverage,result.coverageScore)}
+      ${scoreBar("必殺技出場順序",WEIGHTS.special,result.specialScore)}
+      ${scoreBar("連結（面板加成）",WEIGHTS.connect,result.connectScore)}
+      ${scoreBar("面板",WEIGHTS.board,result.boardScore)}
 
-      <h3>Condition Report（每位隊員 PASS/FAIL）</h3>
-      <table><thead><tr><th>隊員</th><th>Leader Outfit</th><th>Passive</th><th>Type搭配</th><th>Generation搭配</th></tr></thead>
+      <h3>逐位隊員條件檢查（PASS/FAIL）</h3>
+      <table><thead><tr><th>隊員</th><th>隊長服裝</th><th>被動</th><th>屬性搭配</th><th>期別搭配</th></tr></thead>
       <tbody>${condRows}</tbody></table>
 
-      <h3>建議出場順序（Special依此順序發動，最小化與Active重疊）</h3>
+      <h3>建議出場順序（必殺技依此順序發動，最小化與主動技重疊）</h3>
       <div class="order-list">${orderChips}</div>
 
-      <h3>Active / Special Skill Timeline</h3>
+      <h3>主動技／必殺技時間軸</h3>
       <div class="metric-row">
-        <div class="metric-box"><div class="num">${result.coverage.toFixed(1)}%</div><div class="lbl">Coverage 覆蓋率</div></div>
-        <div class="metric-box"><div class="num">${result.overlap.toFixed(1)}%</div><div class="lbl">Overlap 重疊(浪費)</div></div>
-        <div class="metric-box"><div class="num">${result.idle.toFixed(1)}%</div><div class="lbl">Idle 空檔</div></div>
+        <div class="metric-box"><div class="num">${result.coverage.toFixed(1)}%</div><div class="lbl">覆蓋率</div></div>
+        <div class="metric-box"><div class="num">${result.overlap.toFixed(1)}%</div><div class="lbl">重疊（浪費）</div></div>
+        <div class="metric-box"><div class="num">${result.idle.toFixed(1)}%</div><div class="lbl">空檔</div></div>
       </div>
-      <div class="legend"><span><i style="background:var(--accent2)"></i>Active Skill</span><span><i style="background:var(--accent)"></i>Special Skill</span></div>
+      <div class="legend"><span><i style="background:var(--accent2)"></i>主動技</span><span><i style="background:var(--accent)"></i>必殺技</span></div>
       <div class="timeline-wrap">${timelineRows}</div>
-      <p class="small">＊沒有時間軸資料的卡片（Active資料為 unknown）不會顯示色塊，代表該卡目前無法納入時間軸計算，僅其Outfit/Passive/Leader效果仍計入評分。</p>
+      <p class="small">＊沒有時間軸資料的卡片（主動技資料為 unknown）不會顯示色塊，代表該卡目前無法納入時間軸計算，僅其服裝/被動/隊長效果仍計入評分。</p>
     </div>
   `;
 }
@@ -3671,6 +3713,41 @@ function runAnalyzeManual(){
   const cards = ids.map(id=>cardById(id));
   const result = scoreTeam(cards, leaderId, song);
   renderResult(result, song);
+}
+
+/* ================= PRACTICE (no song length) ================= */
+function getPracticeSong(){
+  // 不需使用者輸入：內部固定用一個較長的評估區間，讓每張卡的主動技/必殺技都能跑完好幾輪週期，
+  // 這樣才能純粹看出隊伍技能節奏彼此合不合，不受任何特定歌曲秒數影響。
+  const PRACTICE_DURATION = 200;
+  return {id:"practice", title:"隊伍養成分析（不指定歌曲）", performer:"", duration: PRACTICE_DURATION, exLevel:null};
+}
+
+function runAutoBuildPractice(){
+  const owned = ownedCardList();
+  if(owned.length < TEAM_SIZE){ alert("持有角色不足 "+TEAM_SIZE+" 張（需來自至少 "+TEAM_SIZE+" 位不同Holomem），請先到「①我的角色庫」勾選。"); return; }
+  const uniqueHolomem = [...new Set(owned.map(c=>c.holomem))];
+  if(uniqueHolomem.length < TEAM_SIZE){ alert("持有角色的『不同Holomem』數量不足 "+TEAM_SIZE+" 位，同一位Holomem不能同時上場多張卡。"); return; }
+  const song = getPracticeSong();
+  const forcedLeader = document.getElementById("leaderSelectPractice").value || null;
+  const result = findBestTeamOverall(owned, song, forcedLeader);
+  if(!result){ alert("找不到可行隊伍，請確認角色庫是否足夠多樣。"); return; }
+  renderResult(result, song, "resultAreaPractice");
+  result.team.forEach((m,i)=>{ const sel=document.getElementById("pslot"+i); if(sel) sel.value=m.card.id; });
+  document.getElementById("leaderSelectPractice").value = result.leaderId;
+}
+
+function runAnalyzeManualPractice(){
+  const song = getPracticeSong();
+  const ids=[];
+  for(let i=0;i<TEAM_SIZE;i++){ const v=document.getElementById("pslot"+i).value; if(v) ids.push(v); }
+  if(ids.length!==TEAM_SIZE){ alert("請於「隊伍組成」5個欄位都選好卡片，或改用「自動建議最佳隊伍」。"); return; }
+  const holomemSet = new Set(ids.map(id=>cardById(id).holomem));
+  if(holomemSet.size!==TEAM_SIZE){ alert("隊伍中有重複的 Holomem，同一位角色不能同時上場多張卡。"); return; }
+  const leaderId = document.getElementById("leaderSelectPractice").value || ids[0];
+  const cards = ids.map(id=>cardById(id));
+  const result = scoreTeam(cards, leaderId, song);
+  renderResult(result, song, "resultAreaPractice");
 }
 
 function runROI(){
