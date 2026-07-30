@@ -103,10 +103,9 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
   <button data-tab="roster" class="active">① 我的角色庫</button>
   <button data-tab="practice">② 隊伍養成分析（依現有角色）</button>
   <button data-tab="leaderpick">③ 指定隊長找最佳隊伍</button>
-  <button data-tab="analyze">④ 隊伍分析（依歌曲）</button>
-  <button data-tab="roi">⑤ 抽卡 ROI 推薦</button>
-  <button data-tab="editor">⑥ 資料庫編輯</button>
-  <button data-tab="about">⑦ 方法論 / 資料來源</button>
+  <button data-tab="roi">④ 抽卡 ROI 推薦（測試中）</button>
+  <button data-tab="editor">⑤ 資料庫編輯</button>
+  <button data-tab="about">⑥ 方法論 / 資料來源</button>
 </nav>
 
 <main>
@@ -127,36 +126,11 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
   </div>
 </div>
 
-<!-- ============ TAB 2: ANALYZE ============ -->
-<div class="tab" id="tab-analyze">
-  <div class="card">
-    <h2>Step 0 · 選擇歌曲與隊長</h2>
-    <div class="grid cols3">
-      <div>
-        <label class="small">歌曲（依歌曲長度重新計算最佳隊伍）</label>
-        <select id="songSelect"></select>
-      </div>
-      <div>
-        <label class="small">Leader（必須為持有角色）</label>
-        <select id="leaderSelect"></select>
-      </div>
-      <div style="display:flex;align-items:flex-end;gap:8px;">
-        <button class="btn" onclick="runAutoBuild()">🪄 自動建議最佳隊伍</button>
-        <button class="btn secondary" onclick="runAnalyzeManual()">分析目前手動隊伍</button>
-      </div>
-    </div>
-    <p class="small" style="margin-top:8px;">手動隊伍：於下方「隊伍組成」直接於 5 個欄位選卡（可留空 by AI 自動補），按「分析目前手動隊伍」查看結果；或直接按「自動建議最佳隊伍」讓系統從你持有角色中窮舉／爬山演算法找出最高分 5 人隊。</p>
-    <div class="grid cols4" id="manualSlots" style="margin-top:10px;"></div>
-  </div>
-
-  <div id="resultArea"></div>
-</div>
-
 <!-- ============ TAB 2b: PRACTICE (依現有角色，不看歌曲) ============ -->
 <div class="tab" id="tab-practice">
   <div class="card">
     <h2>Step 0 · 選擇隊長（依現有角色，不指定歌曲）</h2>
-    <p class="small">這一頁<b>不綁定任何特定歌曲</b>，系統會直接依你在①勾選的持有角色，找出技能節奏彼此重疊最少、空檔最少的隊伍。原因：短歌曲常常會把主動技能「攔腰截斷」——例如 Interval 29 秒的技能，在一首 24 秒的短歌裡根本來不及發動，導致覆蓋率分數看起來很差，但那其實是歌曲太短，不代表這隊搭配不好。這頁改用系統內部一個較長的評估區間，讓每張卡的主動技／必殺技都能跑完好幾輪週期，這樣才看得出這隊技能彼此的「間隔／重疊／空檔」本質上合不合，適合先在這裡練出一隊技能節奏鬆一點、重疊低的隊伍，之後再回到④依你實際要打的歌曲秒數驗證一次。</p>
+    <p class="small">這一頁<b>不綁定任何特定歌曲</b>，系統會直接依你在①勾選的持有角色，找出技能節奏彼此重疊最少、空檔最少的隊伍。原因：短歌曲常常會把主動技能「攔腰截斷」——例如 Interval 29 秒的技能，在一首 24 秒的短歌裡根本來不及發動，導致覆蓋率分數看起來很差，但那其實是歌曲太短，不代表這隊搭配不好。這頁改用系統內部一個較長的評估區間，讓每張卡的主動技／必殺技都能跑完好幾輪週期，這樣才看得出這隊技能彼此的「間隔／重疊／空檔」本質上合不合，適合先在這裡練出一隊技能節奏鬆一點、重疊低的隊伍。</p>
     <div class="grid cols2">
       <div>
         <label class="small">Leader（必須為持有角色）</label>
@@ -165,6 +139,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
       <div style="display:flex;align-items:flex-end;gap:8px;">
         <button class="btn" onclick="runAutoBuildPractice()">🪄 自動建議最佳隊伍</button>
         <button class="btn secondary" onclick="runAnalyzeManualPractice()">分析目前手動隊伍</button>
+        <button class="btn secondary" onclick="clearPractice()">🗑 清空</button>
       </div>
     </div>
     <p class="small" style="margin-top:8px;">手動隊伍：於下方「隊伍組成」直接於 5 個欄位選卡。按「🪄 自動建議最佳隊伍」時，<b>已經選好的欄位會被鎖定不動</b>，系統只會針對還空著的欄位，從你持有角色中窮舉／爬山演算法找出最佳搭配；如果 5 個欄位全部空白，則會從頭找出整隊最佳組合。全部選好後也可以按「分析目前手動隊伍」直接查看這組隊伍的分數，不會幫你調整任何欄位。</p>
@@ -178,7 +153,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <div class="tab" id="tab-leaderpick">
   <div class="card">
     <h2>Step 0 · 指定隊長</h2>
-    <p class="small">跟④不同：這一頁<b>一定要先選好一位隊長</b>（不提供「自動選擇最佳Leader」，隊長仍只列出你持有的角色），也不需要選歌曲。系統會從<b>資料庫全部卡片</b>（不限於你持有的）窮舉／爬山演算法找出搭配這位隊長客觀上最強的隊友，並在下方結果的「逐位隊員條件檢查」表格標示每一位是<b>✅ 已持有</b>還是<b>🛒 未持有</b>——這樣你就能一次看出理論最佳隊伍長怎樣、以及還缺哪些卡值得抽。</p>
+    <p class="small">這一頁<b>一定要先選好一位隊長</b>（不提供「自動選擇最佳Leader」，隊長仍只列出你持有的角色），也不需要選歌曲。系統會從<b>資料庫全部卡片</b>（不限於你持有的）窮舉／爬山演算法找出搭配這位隊長客觀上最強的隊友，並在下方結果的「逐位隊員條件檢查」表格標示每一位是<b>✅ 已持有</b>還是<b>🛒 未持有</b>——這樣你就能一次看出理論最佳隊伍長怎樣、以及還缺哪些卡值得抽。</p>
     <div class="grid cols2">
       <div>
         <label class="small">隊長（必選，僅列出持有角色）</label>
@@ -187,6 +162,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
       <div style="display:flex;align-items:flex-end;gap:8px;">
         <button class="btn" onclick="runFindBestForLeader()">🪄 找出這位隊長的最佳隊伍</button>
         <button class="btn secondary" onclick="runAnalyzeManualLeaderPick()">分析目前手動隊伍</button>
+        <button class="btn secondary" onclick="clearLeaderPick()">🗑 清空</button>
       </div>
     </div>
     <p class="small" style="margin-top:8px;">手動隊伍：於下方「隊伍組成」直接於 5 個欄位選卡（<b>選項包含資料庫全部卡片，不限於你持有的</b>），可以先把想固定用的角色（不論有沒有持有）放進去。按「🪄 找出這位隊長的最佳隊伍」時，<b>已經選好的欄位（以及上方選的隊長）會被鎖定不動</b>，系統只針對還空著的欄位，從全部卡片中找最佳搭配；全部空白則從頭找出整隊最佳組合。全部選好後也可以按「分析目前手動隊伍」直接查看這組隊伍的分數，不會幫你調整任何欄位。</p>
@@ -199,8 +175,9 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <!-- ============ TAB 3: ROI ============ -->
 <div class="tab" id="tab-roi">
   <div class="card">
-    <h2>抽卡投資報酬率（ROI）推薦</h2>
-    <p class="small">邏輯：針對每一張你「未持有」的卡，模擬「假設加入角色庫」後重新跑一次最佳隊伍演算，比較新最佳隊伍分數 − 目前最佳隊伍分數 = 提升幅度。分數提升幅度越大，代表這張卡越值得優先抽取——這是根據<b>你目前的角色庫</b>算出來的客觀提升值，而不是泛用 Tier 排行榜。</p>
+    <h2>抽卡投資報酬率（ROI）推薦 <span class="small" style="color:var(--warn,#f4a);">（測試中）</span></h2>
+    <div class="warn-banner">⚠️ 這個分頁還在測試階段，目前的演算法可能有邏輯上的疑慮：現在是「假設加入這張未持有的卡後，從全資料庫重新搜尋一次全新的最佳隊伍（Leader 也重選），比較分數差」，這個結果不一定等於「這張卡能補上我目前這隊缺的東西」——比較合理的做法應該是先看你目前評估出來的隊伍卡在哪裡（例如隊長服裝條件沒過、屬性或期別搭配 FAIL、被動觸發不了），再針對這些具體缺口去找哪張卡能補上，而不是每次都整隊重新洗牌比較。這部分還沒有重新設計，數字僅供參考，之後會再調整。</div>
+    <p class="small">目前邏輯：針對每一張你「未持有」的卡，模擬「假設加入角色庫」後重新跑一次最佳隊伍演算，比較新最佳隊伍分數 − 目前最佳隊伍分數 = 提升幅度。分數提升幅度越大，代表這張卡越值得優先抽取——這是根據<b>你目前的角色庫</b>算出來的客觀提升值，而不是泛用 Tier 排行榜。</p>
     <div class="grid cols3">
       <div>
         <label class="small">計算基準歌曲</label>
@@ -215,6 +192,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
       </div>
       <div style="display:flex;align-items:flex-end;">
         <button class="btn" onclick="runROI()">🎯 計算 ROI 排行</button>
+        <button class="btn secondary" onclick="clearROI()">🗑 清空</button>
       </div>
     </div>
   </div>
@@ -235,6 +213,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
         <button class="btn secondary small" onclick="document.getElementById('importFile').click()">⬆ 匯入 JSON</button>
         <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
         <button class="btn secondary small" onclick="resetToDefault()">↺ 還原內建預設資料</button>
+        <button class="btn secondary small" onclick="clearEditor()">🗑 清空編輯欄</button>
       </div>
     </div>
     <h3>新增 / 修改單張卡片</h3>
@@ -259,14 +238,12 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
       <li><b>Active Skill Timeline（併入 Timeline 20%）</b>：以「首次觸發＝Interval秒，之後每隔 Interval 秒觸發一次，每次持續 Duration 秒」的確定性模型建立時間軸（例：Interval23秒/Duration8秒 → 23–31、46–54、69–77…）。＊本遊戲 Active 技能實際帶有機率（低/中/高機率），非 100% 必發；本模型以「高機率視為近似必發」簡化計算，實際遊戲表現會有隨機浮動，請將本工具的時間軸視為「理論上限」而非保證值。</li>
       <li><b>Skill Coverage（10%）</b>：同類型的 Active「Score Up」效果不可疊加，因此 Overlap（重疊/浪費）只計算<b>主動技彼此</b>同時生效的時間佔比；必殺技（Special）與主動技是不同機制、會疊加，兩者重疊不算浪費。Coverage（至少1個技能生效的時間佔比）、Idle（完全沒有技能生效的時間佔比）則涵蓋所有技能種類。Timeline 分數＝Coverage%；Coverage 分數＝Coverage% − Overlap%（此處 Overlap 僅指主動技彼此重疊）。</li>
       <li><b>Song Length</b>：所有時間軸與覆蓋率皆依你選擇的歌曲實際秒數重新計算（資料庫含 168 首歌曲秒數，來源 Game8）。</li>
-      <li><b>Special Skill Order（5%）</b>：Special 技能每首歌只發動一次，依隊伍站位順序發動；因為 Special 可以跟 Active 疊加，站位順序不需要「避開」Active 的時間，真正有意義的目標是讓 Special 盡量落在完全沒有任何技能生效的「Idle 空檔」，把 Idle 轉換成 Coverage——這是唯一無法靠疊加補救的損失。系統會嘗試 5 名成員的站位排列組合，找出「填補 Idle 空檔」效率最高的順序。</li>
+      <li><b>Special Skill Order（不列入本工具加權，僅供參考）</b>：Special 技能每首歌只發動一次，依隊伍站位由左到右依序輪流發動（站位1最早、站位5最晚），彼此之間<b>不能重疊</b>（同時間只有1個必殺技生效），但可以自由跟 Active 疊加。部分 Special 帶有額外加成條件（解析自技能說明文字，例如「40コンボ以上でスコアが120%UP」「ライフ1000以上でスキル発動率が55%UP」）：需要<b>連段(コンボ)</b>門檻的應放越右邊（越晚發動，連段數才夠）；需要<b>生命值(ライフ)</b>門檻的應放越左邊（越早發動，生命值還沒被扣掉太多）；沒有特殊條件的則依「スコアサポート效果%」數值由小到大排，數值越高越晚發動，可疊加在音樂遊戲後段通常較高的連段分數倍率上。這個排序邏輯對<b>實際遊戲分數</b>有實質影響，但因為本工具沒有逐拍模擬連段成長，所以<b>不會反映在 Overall Score</b>裡，僅作為站位建議呈現。</li>
       <li><b>Connect / Board（不列入加權，僅供參考）</b>：本遊戲的 Connect 實際機制是「此卡放置於某 Holomem 技能板的 Connect 格時，提升該技能板效果 X%」，並非同隊成員間的加成；Board 加成因人而異，依玩家板面投資進度不同。這兩項對整隊評分的實際影響難以量化，故不列入 Overall Score 加權計算，只在分析結果中列出原始數值供參考。</li>
-      <li><b>Overall Score</b>：以上各項依 Leader Outfit 30 / Passive 25 / Timeline 20 / Coverage 10 / Special 5 加權（原始權重總和90%，已等比例正規化為100%）。Connect／Board 不計入。</li>
+      <li><b>Overall Score</b>：以上各項依 Leader Outfit 30 / Passive 25 / Timeline 20 / Coverage 10 加權（原始權重總和85%，已等比例正規化為100%）。Special Skill Order／Connect／Board 皆不計入。</li>
     </ol>
     <h3>已知資料限制</h3>
-    <p class="small">目前遊戲（2026/7/23 上線）wiki 資料仍在補齊中：(1) 內建資料庫已收錄 <b>59 張卡</b>——54 位 Holomem 各自的主力 5★卡（來自 AppMedia／Game8 星5一覧），加上 5 張最新追加的水著限定 5★卡（白銀ノエル／大空スバル／不知火フレア／角巻わため／音乃瀬奏），<b>全部 59 張都已取得完整的 Active/Passive/Special/Outfit/Connect/Stats/Type/Generation 數值</b>（AppMedia 有 19 張把技能表渲染成圖片抓不到文字，已改用 Game8 的純文字版頁面補齊，未用假數字填補）；(2) 完整遊戲每位角色通常還有第2、第3張卡（We are hololive!基礎款等），尚未全部收錄，可在「⑥ 資料庫編輯」分頁持續新增；(3) Active 技能的精確發動機率（%）目前沒有任何公開 wiki 揭露確切數字，僅有「低/中/高機率」的質化描述；(4) 歌曲 BPM 目前無公開資料；(5) Holomem Board 逐格效果未逐一列出，改由你在①分頁手動輸入目前的加成%。所有假設與資料缺口都會在介面上明確標示，不會用虛構數字掩蓋。</p>
-    <h3>部署 / GitHub</h3>
-    <p class="small">目前工作環境沒有連接你的 GitHub 或 Google 帳號，因此我無法直接幫你 push 到 repo。這個檔案是完整可獨立運作的單一 HTML（不需伺服器、不需安裝），你可以直接拖進任何 GitHub repo 資料夾用 GitHub Pages host，或存到 Google Drive／雲端硬碟分享。若你想讓我之後直接操作 GitHub 或 Google Drive，可以在 Cowork 設定裡連接對應的 connector，我再幫你自動化更新與部署。</p>
+    <p class="small">目前遊戲（2026/7/23 上線）wiki 資料仍在補齊中：(1) 內建資料庫已收錄 <b>59 張卡</b>——54 位 Holomem 各自的主力 5★卡（來自 AppMedia／Game8 星5一覧），加上 5 張最新追加的水著限定 5★卡（白銀ノエル／大空スバル／不知火フレア／角巻わため／音乃瀬奏），<b>全部 59 張都已取得完整的 Active/Passive/Special/Outfit/Connect/Stats/Type/Generation 數值</b>（AppMedia 有 19 張把技能表渲染成圖片抓不到文字，已改用 Game8 的純文字版頁面補齊，未用假數字填補）；(2) 完整遊戲每位角色通常還有第2、第3張卡（We are hololive!基礎款等），尚未全部收錄，可在「⑤ 資料庫編輯」分頁持續新增；(3) Active 技能的精確發動機率（%）目前沒有任何公開 wiki 揭露確切數字，僅有「低/中/高機率」的質化描述；(4) 歌曲 BPM 目前無公開資料；(5) Holomem Board 逐格效果未逐一列出，改由你在①分頁手動輸入目前的加成%。所有假設與資料缺口都會在介面上明確標示，不會用虛構數字掩蓋。</p>
   </div>
 </div>
 
@@ -3238,7 +3215,7 @@ const GEN_LABELS = {"0":"0期生","1":"1期生","2":"2期生","3":"3期生","4":
 const GEN_ORDER = ["0","1","2","3","4","5","gamers","holox","myth","promise","regloss","advent","id1","id2","id3"];
 const TYPES = ["Happy","Cute","Pure"];
 const TEAM_SIZE = 5; // 依 Game8/Gamerch：1隊 = 5張卡，其中1張為Leader（AppMedia最強編成頁確認）
-const WEIGHTS = {leader:30,passive:25,timeline:20,coverage:10,special:5}; // Connect/Board 不列入加權評分，僅在①分頁與資料庫中作為參考資訊
+const WEIGHTS = {leader:30,passive:25,timeline:20,coverage:10}; // 必殺技出場順序不列入加權(順序不影響真實分數,只影響誰先誰後上場)；Connect/Board 也不列入加權評分，僅在①分頁與資料庫中作為參考資訊
 const WEIGHT_SUM = Object.values(WEIGHTS).reduce((a,b)=>a+b,0); // 90 -> normalize
 
 /* ================= STORAGE ================= */
@@ -3357,40 +3334,43 @@ function coverageMetrics(events,songLen){
   return {coverage,overlap,idle};
 }
 
-function bestSpecialOrder(team,songLen){
-  // 必殺技可以跟主動技疊加(不是浪費)，所以站位順序不需要「避開」主動技的時間；
-  // 真正有意義的目標是：讓必殺技盡量填補「完全沒有任何技能生效」的空檔(Idle)，
-  // 把 Idle 轉換成 Coverage，這才是唯一無法透過疊加補救的損失。
-  const ids = team.map(m=>m.card.id);
-  function permutations(arr){
-    if(arr.length<=1) return [arr];
-    const res=[];
-    arr.forEach((v,i)=>{
-      const rest=arr.slice(0,i).concat(arr.slice(i+1));
-      permutations(rest).forEach(p=>res.push([v,...p]));
-    });
-    return res;
-  }
-  // 基準：完全不考慮必殺技站位順序時，只有主動技覆蓋下的 Idle（用來衡量必殺技實際「補了多少空檔」）
-  const activeOnlyEvents = buildTimeline(team, ids[0], songLen, []);
-  const baseIdle = coverageMetrics(activeOnlyEvents, songLen).idle;
-  const totalSpecialDur = team.reduce((sum,m)=> sum + ((m.card.special&&m.card.special.duration)?m.card.special.duration:0), 0);
-  const maxPossibleFill = Math.min(baseIdle, songLen>0 ? (totalSpecialDur/songLen*100) : 0);
+// 從必殺技說明文字中解析出「額外加成觸發條件」：連段(コンボ)門檻 或 生命值(ライフ)門檻。
+// 目前資料庫沒有另外的結構化欄位存這個條件，但文字說明裡已經有(例如「40コンボ以上でスコアが120%UP」「ライフ1000以上でスキル発動率が55%UP」)，直接解析即可，不需要逐卡手動再標一次。
+function parseSpecialCondition(special){
+  if(!special || !special.desc) return {type:null, threshold:0};
+  const desc = special.desc;
+  let m = desc.match(/(\d+)\s*コンボ以上/);
+  if(m) return {type:"combo", threshold:parseInt(m[1],10)};
+  m = desc.match(/ライフ\s*(\d+)\s*以上/);
+  if(m) return {type:"life", threshold:parseInt(m[1],10)};
+  return {type:null, threshold:0};
+}
 
-  let best=null, bestScore=-1;
-  permutations(ids).forEach(order=>{
-    const events = buildTimeline(team, ids[0], songLen, order);
-    const idleAfter = coverageMetrics(events, songLen).idle;
-    const idleFilled = Math.max(0, baseIdle - idleAfter); // 這個順序把多少 Idle% 轉換成有技能覆蓋
-    const score = maxPossibleFill>0 ? (idleFilled/maxPossibleFill) : 1;
-    if(score>bestScore){ bestScore=score; best=order; }
-  });
-  return {order:best||ids, specialEfficiency: Math.max(0, Math.min(100, (bestScore<0?100:bestScore*100)))};
+function bestSpecialOrder(team,songLen){
+  // 必殺技是依隊伍站位「由左到右」依序輪流發動，不是隨機、站位也不能任意互換視為等價：
+  // 站位1永遠最早發動(這時候連段數還很低、生命值通常還很高)，站位5永遠最晚發動(這時候連段數通常已經累積得比較高)。
+  // 因此排序規則：
+  // 1) 需要「生命值(ライフ)達到門檻」才吃到額外加成的必殺技 → 放越左邊越好(越早發動，生命值還沒被扣掉太多)。
+  // 2) 需要「連段(コンボ)達到門檻」才吃到額外加成的必殺技 → 放越右邊越好(越晚發動，連段數才夠，門檻越高的越要排在更右邊)。
+  // 3) 沒有這類特殊條件的必殺技：音樂遊戲普遍是連段越高、每個note的分數倍率越高，所以「スコアサポート効果%」數值越高的必殺技也應該盡量放越右邊，讓它疊加在後段已經比較高的連段倍率上，換到的實際加分效果更大。
+  function priority(card){
+    const cond = parseSpecialCondition(card.special);
+    const value = (card.special && typeof card.special.value==="number") ? card.special.value : 0;
+    if(cond.type==="life") return -100000 - cond.threshold; // 生命值門檻越高，越要排最左邊
+    if(cond.type==="combo") return 100000 + cond.threshold; // 連段門檻越高，越要排最右邊
+    return value; // 無特殊條件：依數值百分比由小到大排（數值越高，越晚發動越好）
+  }
+  // 主要依 priority 排序；數值/條件完全平手時，一律用 card.id 當固定的次要排序依據，
+  // 確保同一組5張卡不管是從「自動建議」還是「手動分析」進來，內部陣列順序不同，也一定排出同一個結果。
+  const sorted = team.slice().sort((a,b)=> priority(a.card)-priority(b.card) || a.card.id.localeCompare(b.card.id));
+  const order = sorted.map(m=>m.card.id);
+  // 這裡回傳的是依實際遊戲機制推導出的固定規則排序，不是靠搜尋逼近的分數，specialEfficiency 僅作為佔位參考值。
+  return {order, specialEfficiency: 100};
 }
 
 function scoreTeam(ownedTeamCards, leaderId, song){
   // ownedTeamCards: array of card objects length TEAM_SIZE
-  const team = ownedTeamCards.map(c=>({card:c}));
+  let team = ownedTeamCards.map(c=>({card:c}));
   const counts = computeCounts(team);
   const leader = team.find(m=>m.card.id===leaderId).card;
 
@@ -3420,13 +3400,19 @@ function scoreTeam(ownedTeamCards, leaderId, song){
   });
   const passiveScore = passiveKnownCount>0 ? (passiveOkCount/passiveKnownCount*100) : 0;
 
-  // 3/5/6/7. timeline / coverage / special
+  // 3/5/6. timeline / coverage；必殺技站位順序（由左到右依序發動）依連段/生命值門檻與數值高低排出，
+  // 對實際遊戲分數有影響，但本工具沒有逐拍模擬連段成長，所以這裡算出的 Coverage/Overlap/Idle 不會因此改變，
+  // 站位順序本身不計入 Overall Score，只作為參考建議。
   const {order, specialEfficiency} = bestSpecialOrder(team, song.duration);
+  // 把 team 陣列也依這個穩定的站位順序重排，這樣「逐位隊員條件檢查」表格、回寫的隊伍欄位…等
+  // 所有會顯示 team 順序的地方都會跟「建議站位順序」一致，不會再因為這次呼叫時 team 傳進來的
+  // 原始順序不同（例如鎖定欄位 vs 從頭搜尋）而跳動。events/coverage 計算本身跟 team 陣列順序無關，不受影響。
+  team = order.map(id=> team.find(m=>m.card.id===id)).filter(Boolean);
   const events = buildTimeline(team, leaderId, song.duration, order);
   const {coverage, overlap, idle} = coverageMetrics(events, song.duration);
   const timelineScore = coverage;
   const coverageScore = Math.max(0, coverage-overlap);
-  const specialScore = specialEfficiency;
+  const specialScore = specialEfficiency; // 參考資訊，不計入總分
 
   // Connect / Board：保留原始數值做為參考資訊，但不列入 Overall Score 加權
   const connectVals = team.map(m=>m.card.connect?m.card.connect.value:0).filter(v=>v>0);
@@ -3436,7 +3422,7 @@ function scoreTeam(ownedTeamCards, leaderId, song){
   const boardScore = Math.min(100, (boardVals.reduce((a,b)=>a+b,0)/team.length));
 
   const overallRaw = leaderScore*WEIGHTS.leader + passiveScore*WEIGHTS.passive + timelineScore*WEIGHTS.timeline +
-    coverageScore*WEIGHTS.coverage + specialScore*WEIGHTS.special;
+    coverageScore*WEIGHTS.coverage;
   const overall = overallRaw/(WEIGHT_SUM*100)*100;
 
   return {
@@ -3683,34 +3669,38 @@ function toggleOwned(id,val){ OWNED[id]=val; saveOwned(OWNED); updateDbStat(); p
 function setBoard(id,val){ BOARD[id]=parseFloat(val)||0; saveBoard(BOARD); }
 function rosterSelectAll(val){ CARDS.forEach(c=>OWNED[c.id]=val); saveOwned(OWNED); renderRoster(); updateDbStat(); populateSelectors(); }
 
-function populateSelectors(){
-  const songSel=document.getElementById("songSelect");
-  const roiSongSel=document.getElementById("roiSongSelect");
-  [songSel,roiSongSel].forEach(sel=>{
-    const cur=sel.value;
-    sel.innerHTML = SONGS.map(s=>`<option value="${s.id}">${s.title}（${s.performer}）· ${s.duration}秒 · EX${s.exLevel}</option>`).join("");
-    if(cur) sel.value=cur;
+// 把一批卡片依期生(Generation)分組，輸出成 <optgroup> 包住的 <option>，
+// 期生標籤本身是 optgroup 不能被選取，只有底下的角色可以選。
+function cardOptionsGroupedByGen(cardList, optionLabelFn){
+  const byGen = {};
+  cardList.forEach(c=>{
+    const g = c.genCode;
+    if(!byGen[g]) byGen[g]=[];
+    byGen[g].push(c);
   });
-  const leaderSel=document.getElementById("leaderSelect");
-  const owned=ownedCardList();
-  leaderSel.innerHTML = `<option value="">（自動選擇最佳Leader）</option>` + owned.map(c=>`<option value="${c.id}">${c.holomem} - ${c.name}</option>`).join("");
+  const gensPresent = GEN_ORDER.filter(g=>byGen[g] && byGen[g].length);
+  // 保險：如果有資料庫裡出現、但不在 GEN_ORDER 清單裡的期別代碼，補在最後面，避免整組角色消失
+  Object.keys(byGen).forEach(g=>{ if(!gensPresent.includes(g)) gensPresent.push(g); });
+  return gensPresent.map(g=>{
+    const label = GEN_LABELS[g]||g;
+    const opts = byGen[g].map(c=>`<option value="${c.id}">${optionLabelFn(c)}</option>`).join("");
+    return `<optgroup label="${label}">${opts}</optgroup>`;
+  }).join("");
+}
 
-  const slots=document.getElementById("manualSlots");
-  slots.innerHTML="";
-  for(let i=0;i<TEAM_SIZE;i++){
-    const sel=document.createElement("select");
-    sel.id="slot"+i;
-    sel.innerHTML = `<option value="">（空）</option>` + owned.map(c=>`<option value="${c.id}">${c.holomem} - ${c.name}</option>`).join("");
-    const wrap=document.createElement("div");
-    wrap.innerHTML=`<label class="small">位置 ${i+1}${i===0?"（預設Leader，可於上方Leader選單覆蓋）":""}</label>`;
-    wrap.appendChild(sel);
-    slots.appendChild(wrap);
+function populateSelectors(){
+  const roiSongSel=document.getElementById("roiSongSelect");
+  if(roiSongSel){
+    const cur=roiSongSel.value;
+    roiSongSel.innerHTML = SONGS.map(s=>`<option value="${s.id}">${s.title}（${s.performer}）· ${s.duration}秒 · EX${s.exLevel}</option>`).join("");
+    if(cur) roiSongSel.value=cur;
   }
+  const owned=ownedCardList();
 
   // ---- 隊伍養成分析（依現有角色，不看歌曲）用的 Leader 選單 / 手動隊伍插槽，內容與上方同步 ----
   const leaderSelPractice=document.getElementById("leaderSelectPractice");
   if(leaderSelPractice){
-    leaderSelPractice.innerHTML = `<option value="">（自動選擇最佳Leader）</option>` + owned.map(c=>`<option value="${c.id}">${c.holomem} - ${c.name}</option>`).join("");
+    leaderSelPractice.innerHTML = `<option value="">（自動選擇最佳Leader）</option>` + cardOptionsGroupedByGen(owned, c=>`${c.holomem} - ${c.name}`);
   }
   const slotsPractice=document.getElementById("manualSlotsPractice");
   if(slotsPractice){
@@ -3718,7 +3708,7 @@ function populateSelectors(){
     for(let i=0;i<TEAM_SIZE;i++){
       const sel=document.createElement("select");
       sel.id="pslot"+i;
-      sel.innerHTML = `<option value="">（空）</option>` + owned.map(c=>`<option value="${c.id}">${c.holomem} - ${c.name}</option>`).join("");
+      sel.innerHTML = `<option value="">（空）</option>` + cardOptionsGroupedByGen(owned, c=>`${c.holomem} - ${c.name}`);
       const wrap=document.createElement("div");
       wrap.innerHTML=`<label class="small">位置 ${i+1}${i===0?"（預設Leader，可於上方Leader選單覆蓋）":""}</label>`;
       wrap.appendChild(sel);
@@ -3730,7 +3720,7 @@ function populateSelectors(){
   const leaderSelPick=document.getElementById("leaderSelectPick");
   if(leaderSelPick){
     const curPick=leaderSelPick.value;
-    leaderSelPick.innerHTML = `<option value="">（請選擇隊長）</option>` + owned.map(c=>`<option value="${c.id}">${c.holomem} - ${c.name}</option>`).join("");
+    leaderSelPick.innerHTML = `<option value="">（請選擇隊長）</option>` + cardOptionsGroupedByGen(owned, c=>`${c.holomem} - ${c.name}`);
     if(curPick) leaderSelPick.value=curPick;
   }
   const slotsLeaderPick=document.getElementById("manualSlotsLeaderPick");
@@ -3742,7 +3732,7 @@ function populateSelectors(){
     for(let i=0;i<TEAM_SIZE;i++){
       const sel=document.createElement("select");
       sel.id="lpslot"+i;
-      sel.innerHTML = `<option value="">（空）</option>` + CARDS.map(c=>`<option value="${c.id}">${c.holomem} - ${c.name}${OWNED[c.id]?"":"（未持有）"}</option>`).join("");
+      sel.innerHTML = `<option value="">（空）</option>` + cardOptionsGroupedByGen(CARDS, c=>`${c.holomem} - ${c.name}${OWNED[c.id]?"":"（未持有）"}`);
       if(prevVals[i]) sel.value = prevVals[i];
       const wrap=document.createElement("div");
       wrap.innerHTML=`<label class="small">位置 ${i+1}</label>`;
@@ -3779,7 +3769,12 @@ function renderResult(result, song, targetId, highlightOwned){
 
   const orderChips = result.order.map(id=>{
     const c=cardById(id);
-    return `<div class="order-chip ${id===result.leaderId?'leader':''}">${c.holomem}${id===result.leaderId?' 👑':''}</div>`;
+    const cond = parseSpecialCondition(c.special);
+    let reason = "";
+    if(cond.type==="combo") reason = `連段${cond.threshold}+`;
+    else if(cond.type==="life") reason = `生命${cond.threshold}+`;
+    else if(c.special && typeof c.special.value==="number") reason = `數值${c.special.value}%`;
+    return `<div class="order-chip ${id===result.leaderId?'leader':''}">${c.holomem}${id===result.leaderId?' 👑':''}${reason?`<br><span class="small">${reason}</span>`:""}</div>`;
   }).join("");
 
   el.innerHTML = `
@@ -3789,20 +3784,20 @@ function renderResult(result, song, targetId, highlightOwned){
         <div class="overall-score">${result.overall.toFixed(1)} <span style="font-size:14px;color:var(--sub);">/ 100</span></div>
       </div>
       ${banner}
-      <h3>總分組成（各項權重已正規化，原始總和${WEIGHT_SUM}% → 100%；連結／面板不列入加權，僅供參考）</h3>
+      <h3>總分組成（各項權重已正規化，原始總和${WEIGHT_SUM}% → 100%；必殺技出場順序／連結／面板不列入本工具加權，僅供參考）</h3>
       ${scoreBar("隊長服裝",WEIGHTS.leader,result.leaderScore)}
       ${scoreBar("隊員被動",WEIGHTS.passive,result.passiveScore)}
       ${scoreBar("時間軸覆蓋率",WEIGHTS.timeline,result.timelineScore)}
       ${scoreBar("覆蓋效率（扣除重疊）",WEIGHTS.coverage,result.coverageScore)}
-      ${scoreBar("必殺技出場順序",WEIGHTS.special,result.specialScore)}
-      <p class="small">參考資訊（不計入總分）：連結 ${result.connectScore.toFixed(1)} / 100 · 面板 ${result.boardScore.toFixed(1)} / 100</p>
+      <p class="small">參考資訊（不計入總分，本工具未模擬逐拍連段成長）：連結 ${result.connectScore.toFixed(1)} / 100 · 面板 ${result.boardScore.toFixed(1)} / 100</p>
 
       <h3>逐位隊員條件檢查（PASS/FAIL）</h3>
       <table><thead><tr><th>隊員</th>${highlightOwned? "<th>持有狀態</th>":""}<th>隊長服裝</th><th>被動</th><th>屬性搭配</th><th>期別搭配</th></tr></thead>
       <tbody>${condRows}</tbody></table>
 
-      <h3>建議出場順序（必殺技依此順序發動，優先填補完全沒有技能生效的空檔）</h3>
+      <h3>建議站位順序（必殺技依隊伍站位由左到右依序輪流發動，站位1最早發動、站位5最晚）</h3>
       <div class="order-list">${orderChips}</div>
+      <p class="small">＊排序規則：需要<b>生命值(ライフ)達到門檻</b>才吃到額外加成的必殺技放最左邊（越早發動，生命值還沒被扣掉太多）；需要<b>連段(コンボ)達到門檻</b>才吃到額外加成的放最右邊（越晚發動，連段數才夠，門檻越高排越右）；沒有這類條件的則依「スコアサポート效果%」數值由小到大排，數值越高越晚發動，可以疊加在音樂遊戲後段通常已經比較高的連段分數倍率上。這個排序<b>不會反映在本工具的 Overall Score</b>裡（因為沒有逐拍模擬連段成長），但對實際遊戲分數有實質影響，請照這個順序安排站位。</p>
 
       <h3>主動技／必殺技時間軸</h3>
       <div class="metric-row">
@@ -3812,7 +3807,7 @@ function renderResult(result, song, targetId, highlightOwned){
       </div>
       <div class="legend"><span><i style="background:var(--accent2)"></i>主動技</span><span><i style="background:var(--accent)"></i>必殺技</span></div>
       <div class="timeline-wrap">${timelineRows}</div>
-      <p class="small">＊「重疊（浪費）」只計算<b>主動技彼此</b>同時生效的時間（同類型 Score Up 效果不可疊加）；必殺技與主動技是不同機制，會疊加，兩者重疊不算浪費。必殺技出場順序改成優先填補「完全沒有技能生效」的空檔（Idle），而非刻意避開主動技。</p>
+      <p class="small">＊「重疊（浪費）」只計算<b>主動技彼此</b>同時生效的時間（同類型 Score Up 效果不可疊加）；必殺技與主動技是不同機制，會疊加，兩者重疊不算浪費、也不影響必殺技的站位順序。</p>
       <p class="small">＊沒有時間軸資料的卡片（主動技資料為 unknown）不會顯示色塊，代表該卡目前無法納入時間軸計算，僅其服裝/被動/隊長效果仍計入評分。</p>
     </div>
   `;
@@ -3825,34 +3820,6 @@ function pillFor(v){
 }
 function scoreBar(label,weight,score){
   return `<div class="score-bar-row"><div class="label">${label}（${weight}%）</div><div class="score-bar-track"><div class="score-bar-fill" style="width:${score}%;"></div></div><div class="score-bar-val">${score.toFixed(1)}</div></div>`;
-}
-
-function runAutoBuild(){
-  const owned = ownedCardList();
-  if(owned.length < TEAM_SIZE){ alert("持有角色不足 "+TEAM_SIZE+" 張（需來自至少 "+TEAM_SIZE+" 位不同Holomem），請先到「①我的角色庫」勾選。"); return; }
-  const uniqueHolomem = [...new Set(owned.map(c=>c.holomem))];
-  if(uniqueHolomem.length < TEAM_SIZE){ alert("持有角色的『不同Holomem』數量不足 "+TEAM_SIZE+" 位，同一位Holomem不能同時上場多張卡。"); return; }
-  const song = SONGS.find(s=>s.id===document.getElementById("songSelect").value) || SONGS[0];
-  const forcedLeader = document.getElementById("leaderSelect").value || null;
-  const result = findBestTeamOverall(owned, song, forcedLeader);
-  if(!result){ alert("找不到可行隊伍，請確認角色庫是否足夠多樣。"); return; }
-  renderResult(result, song);
-  // reflect into manual slots for visibility
-  result.team.forEach((m,i)=>{ const sel=document.getElementById("slot"+i); if(sel) sel.value=m.card.id; });
-  document.getElementById("leaderSelect").value = result.leaderId;
-}
-
-function runAnalyzeManual(){
-  const song = SONGS.find(s=>s.id===document.getElementById("songSelect").value) || SONGS[0];
-  const ids=[];
-  for(let i=0;i<TEAM_SIZE;i++){ const v=document.getElementById("slot"+i).value; if(v) ids.push(v); }
-  if(ids.length!==TEAM_SIZE){ alert("請於「隊伍組成」5個欄位都選好卡片，或改用「自動建議最佳隊伍」。"); return; }
-  const holomemSet = new Set(ids.map(id=>cardById(id).holomem));
-  if(holomemSet.size!==TEAM_SIZE){ alert("隊伍中有重複的 Holomem，同一位角色不能同時上場多張卡。"); return; }
-  const leaderId = document.getElementById("leaderSelect").value || ids[0];
-  const cards = ids.map(id=>cardById(id));
-  const result = scoreTeam(cards, leaderId, song);
-  renderResult(result, song);
 }
 
 /* ================= PRACTICE (no song length) ================= */
@@ -3887,7 +3854,7 @@ function runAutoBuildPractice(){
     if(!result){ alert("找不到可行隊伍，請確認角色庫是否足夠多樣。"); return; }
   }
   renderResult(result, song, "resultAreaPractice");
-  result.team.forEach((m,i)=>{ const sel=document.getElementById("pslot"+i); if(sel) sel.value=m.card.id; });
+  result.order.forEach((id,i)=>{ const sel=document.getElementById("pslot"+i); if(sel) sel.value=id; });
   document.getElementById("leaderSelectPractice").value = result.leaderId;
 }
 
@@ -3902,6 +3869,12 @@ function runAnalyzeManualPractice(){
   const cards = ids.map(id=>cardById(id));
   const result = scoreTeam(cards, leaderId, song);
   renderResult(result, song, "resultAreaPractice");
+}
+
+function clearPractice(){
+  document.getElementById("leaderSelectPractice").value = "";
+  for(let i=0;i<TEAM_SIZE;i++){ const sel=document.getElementById("pslot"+i); if(sel) sel.value=""; }
+  const el=document.getElementById("resultAreaPractice"); if(el) el.innerHTML="";
 }
 
 /* ================= LEADER-PICK (必須先選隊長，從「全部卡片」找最佳隊友並標示持有狀態) ================= */
@@ -3931,12 +3904,12 @@ function runFindBestForLeader(){
     if(!result){ alert("找不到可行隊伍，請確認資料庫是否足夠多樣（还需其他不同 Holomem 補滿剩餘位置）。"); return; }
   } else {
     const uniqueHolomem = [...new Set(CARDS.filter(c=>c.holomem!==leaderCard.holomem).map(c=>c.holomem))];
-    if(uniqueHolomem.length < TEAM_SIZE-1){ alert("資料庫中可搭配的不同 Holomem 數量不足，請先到「⑥資料庫編輯」補充卡片。"); return; }
+    if(uniqueHolomem.length < TEAM_SIZE-1){ alert("資料庫中可搭配的不同 Holomem 數量不足，請先到「⑤資料庫編輯」補充卡片。"); return; }
     result = findBestTeamOverall(CARDS, song, leaderId);
     if(!result){ alert("找不到可行隊伍，請確認資料庫是否足夠多樣。"); return; }
   }
   renderResult(result, song, "resultAreaLeaderPick", true);
-  result.team.forEach((m,i)=>{ const sel=document.getElementById("lpslot"+i); if(sel) sel.value=m.card.id; });
+  result.order.forEach((id,i)=>{ const sel=document.getElementById("lpslot"+i); if(sel) sel.value=id; });
 }
 
 function runAnalyzeManualLeaderPick(){
@@ -3950,6 +3923,12 @@ function runAnalyzeManualLeaderPick(){
   const song = {id:"leaderpick", title:"指定隊長最佳隊伍（不指定歌曲，從全部卡片挑選）", performer:"", duration:200, exLevel:null};
   const result = scoreTeam(fixedCards, leaderId, song);
   renderResult(result, song, "resultAreaLeaderPick", true);
+}
+
+function clearLeaderPick(){
+  document.getElementById("leaderSelectPick").value = "";
+  for(let i=0;i<TEAM_SIZE;i++){ const sel=document.getElementById("lpslot"+i); if(sel) sel.value=""; }
+  const el=document.getElementById("resultAreaLeaderPick"); if(el) el.innerHTML="";
 }
 
 function runROI(){
@@ -3986,7 +3965,17 @@ function runROI(){
     </div>`).join("");
 }
 
+function clearROI(){
+  document.getElementById("roiMode").value = "single";
+  document.getElementById("roiResult").style.display = "none";
+  document.getElementById("roiList").innerHTML = "";
+}
+
 /* ================= EDITOR ================= */
+function clearEditor(){
+  document.getElementById("cardJsonEditor").value = "";
+}
+
 function renderCardTable(){
   const tbody=document.querySelector("#cardTable tbody");
   tbody.innerHTML = CARDS.map(c=>`
