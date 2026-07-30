@@ -1,0 +1,3760 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hololive Dreams 隊伍最佳化分析器</title>
+<style>
+:root{
+  --bg:#12131a; --panel:#1c1e29; --panel2:#232637; --border:#333650;
+  --text:#e8e9f0; --sub:#9a9db3; --accent:#ff6fa5; --accent2:#7ea6ff;
+  --good:#5fd97a; --bad:#ff5f7e; --warn:#ffc75f;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:"Hiragino Sans","Noto Sans TC",-apple-system,sans-serif;background:var(--bg);color:var(--text);}
+header{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+header h1{font-size:18px;margin:0;}
+header .sub{color:var(--sub);font-size:12px;}
+nav{display:flex;gap:6px;padding:10px 24px;border-bottom:1px solid var(--border);flex-wrap:wrap;background:var(--panel);}
+nav button{background:none;border:1px solid var(--border);color:var(--sub);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;}
+nav button.active{background:var(--accent);color:#1a1020;border-color:var(--accent);font-weight:600;}
+main{padding:20px 24px 60px;max-width:1400px;margin:0 auto;}
+.tab{display:none;} .tab.active{display:block;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;}
+.card h2{margin:0 0 10px;font-size:15px;color:var(--accent2);}
+.card h3{margin:14px 0 8px;font-size:13px;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;}
+.grid{display:grid;gap:10px;}
+.grid.cols2{grid-template-columns:1fr 1fr;}
+.grid.cols3{grid-template-columns:1fr 1fr 1fr;}
+.grid.cols4{grid-template-columns:repeat(4,1fr);}
+@media(max-width:900px){.grid.cols2,.grid.cols3,.grid.cols4{grid-template-columns:1fr;}}
+select,input[type=text],input[type=number],input[type=search]{background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:13px;width:100%;}
+button.btn{background:var(--accent);color:#1a1020;border:none;padding:9px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;}
+button.btn.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--border);font-weight:500;}
+button.btn.small{padding:5px 10px;font-size:12px;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th,td{padding:6px 8px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top;}
+th{color:var(--sub);font-weight:600;position:sticky;top:0;background:var(--panel);}
+.pass{color:var(--good);font-weight:700;}
+.fail{color:var(--bad);font-weight:700;}
+.na{color:var(--sub);}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;}
+.pill.g{background:rgba(95,217,122,.15);color:var(--good);}
+.pill.r{background:rgba(255,95,126,.15);color:var(--bad);}
+.pill.y{background:rgba(255,199,95,.15);color:var(--warn);}
+.roster-list{max-height:520px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px;}
+.roster-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;font-size:12.5px;}
+.roster-item:hover{background:var(--panel2);}
+.roster-item .name{flex:1;}
+.roster-item .tag{color:var(--sub);font-size:11px;}
+.roster-item input[type=number]{width:64px;padding:3px 6px;font-size:11px;}
+.score-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.score-bar-row .label{width:150px;font-size:12.5px;color:var(--sub);flex-shrink:0;}
+.score-bar-track{flex:1;height:14px;background:var(--panel2);border-radius:7px;overflow:hidden;}
+.score-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));}
+.score-bar-val{width:70px;text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums;flex-shrink:0;}
+.overall-score{font-size:44px;font-weight:800;color:var(--accent);}
+.timeline-wrap{margin-top:8px;}
+.timeline-ruler{display:flex;justify-content:space-between;font-size:10px;color:var(--sub);margin-bottom:2px;}
+.timeline-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.timeline-row .who{width:170px;font-size:11.5px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.timeline-track{position:relative;flex:1;height:20px;background:var(--panel2);border-radius:4px;overflow:hidden;}
+.seg{position:absolute;top:0;height:100%;opacity:.85;border-radius:3px;}
+.seg.active{background:var(--accent2);}
+.seg.special{background:var(--accent);}
+.legend{display:flex;gap:16px;font-size:11px;color:var(--sub);margin:6px 0 14px;}
+.legend span{display:inline-flex;align-items:center;gap:5px;}
+.legend i{width:10px;height:10px;border-radius:2px;display:inline-block;}
+.metric-row{display:flex;gap:14px;flex-wrap:wrap;margin:10px 0;}
+.metric-box{flex:1;min-width:120px;background:var(--panel2);border-radius:8px;padding:10px 14px;}
+.metric-box .num{font-size:22px;font-weight:800;}
+.metric-box .lbl{font-size:11px;color:var(--sub);}
+.warn-banner{background:rgba(255,95,126,.12);border:1px solid var(--bad);color:#ffb0c0;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;}
+.ok-banner{background:rgba(95,217,122,.1);border:1px solid var(--good);color:#bdf5c8;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;}
+.small{font-size:11.5px;color:var(--sub);}
+.searchbar{margin-bottom:10px;}
+textarea{width:100%;min-height:260px;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px;font-family:monospace;font-size:12px;}
+.roi-row{display:flex;align-items:center;gap:10px;padding:8px 6px;border-bottom:1px solid var(--border);}
+.roi-rank{width:26px;text-align:center;font-weight:800;color:var(--accent);}
+.roi-name{flex:1;font-size:13px;}
+.roi-name .sub{display:block;color:var(--sub);font-size:11px;}
+.roi-delta{font-weight:800;font-size:15px;color:var(--good);width:90px;text-align:right;}
+.badge-src{font-size:10px;color:var(--sub);}
+a{color:var(--accent2);}
+.flex-between{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.order-list{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;}
+.order-chip{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px;cursor:grab;}
+.order-chip.leader{border-color:var(--accent);color:var(--accent);}
+footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🎤 Hololive Dreams 隊伍最佳化分析器</h1>
+    <div class="sub">依 AppMedia / Gamerch / Game8 公開資料建立 · 以「整隊」而非「單卡」評分</div>
+  </div>
+  <div class="sub" id="dbstat"></div>
+</header>
+
+<nav>
+  <button data-tab="roster" class="active">① 我的角色庫</button>
+  <button data-tab="analyze">② 隊伍分析</button>
+  <button data-tab="roi">③ 抽卡 ROI 推薦</button>
+  <button data-tab="editor">④ 資料庫編輯</button>
+  <button data-tab="about">⑤ 方法論 / 資料來源</button>
+</nav>
+
+<main>
+
+<!-- ============ TAB 1: ROSTER ============ -->
+<div class="tab active" id="tab-roster">
+  <div class="card">
+    <div class="flex-between">
+      <h2>持有角色設定</h2>
+      <div>
+        <button class="btn secondary small" onclick="rosterSelectAll(true)">全選</button>
+        <button class="btn secondary small" onclick="rosterSelectAll(false)">清空</button>
+      </div>
+    </div>
+    <p class="small">勾選你目前持有的卡片。同一位 Holomem 若持有多張卡（例如常駐款＋泳裝款），可以全部勾選——分析時系統會自動確保同一 Holomem 不會同時上場。「Board加成%」為你自己在該卡 Holomem Board 已投資解鎖的效果加成（依你帳號實際進度手動輸入，遊戲未公開統一數值，故無法自動抓取）。</p>
+    <input type="search" class="searchbar" placeholder="搜尋角色 / Holomem / 期別..." id="rosterSearch" oninput="renderRoster()">
+    <div class="roster-list" id="rosterList"></div>
+  </div>
+</div>
+
+<!-- ============ TAB 2: ANALYZE ============ -->
+<div class="tab" id="tab-analyze">
+  <div class="card">
+    <h2>Step 0 · 選擇歌曲與隊長</h2>
+    <div class="grid cols3">
+      <div>
+        <label class="small">歌曲（依歌曲長度重新計算最佳隊伍）</label>
+        <select id="songSelect"></select>
+      </div>
+      <div>
+        <label class="small">Leader（必須為持有角色）</label>
+        <select id="leaderSelect"></select>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:8px;">
+        <button class="btn" onclick="runAutoBuild()">🪄 自動建議最佳隊伍</button>
+        <button class="btn secondary" onclick="runAnalyzeManual()">分析目前手動隊伍</button>
+      </div>
+    </div>
+    <p class="small" style="margin-top:8px;">手動隊伍：於下方「隊伍組成」直接於 5 個欄位選卡（可留空 by AI 自動補），按「分析目前手動隊伍」查看結果；或直接按「自動建議最佳隊伍」讓系統從你持有角色中窮舉／爬山演算法找出最高分 5 人隊。</p>
+    <div class="grid cols4" id="manualSlots" style="margin-top:10px;"></div>
+  </div>
+
+  <div id="resultArea"></div>
+</div>
+
+<!-- ============ TAB 3: ROI ============ -->
+<div class="tab" id="tab-roi">
+  <div class="card">
+    <h2>抽卡投資報酬率（ROI）推薦</h2>
+    <p class="small">邏輯：針對每一張你「未持有」的卡，模擬「假設加入角色庫」後重新跑一次最佳隊伍演算，比較新最佳隊伍分數 − 目前最佳隊伍分數 = 提升幅度。分數提升幅度越大，代表這張卡越值得優先抽取——這是根據<b>你目前的角色庫</b>算出來的客觀提升值，而不是泛用 Tier 排行榜。</p>
+    <div class="grid cols3">
+      <div>
+        <label class="small">計算基準歌曲</label>
+        <select id="roiSongSelect"></select>
+      </div>
+      <div>
+        <label class="small">計算模式</label>
+        <select id="roiMode">
+          <option value="single">單曲（依上方選擇歌曲）</option>
+          <option value="avg">平均（短/中/長三首代表歌曲）</option>
+        </select>
+      </div>
+      <div style="display:flex;align-items:flex-end;">
+        <button class="btn" onclick="runROI()">🎯 計算 ROI 排行</button>
+      </div>
+    </div>
+  </div>
+  <div class="card" id="roiResult" style="display:none;">
+    <h2>ROI 排行榜（分數提升幅度）</h2>
+    <div id="roiList"></div>
+  </div>
+</div>
+
+<!-- ============ TAB 4: EDITOR ============ -->
+<div class="tab" id="tab-editor">
+  <div class="card">
+    <h2>卡片資料庫（可編輯 / 匯入 / 匯出）</h2>
+    <p class="small">內建資料庫目前收錄 <b id="cardCountLabel"></b> 張卡（AppMedia／Gamerch 公開資料整理，完整遊戲約有 160+ 張卡，尚未收錄者可在此以 JSON 格式新增）。標示「unknown」的欄位代表該數值目前未被任何公開 wiki 揭露（例如 Active 發動機率的精確%），系統會在分析時明確標出「資料缺」而非亂猜數字。你的編輯會存在瀏覽器 localStorage，重新整理後仍會保留；也可「匯出」成 JSON 檔備份或分享。</p>
+    <div class="flex-between" style="margin-bottom:8px;">
+      <div>
+        <button class="btn secondary small" onclick="exportData()">⬇ 匯出目前資料庫 JSON</button>
+        <button class="btn secondary small" onclick="document.getElementById('importFile').click()">⬆ 匯入 JSON</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+        <button class="btn secondary small" onclick="resetToDefault()">↺ 還原內建預設資料</button>
+      </div>
+    </div>
+    <h3>新增 / 修改單張卡片</h3>
+    <textarea id="cardJsonEditor" placeholder='貼上單張卡片 JSON，例如 {"id":"...","name":"...","holomem":"...","genCode":"...","type":"Cute", ...}'></textarea>
+    <div style="margin-top:8px;"><button class="btn small" onclick="upsertCardFromEditor()">儲存這張卡片到資料庫</button></div>
+    <h3>目前資料庫一覽</h3>
+    <div style="max-height:420px;overflow:auto;">
+      <table id="cardTable"><thead><tr><th>Holomem</th><th>卡片</th><th>期別/所屬</th><th>Type</th><th>Outfit條件</th><th>Outfit數值</th><th>Active</th><th>來源</th><th></th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TAB 5: ABOUT ============ -->
+<div class="tab" id="tab-about">
+  <div class="card">
+    <h2>分析方法論</h2>
+    <p>本工具依照以下十步驟流程分析「整隊」（而非單卡）表現，資料來源以 <a href="https://appmedia.jp/hololive-dreams" target="_blank">AppMedia</a>、<a href="https://gamerch.com/hololive-dreams" target="_blank">Gamerch</a>、<a href="https://game8.jp/hololive-dreams" target="_blank">Game8</a> 公開 wiki 為主。</p>
+    <ol>
+      <li><b>Leader Outfit（權重 30%）</b>：Leader 的衣裝技能（例如「1期生2人以上」）若未啟動，整隊視為不完整，此項得分為 0，並顯示紅色警告。</li>
+      <li><b>Member Passive（25%）</b>：逐一檢查每位隊員的被動技能觸發條件是否成立（PASS/FAIL）。</li>
+      <li><b>Type / Generation 檢查</b>：於「條件報告」表格中列出每位隊員的 Type、Generation 是否與隊上其他成員形成有效搭配（同屬性/期別≥2）。</li>
+      <li><b>Active Skill Timeline（併入 Timeline 20%）</b>：以「首次觸發＝Interval秒，之後每隔 Interval 秒觸發一次，每次持續 Duration 秒」的確定性模型建立時間軸（例：Interval23秒/Duration8秒 → 23–31、46–54、69–77…）。＊本遊戲 Active 技能實際帶有機率（低/中/高機率），非 100% 必發；本模型以「高機率視為近似必發」簡化計算，實際遊戲表現會有隨機浮動，請將本工具的時間軸視為「理論上限」而非保證值。</li>
+      <li><b>Skill Coverage（10%）</b>：因 Score Up 效果不可疊加，計算 Coverage（至少1個技能生效的時間佔比）、Overlap（≥2個技能同時生效、視為浪費的時間佔比）、Idle（無技能生效的時間佔比）。Timeline 分數＝Coverage%；Coverage 分數＝Coverage% − Overlap%（越少重疊、效率越高）。</li>
+      <li><b>Song Length</b>：所有時間軸與覆蓋率皆依你選擇的歌曲實際秒數重新計算（資料庫含 168 首歌曲秒數，來源 Game8）。</li>
+      <li><b>Special Skill Order（5%）</b>：Special 技能每首歌只發動一次，依隊伍站位順序發動；系統會嘗試 5 名成員的站位排列組合，找出讓 Special 觸發時段盡量落在 Active 技能「Idle 空檔」、彼此不重疊的最佳順序。</li>
+      <li><b>Connect（5%）</b>：本遊戲的 Connect 實際機制是「此卡放置於某 Holomem 技能板的 Connect 格時，提升該技能板效果 X%」，並非同隊成員間的加成（初版规格書假設有誤，已依實際遊戲機制修正）。此項以 Connect 數值的正規化分數呈現，供參考。</li>
+      <li><b>Board（5%）</b>：Holomem Board 加成因人而異（依玩家板面投資進度），故以「角色庫」分頁中你手動輸入的 Board 加成% 計算。</li>
+      <li><b>Overall Score</b>：以上各項依 Leader Outfit 30 / Passive 25 / Timeline 20 / Coverage 10 / Special 5 / Connect 5 / Board 5 加權（原始權重總和105%，已等比例正規化為100%）。</li>
+    </ol>
+    <h3>已知資料限制</h3>
+    <p class="small">目前遊戲（2026/7/23 上線）wiki 資料仍在補齊中：(1) 內建資料庫已收錄 <b>59 張卡</b>——54 位 Holomem 各自的主力 5★卡（來自 AppMedia／Game8 星5一覧），加上 5 張最新追加的水著限定 5★卡（白銀ノエル／大空スバル／不知火フレア／角巻わため／音乃瀬奏），<b>全部 59 張都已取得完整的 Active/Passive/Special/Outfit/Connect/Stats/Type/Generation 數值</b>（AppMedia 有 19 張把技能表渲染成圖片抓不到文字，已改用 Game8 的純文字版頁面補齊，未用假數字填補）；(2) 完整遊戲每位角色通常還有第2、第3張卡（We are hololive!基礎款等），尚未全部收錄，可在「④ 資料庫編輯」分頁持續新增；(3) Active 技能的精確發動機率（%）目前沒有任何公開 wiki 揭露確切數字，僅有「低/中/高機率」的質化描述；(4) 歌曲 BPM 目前無公開資料；(5) Holomem Board 逐格效果未逐一列出，改由你在①分頁手動輸入目前的加成%。所有假設與資料缺口都會在介面上明確標示，不會用虛構數字掩蓋。</p>
+    <h3>部署 / GitHub</h3>
+    <p class="small">目前工作環境沒有連接你的 GitHub 或 Google 帳號，因此我無法直接幫你 push 到 repo。這個檔案是完整可獨立運作的單一 HTML（不需伺服器、不需安裝），你可以直接拖進任何 GitHub repo 資料夾用 GitHub Pages host，或存到 Google Drive／雲端硬碟分享。若你想讓我之後直接操作 GitHub 或 Google Drive，可以在 Cowork 設定裡連接對應的 connector，我再幫你自動化更新與部署。</p>
+  </div>
+</div>
+
+</main>
+<footer>Hololive Dreams Team Builder · 資料來源：AppMedia / Gamerch / Game8（僅供玩家自製攻略工具參考，非官方資料）</footer>
+
+<script>
+/* ================= DATA: CARDS ================= */
+const DEFAULT_CARDS = [
+ {
+  "id": "momoki_ayame_kakuriyo_chochin",
+  "name": "隠世でのほほん、気ままな提灯",
+  "holomem": "百鬼あやめ",
+  "genCode": "2",
+  "genLabel": "2期生",
+  "type": "Pure",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 10433,
+   "technique": 7668,
+   "sense": 7981
+  },
+  "special": {
+   "value": 160,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果160%"
+  },
+  "active": {
+   "interval": 29,
+   "duration": 10,
+   "value": 60,
+   "probTier": "高",
+   "condition": "ピュアタイプ2人以上でスコアが120%UP",
+   "desc": "29秒毎に高確率で10秒間スコアが60%UP ピュアタイプ2人以上でスコアが120%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Pure",
+   "condCount": 2,
+   "value": 41,
+   "desc": "ピュアタイプ2人のパフォーマンスが41%UP"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "support",
+   "value": 60,
+   "desc": "全員のスコアサポート効果60%"
+  },
+  "connect": {
+   "value": 200,
+   "desc": "範囲内のホロメンボード効果を200%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234545"
+ },
+ {
+  "id": "momosuzu_nene_issho_ni_utao_innocent_rhythm",
+  "name": "一緒に歌お！イノセントリズム",
+  "holomem": "桃鈴ねね",
+  "genCode": "5",
+  "genLabel": "5期生",
+  "type": "Cute",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 11380,
+   "technique": 6803,
+   "sense": 7682
+  },
+  "special": {
+   "value": 145,
+   "duration": 11,
+   "desc": "11秒間スコアサポート効果145%"
+  },
+  "active": {
+   "interval": 26,
+   "duration": 9,
+   "value": 60,
+   "probTier": "高",
+   "condition": "ライフ600以上でスコアが120%UP",
+   "desc": "26秒毎に高確率で9秒間スコアが60%UP ライフ600以上でスコアが120%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Cute",
+   "condCount": 2,
+   "value": 11,
+   "desc": "キュートタイプ2人のスコアサポート効果11%"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "performance",
+   "value": 120,
+   "desc": "全員のパフォーマンスが120%UP"
+  },
+  "connect": {
+   "value": 135,
+   "desc": "範囲内のホロメンボード効果を135%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234587"
+ },
+ {
+  "id": "shishiro_botan_lions_hunt",
+  "name": "目を奪う神エイム！lion's hunt",
+  "holomem": "獅白ぼたん",
+  "genCode": "5",
+  "genLabel": "5期生",
+  "type": "Happy",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 10672,
+   "technique": 7991,
+   "sense": 7366
+  },
+  "special": {
+   "value": 160,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果160%"
+  },
+  "active": {
+   "interval": 27,
+   "duration": 9,
+   "value": 60,
+   "probTier": "高",
+   "condition": "ハッピータイプ2人以上でスコアが125%UP",
+   "desc": "27秒毎に高確率で9秒間スコアが60%UP ハッピータイプ2人以上でスコアが125%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Happy",
+   "condCount": 2,
+   "value": 43,
+   "desc": "ハッピータイプ2人以上でハッピータイプ2人のパフォーマンスが43%UP"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "all",
+   "value": 45,
+   "desc": "全員の全パラメータが45%UP"
+  },
+  "connect": {
+   "value": 250,
+   "desc": "範囲内のホロメンボード効果を250%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234590"
+ },
+ {
+  "id": "hakui_koyori_joshukun_kokoro_washizukami_live",
+  "name": "助手くんの心を鷲掴みライブ！",
+  "holomem": "博衣こより",
+  "genCode": "holox",
+  "genLabel": "holoX",
+  "type": "Pure",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7991,
+   "technique": 7366,
+   "sense": 10672
+  },
+  "special": {
+   "value": 145,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果145% ライフ1000以上でスキル発動率が55%UP"
+  },
+  "active": {
+   "interval": 23,
+   "duration": 8,
+   "value": 115,
+   "probTier": "高",
+   "condition": null,
+   "desc": "23秒毎に高確率で8秒間スコア115%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Pure",
+   "condCount": 2,
+   "value": 43,
+   "desc": "ピュアタイプ2人以上でピュアタイプ2人のセンスが43%UP"
+  },
+  "outfit": {
+   "condType": "type",
+   "condVal": "Pure",
+   "condCount": 2,
+   "statTarget": "all",
+   "value": 30,
+   "desc": "ピュアタイプ2人以上で全員の全パラメータが30%UP ピュアタイプ2人以上で全員のスコアサポート効果25%"
+  },
+  "connect": {
+   "value": 135,
+   "desc": "範囲内のホロメンボード効果を135%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234602"
+ },
+ {
+  "id": "pavolia_reine_osumashi_kujaku_to_tashinamu_ippai",
+  "name": "おすまし孔雀と嗜む一杯",
+  "holomem": "パヴォリア・レイネ",
+  "genCode": "id2",
+  "genLabel": "ID2期生",
+  "type": "Happy",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7668,
+   "technique": 10433,
+   "sense": 7981
+  },
+  "special": {
+   "value": 160,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果160%"
+  },
+  "active": {
+   "interval": 29,
+   "duration": 10,
+   "value": 60,
+   "probTier": "高",
+   "condition": "ハッピータイプ2人以上でスコアが120%UP",
+   "desc": "29秒毎に高確率で10秒間スコアが60%UP ハッピータイプ2人以上でスコアが120%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Happy",
+   "condCount": 2,
+   "value": 41,
+   "desc": "ハッピータイプ2人のテクニックが41%UP"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "support",
+   "value": 60,
+   "desc": "全員のスコアサポート効果60%"
+  },
+  "connect": {
+   "value": 135,
+   "desc": "範囲内のホロメンボード効果を135%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234623"
+ },
+ {
+  "id": "ouro_kronii_tengoku_sasayaku_clock_tower",
+  "name": "典獄ささやくClock Tower",
+  "holomem": "オーロ・クロニー",
+  "genCode": "promise",
+  "genLabel": "Promise",
+  "type": "Cute",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7668,
+   "technique": 7981,
+   "sense": 10433
+  },
+  "special": {
+   "value": 115,
+   "duration": 14,
+   "desc": "14秒間スコアサポート効果115%"
+  },
+  "active": {
+   "interval": 33,
+   "duration": 12,
+   "value": 55,
+   "probTier": "高",
+   "condition": "キュートタイプ2人以上でスコアが115%UP",
+   "desc": "33秒毎に高確率で12秒間スコアが55%UP キュートタイプ2人以上でスコアが115%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Cute",
+   "condCount": 2,
+   "value": 41,
+   "desc": "キュートタイプ2人のセンスが41%UP"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "support",
+   "value": 60,
+   "desc": "全員のスコアサポート効果60%"
+  },
+  "connect": {
+   "value": 200,
+   "desc": "範囲内のホロメンボード効果を200%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234647"
+ },
+ {
+  "id": "azki_sakihokoru_ichizuna_hana",
+  "name": "咲き誇る一途な花",
+  "holomem": "AZKi",
+  "genCode": "0",
+  "genLabel": "0期生",
+  "type": "Pure",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 6803,
+   "technique": 7682,
+   "sense": 11380
+  },
+  "special": {
+   "value": 145,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果145% スキル発動率が50%UP"
+  },
+  "active": {
+   "interval": 20,
+   "duration": 7,
+   "value": 60,
+   "probTier": "高",
+   "condition": "ライフ600以上でスコアが120%UP",
+   "desc": "20秒毎に高確率で7秒間スコアが60%UP ライフ600以上でスコアが120%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "0",
+   "condCount": 2,
+   "value": 43,
+   "desc": "0期生2人のセンスが43%UP"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "sense",
+   "value": 120,
+   "desc": "全員のセンスが120%UP"
+  },
+  "connect": {
+   "value": 135,
+   "desc": "範囲内のホロメンボード効果を135%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234524"
+ },
+ {
+  "id": "hoshimachi_suisei_kokoroubau_comet_tune",
+  "name": "心奪うComet Tune",
+  "holomem": "星街すいせい",
+  "genCode": "0",
+  "genLabel": "0期生",
+  "type": "Pure",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 6803,
+   "technique": 11380,
+   "sense": 7682
+  },
+  "special": {
+   "value": 145,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果145% スキル発動率が50%UP"
+  },
+  "active": {
+   "interval": 29,
+   "duration": 10,
+   "value": 60,
+   "probTier": "高",
+   "condition": "ライフ600以上でスコアが120%UP",
+   "desc": "29秒毎に高確率で10秒間スコアが60%UP ライフ600以上でスコアが120%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Pure",
+   "condCount": 2,
+   "value": 41,
+   "desc": "ピュアタイプ2人のテクニックが41%UP"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "technique",
+   "value": 120,
+   "desc": "全員のテクニックが120%UP"
+  },
+  "connect": {
+   "value": 190,
+   "desc": "範囲内のホロメンボード効果を190%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234530"
+ },
+ {
+  "id": "shirakami_fubuki_kitsune_no_omiya_konkonkon",
+  "name": "狐のお宮でこんこんこん",
+  "holomem": "白上フブキ",
+  "genCode": "1",
+  "genLabel": "1期生",
+  "type": "Pure",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 10909,
+   "technique": 7221,
+   "sense": 7844
+  },
+  "special": {
+   "value": 115,
+   "duration": 14,
+   "desc": "14秒間スコアサポート効果115%"
+  },
+  "active": {
+   "interval": 30,
+   "duration": 11,
+   "value": 110,
+   "probTier": "高",
+   "condition": null,
+   "desc": "30秒毎に高確率で11秒間スコアが110%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "1",
+   "condCount": 2,
+   "value": 45,
+   "desc": "1期生が2人以上で1期生2人のパフォーマンスが45%UP"
+  },
+  "outfit": {
+   "condType": "gen",
+   "condVal": "1",
+   "condCount": 2,
+   "statTarget": "all",
+   "value": 50,
+   "desc": "1期生が2人以上で全員の全パラメータが50%UP"
+  },
+  "connect": {
+   "value": 200,
+   "desc": "範囲内のホロメンボード効果を200%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234539"
+ },
+ {
+  "id": "natsuiro_matsuri_hajikeru_kaikatsu_cheerleader",
+  "name": "ハジける快活チアリーダー",
+  "holomem": "夏色まつり",
+  "genCode": "1",
+  "genLabel": "1期生",
+  "type": "Happy",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 11380,
+   "technique": 7682,
+   "sense": 6803
+  },
+  "special": {
+   "value": 145,
+   "duration": 11,
+   "desc": "11秒間スコアサポート効果145%"
+  },
+  "active": {
+   "interval": 23,
+   "duration": 8,
+   "value": 60,
+   "probTier": "高",
+   "condition": "ライフ600以上でスコアが120%UP",
+   "desc": "23秒毎に高確率で8秒間スコアが60%UP ライフ600以上でスコアが120%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "1",
+   "condCount": 2,
+   "value": 43,
+   "desc": "1期生2人のパフォーマンスが43%UP"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "performance",
+   "value": 120,
+   "desc": "全員のパフォーマンスが120%UP"
+  },
+  "connect": {
+   "value": 200,
+   "desc": "範囲内のホロメンボード効果を200%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234542"
+ },
+ {
+  "id": "oozora_subaru_kwatto_jareau_ahiru_no_gogo",
+  "name": "クワッとじゃれ合うアヒルの午後",
+  "holomem": "大空スバル",
+  "genCode": "2",
+  "genLabel": "2期生",
+  "type": "Cute",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 10909,
+   "technique": 7221,
+   "sense": 7844
+  },
+  "special": {
+   "value": 120,
+   "duration": 12,
+   "desc": "12秒間スコアサポート効果120% スキル発動率が40%UP"
+  },
+  "active": {
+   "interval": 34,
+   "duration": 12,
+   "value": 115,
+   "probTier": "高",
+   "condition": null,
+   "desc": "34秒毎に高確率で12秒間スコアが115%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "2",
+   "condCount": 2,
+   "value": 45,
+   "desc": "2期生が2人以上で2期生2人のパフォーマンスが45%UP"
+  },
+  "outfit": {
+   "condType": "gen",
+   "condVal": "2",
+   "condCount": 2,
+   "statTarget": "all",
+   "value": 50,
+   "desc": "2期生が2人以上で全員の全パラメータが50%UP"
+  },
+  "connect": {
+   "value": 160,
+   "desc": "範囲内のホロメンボード効果を160%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234551"
+ },
+ {
+  "id": "ookami_mio_hotto_torokeru_nightscape",
+  "name": "ホッととろけるnightscape",
+  "holomem": "大神ミオ",
+  "genCode": "gamers",
+  "genLabel": "ゲーマーズ",
+  "type": "Cute",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7844,
+   "technique": 7221,
+   "sense": 10909
+  },
+  "special": {
+   "value": 115,
+   "duration": 14,
+   "desc": "14秒間スコアサポート効果115%"
+  },
+  "active": {
+   "interval": 27,
+   "duration": 9,
+   "value": 120,
+   "probTier": "高",
+   "condition": null,
+   "desc": "27秒毎に高確率で9秒間スコアが120%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "gamers",
+   "condCount": 2,
+   "value": 12,
+   "desc": "ゲーマーズが2人以上でゲーマーズ2人のスコアサポート効果12%"
+  },
+  "outfit": {
+   "condType": "gen",
+   "condVal": "gamers",
+   "condCount": 2,
+   "statTarget": "all",
+   "value": 50,
+   "desc": "ゲーマーズが2人以上で全員の全パラメータが50%UP"
+  },
+  "connect": {
+   "value": 190,
+   "desc": "範囲内のホロメンボード効果を190%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234554"
+ },
+ {
+  "id": "shiranui_flare_half_elf_no_kaze_wataru_gondola",
+  "name": "ハーフエルフの風渡るゴンドラ",
+  "holomem": "不知火フレア",
+  "genCode": "3",
+  "genLabel": "3期生",
+  "type": "Pure",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 11380,
+   "technique": 6803,
+   "sense": 7682
+  },
+  "special": {
+   "value": 135,
+   "duration": 12,
+   "desc": "12秒間スコアサポート効果135%"
+  },
+  "active": {
+   "interval": 16,
+   "duration": 6,
+   "value": 60,
+   "probTier": "中",
+   "condition": "40コンボ以上でスコアが110%UP",
+   "desc": "16秒毎に中確率で6秒間スコアが60%UP 40コンボ以上でスコアが110%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Cute",
+   "condCount": 2,
+   "value": 11,
+   "desc": "キュートタイプ2人のスコアサポート効果11%"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "performance",
+   "value": 120,
+   "desc": "全員のパフォーマンスが120%UP"
+  },
+  "connect": {
+   "value": 160,
+   "desc": "範囲内のホロメンボード効果を160%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234566"
+ },
+ {
+  "id": "houshou_marin_youen_afureru_marine_blue",
+  "name": "妖艶あふれるマリンブルー",
+  "holomem": "宝鐘マリン",
+  "genCode": "3",
+  "genLabel": "3期生",
+  "type": "Happy",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7221,
+   "technique": 10909,
+   "sense": 7844
+  },
+  "special": {
+   "value": 120,
+   "duration": 12,
+   "desc": "12秒間スコアサポート効果120% スキル発動率が40%UP"
+  },
+  "active": {
+   "interval": 23,
+   "duration": 8,
+   "value": 115,
+   "probTier": "高",
+   "condition": null,
+   "desc": "23秒毎に高確率で8秒間スコアが115%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "3",
+   "condCount": 2,
+   "value": 12,
+   "desc": "3期生が2人以上で3期生2人のスコアサポート効果12%"
+  },
+  "outfit": {
+   "condType": "gen",
+   "condVal": "3",
+   "condCount": 2,
+   "statTarget": "all",
+   "value": 50,
+   "desc": "3期生が2人以上で全員の全パラメータが50%UP"
+  },
+  "connect": {
+   "value": 190,
+   "desc": "範囲内のホロメンボード効果を190%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234572"
+ },
+ {
+  "id": "himemori_luna_hime_ni_chusei_afternoon",
+  "name": "姫に忠誠アフタヌーン",
+  "holomem": "姫森ルーナ",
+  "genCode": "4",
+  "genLabel": "4期生",
+  "type": "Happy",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7682,
+   "technique": 11380,
+   "sense": 6803
+  },
+  "special": {
+   "value": 115,
+   "duration": 14,
+   "desc": "14秒間スコアサポート効果115%"
+  },
+  "active": {
+   "interval": 29,
+   "duration": 10,
+   "value": 60,
+   "probTier": "高",
+   "condition": "40コンボ以上でスコアが120%UP",
+   "desc": "29秒毎に高確率で10秒間スコアが60%UP 40コンボ以上でスコアが120%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "4",
+   "condCount": 2,
+   "value": 43,
+   "desc": "4期生2人のテクニックが43%UP"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "technique",
+   "value": 120,
+   "desc": "全員のテクニックが120%UP"
+  },
+  "connect": {
+   "value": 270,
+   "desc": "範囲内のホロメンボード効果を270%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234581"
+ },
+ {
+  "id": "yukihana_lamy_sabishigariya_na_yukiyoru_no_reijou",
+  "name": "さびしがり屋な雪夜の令嬢",
+  "holomem": "雪花ラミィ",
+  "genCode": "5",
+  "genLabel": "5期生",
+  "type": "Pure",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7221,
+   "technique": 7844,
+   "sense": 10909
+  },
+  "special": {
+   "value": 120,
+   "duration": 12,
+   "desc": "12秒間スコアサポート効果120% スキル発動率が40%UP"
+  },
+  "active": {
+   "interval": 23,
+   "duration": 8,
+   "value": 115,
+   "probTier": "高",
+   "condition": null,
+   "desc": "23秒毎に高確率で8秒間スコアが115%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "5",
+   "condCount": 2,
+   "value": 33,
+   "desc": "5期生が2人以上で自身の全パラメータが33%UP"
+  },
+  "outfit": {
+   "condType": "gen",
+   "condVal": "5",
+   "condCount": 2,
+   "statTarget": "all",
+   "value": 50,
+   "desc": "5期生が2人以上で全員の全パラメータが50%UP"
+  },
+  "connect": {
+   "value": 250,
+   "desc": "範囲内のホロメンボード効果を250%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234584"
+ },
+ {
+  "id": "kazama_iroha_chikurin_jakin_to_ittoryodan",
+  "name": "ちくりんジャキン！と一刀両断",
+  "holomem": "風真いろは",
+  "genCode": "holox",
+  "genLabel": "holoX",
+  "type": "Cute",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 6947,
+   "technique": 11145,
+   "sense": 7828
+  },
+  "special": {
+   "value": 145,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果145% ライフ1000以上でスキル発動率が55%UP"
+  },
+  "active": {
+   "interval": 30,
+   "duration": 11,
+   "value": 110,
+   "probTier": "高",
+   "condition": null,
+   "desc": "30秒毎に高確率で11秒間スコアが110%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Cute",
+   "condCount": 2,
+   "value": 11,
+   "desc": "キュートタイプ2人のスコアサポート効果11%"
+  },
+  "outfit": {
+   "condType": "type",
+   "condVal": "Cute",
+   "condCount": 2,
+   "statTarget": "technique",
+   "value": 130,
+   "desc": "キュートタイプ2人以上で全員のテクニックが130%UP"
+  },
+  "connect": {
+   "value": 250,
+   "desc": "範囲内のホロメンボード効果を250%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234605"
+ },
+ {
+  "id": "airani_iofifteen_cosmos_palette",
+  "name": "陽光射すCosmos Palette",
+  "holomem": "アイラニ・イオフィフティーン",
+  "genCode": "id1",
+  "genLabel": "ID1期生",
+  "type": "Pure",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7828,
+   "technique": 11145,
+   "sense": 6947
+  },
+  "special": {
+   "value": 145,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果145%　100コンボ以上でスキル発動率が55%UP"
+  },
+  "active": {
+   "interval": 17,
+   "duration": 6,
+   "value": 120,
+   "probTier": "中",
+   "condition": null,
+   "desc": "17秒毎に中確率で6秒間スコアが120%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Pure",
+   "condCount": 2,
+   "value": 41,
+   "desc": "ピュアタイプ2人のテクニックが41%UP"
+  },
+  "outfit": {
+   "condType": "type",
+   "condVal": "Pure",
+   "condCount": 2,
+   "statTarget": "technique",
+   "value": 130,
+   "desc": "ピュアタイプ2人以上で全員のテクニックが130%UP"
+  },
+  "connect": {
+   "value": 200,
+   "desc": "範囲内のホロメンボード効果を200%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234614"
+ },
+ {
+  "id": "bestia_zeta_hidamari_to_neko_to_kouseiin",
+  "name": "陽だまりとネコと構成員",
+  "holomem": "ベスティア・ゼータ",
+  "genCode": "id3",
+  "genLabel": "ID3期生",
+  "type": "Happy",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 10909,
+   "technique": 7844,
+   "sense": 7221
+  },
+  "special": {
+   "value": 115,
+   "duration": 14,
+   "desc": "14秒間スコアサポート効果115%"
+  },
+  "active": {
+   "interval": 25,
+   "duration": 11,
+   "value": 90,
+   "probTier": "高",
+   "condition": null,
+   "desc": "25秒毎に高確率で11秒間スコアが90%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "id3",
+   "condCount": 2,
+   "value": 33,
+   "desc": "ID3期生が2人以上で自身の全パラメータが33%UP"
+  },
+  "outfit": {
+   "condType": "gen",
+   "condVal": "id3",
+   "condCount": 2,
+   "statTarget": "all",
+   "value": 50,
+   "desc": "ID3期生が2人以上で全員の全パラメータが50%UP"
+  },
+  "connect": {
+   "value": 190,
+   "desc": "範囲内のホロメンボード効果を190%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234626"
+ },
+ {
+  "id": "mori_calliope_reapers_death_flow",
+  "name": "Reaper's death flow",
+  "holomem": "森カリオペ",
+  "genCode": "myth",
+  "genLabel": "Myth",
+  "type": "Pure",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 10909,
+   "technique": 7221,
+   "sense": 7844
+  },
+  "special": {
+   "value": 120,
+   "duration": 12,
+   "desc": "12秒間スコアサポート効果120%　スキル発動率が40%UP"
+  },
+  "active": {
+   "interval": 33,
+   "duration": 11,
+   "value": 120,
+   "probTier": "高",
+   "condition": null,
+   "desc": "33秒毎に高確率で11秒間スコアが120%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "myth",
+   "condCount": 2,
+   "value": 12,
+   "desc": "Mythが2人以上でMythが2人のスコアサポート効果12%"
+  },
+  "outfit": {
+   "condType": "gen",
+   "condVal": "myth",
+   "condCount": 2,
+   "statTarget": "all",
+   "value": 50,
+   "desc": "Mythが2人以上で全員の全パラメータが50%UP"
+  },
+  "connect": {
+   "value": 190,
+   "desc": "範囲内のホロメンボード効果を190%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234635"
+ },
+ {
+  "id": "takanashi_kiara_lovely_phoenix_diner",
+  "name": "Lovely Phoenixダイナー",
+  "holomem": "小鳥遊キアラ",
+  "genCode": "myth",
+  "genLabel": "Myth",
+  "type": "Cute",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 11145,
+   "technique": 6947,
+   "sense": 7828
+  },
+  "special": {
+   "value": 145,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果145% 100コンボ以上でスキル発動率が55%UP"
+  },
+  "active": {
+   "interval": 23,
+   "duration": 8,
+   "value": 115,
+   "probTier": "高",
+   "condition": null,
+   "desc": "23秒毎に高確率で8秒間スコアが115%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Cute",
+   "condCount": 2,
+   "value": 11,
+   "desc": "キュートタイプ2人のスコアサポート効果11%"
+  },
+  "outfit": {
+   "condType": "type",
+   "condVal": "Cute",
+   "condCount": 2,
+   "statTarget": "performance",
+   "value": 130,
+   "desc": "キュートタイプ2人以上で全員のパフォーマンスが130%UP"
+  },
+  "connect": {
+   "value": 190,
+   "desc": "範囲内のホロメンボード効果を190%UP 効果マス範囲5マス"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234638"
+ },
+ {
+  "id": "shiori_novella_shoko_de_hagukumu_tankyushin",
+  "name": "書庫ではぐくむ探究心",
+  "holomem": "シオリ・ノヴェラ",
+  "genCode": "advent",
+  "genLabel": "Advent",
+  "type": "Happy",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 11380,
+   "technique": 6803,
+   "sense": 7682
+  },
+  "special": {
+   "value": 145,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果145% スキル発動率が50%UP"
+  },
+  "active": {
+   "interval": 32,
+   "duration": 11,
+   "value": 60,
+   "probTier": "高",
+   "condition": "40コンボ以上でスコアが120%UP",
+   "desc": "32秒毎に高確率で11秒間スコアが60%UP 40コンボ以上でスコアが120%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "advent",
+   "condCount": 2,
+   "value": 43,
+   "desc": "Advent2人のパフォーマンスが43%UP"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "performance",
+   "value": 120,
+   "desc": "全員のパフォーマンスが120%UP"
+  },
+  "connect": {
+   "value": 260,
+   "desc": "範囲内のホロメンボード効果を260%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234653"
+ },
+ {
+  "id": "mococo_abyssgard_nohohon_donut_party",
+  "name": "のほほんドーナツパーティー♪",
+  "holomem": "モココ・アビスガード",
+  "genCode": "advent",
+  "genLabel": "Advent",
+  "type": "Cute",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7828,
+   "technique": 6947,
+   "sense": 11145
+  },
+  "special": {
+   "value": 130,
+   "duration": 11,
+   "desc": "11秒間スコアサポート効果130% 100コンボ以上でスキル発動率が50%UP"
+  },
+  "active": {
+   "interval": 25,
+   "duration": 8,
+   "value": 125,
+   "probTier": "高",
+   "condition": null,
+   "desc": "25秒毎に高確率で8秒間スコアが125%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Cute",
+   "condCount": 2,
+   "value": 11,
+   "desc": "キュートタイプ2人のスコアサポート効果11%"
+  },
+  "outfit": {
+   "condType": "type",
+   "condVal": "Cute",
+   "condCount": 2,
+   "statTarget": "sense",
+   "value": 130,
+   "desc": "キュートタイプ2人以上で全員のセンスが130%UP"
+  },
+  "connect": {
+   "value": 160,
+   "desc": "範囲内のホロメンボード効果を160%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234665"
+ },
+ {
+  "id": "otonose_kanade_parade_de_egao_wo_otodoke",
+  "name": "パレードで笑顔をお届け",
+  "holomem": "音乃瀬奏",
+  "genCode": "regloss",
+  "genLabel": "ReGLOSS",
+  "type": "Pure",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7828,
+   "technique": 6947,
+   "sense": 11145
+  },
+  "special": {
+   "value": 145,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果145% 100コンボ以上でスキル発動率が55%UP"
+  },
+  "active": {
+   "interval": 27,
+   "duration": 12,
+   "value": 90,
+   "probTier": "高",
+   "condition": null,
+   "desc": "27秒毎に高確率で12秒間スコアが90%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "regloss",
+   "condCount": 2,
+   "value": 43,
+   "desc": "ReGLOSS2人のセンスが43%UP"
+  },
+  "outfit": {
+   "condType": "type",
+   "condVal": "Pure",
+   "condCount": 2,
+   "statTarget": "sense",
+   "value": 130,
+   "desc": "ピュアタイプ2人以上で全員のセンスが130%UP"
+  },
+  "connect": {
+   "value": 190,
+   "desc": "範囲内のホロメンボード効果を190%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234668"
+ },
+ {
+  "id": "ichijou_ririka_shinya_ni_hitoiki_ceo_no_genkaimeshi",
+  "name": "深夜にひと息、CEOの限界飯",
+  "holomem": "一条莉々華",
+  "genCode": "regloss",
+  "genLabel": "ReGLOSS",
+  "type": "Happy",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 10909,
+   "technique": 7844,
+   "sense": 7221
+  },
+  "special": {
+   "value": 135,
+   "duration": 12,
+   "desc": "12秒間スコアサポート効果135%"
+  },
+  "active": {
+   "interval": 30,
+   "duration": 11,
+   "value": 110,
+   "probTier": "高",
+   "condition": null,
+   "desc": "30秒毎に高確率で11秒間スコアが110%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "regloss",
+   "condCount": 2,
+   "value": 45,
+   "desc": "ReGLOSSが2人以上でReGLOSS2人のパフォーマンスが45%UP"
+  },
+  "outfit": {
+   "condType": "gen",
+   "condVal": "regloss",
+   "condCount": 2,
+   "statTarget": "all",
+   "value": 50,
+   "desc": "ReGLOSSが2人以上で全員の全パラメータが50%UP"
+  },
+  "connect": {
+   "value": 190,
+   "desc": "範囲内のホロメンボード効果を190%UP（効果マス範囲：5マス）"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234671"
+ },
+ {
+  "id": "juufuutei_raden_eichi_wo_tomoshi_art_ni_michibiku",
+  "name": "叡智を灯し、アートに導く",
+  "holomem": "儒烏風亭らでん",
+  "genCode": "regloss",
+  "genLabel": "ReGLOSS",
+  "type": "Happy",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7682,
+   "technique": 6803,
+   "sense": 11380
+  },
+  "special": {
+   "value": 145,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果145% スキル発動率が50%UP"
+  },
+  "active": {
+   "interval": 22,
+   "duration": 8,
+   "value": 55,
+   "probTier": "高",
+   "condition": "ライフ600以上でスコアが115%UP",
+   "desc": "22秒毎に高確率で8秒間スコアが55%UP ライフ600以上でスコアが115%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "regloss",
+   "condCount": 2,
+   "value": 43,
+   "desc": "ReGLOSS2人のセンスが43%UP"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "sense",
+   "value": 120,
+   "desc": "全員のセンスが120%UP"
+  },
+  "connect": {
+   "value": 135,
+   "desc": "範囲内のホロメンボード効果を135%UP 効果マス範囲8マス"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234674"
+ },
+ {
+  "id": "todoroki_hajime_garii_bancho_no_osusowake",
+  "name": "ガーリー番長のお裾分け",
+  "holomem": "轟はじめ",
+  "genCode": "regloss",
+  "genLabel": "ReGLOSS",
+  "type": "Cute",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 11380,
+   "technique": 6803,
+   "sense": 7682
+  },
+  "special": {
+   "value": 145,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果145% スキル発動率が50%UP"
+  },
+  "active": {
+   "interval": 26,
+   "duration": 9,
+   "value": 60,
+   "probTier": "高",
+   "condition": "40コンボ以上でスコアが120%UP",
+   "desc": "26秒毎に高確率で9秒間スコアが60%UP 40コンボ以上でスコアが120%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Cute",
+   "condCount": 2,
+   "value": 41,
+   "desc": "キュートタイプ2人のパフォーマンスが41%UP"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "performance",
+   "value": 120,
+   "desc": "全員のパフォーマンスが120%UP"
+  },
+  "connect": {
+   "value": 190,
+   "desc": "範囲内のホロメンボード効果を190%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234677"
+ },
+ {
+  "id": "tokino_sora_hitamuki_ni_egaku_niji_no_uta",
+  "name": "ひたむきに描く虹のうた",
+  "holomem": "ときのそら",
+  "genCode": "0",
+  "genLabel": "0期生",
+  "type": "Cute",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 10909,
+   "technique": 7221,
+   "sense": 7844
+  },
+  "special": {
+   "value": 160,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果160%"
+  },
+  "active": {
+   "interval": 24,
+   "duration": 10,
+   "value": 100,
+   "probTier": "中",
+   "condition": null,
+   "desc": "24秒毎に中確率で10秒間スコアが100%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "0",
+   "condCount": 2,
+   "value": 33,
+   "desc": "0期生が2人以上で自身の全パラメータが33%UP"
+  },
+  "outfit": {
+   "condType": "gen",
+   "condVal": "0",
+   "condCount": 2,
+   "statTarget": "all",
+   "value": 50,
+   "desc": "0期生が2人以上で全員の全パラメータが50%UP"
+  },
+  "connect": {
+   "value": 250,
+   "desc": "範囲内のホロメンボード効果を250%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234518"
+ },
+ {
+  "id": "roboco_vsign",
+  "name": "高性能なVサイン",
+  "holomem": "ロボ子さん",
+  "genCode": "0",
+  "genLabel": "0期生",
+  "type": "Happy",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 11145,
+   "technique": 7828,
+   "sense": 6947
+  },
+  "special": {
+   "value": 145,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果145% ライフ1000以上でスキル発動率が55%UP"
+  },
+  "active": {
+   "interval": 18,
+   "duration": 8,
+   "value": 90,
+   "probTier": "高",
+   "condition": null,
+   "desc": "18秒毎に高確率で8秒間スコアが90%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Happy",
+   "condCount": 2,
+   "value": 11,
+   "desc": "ハッピータイプ2人のスコアサポート効果11%"
+  },
+  "outfit": {
+   "condType": "type",
+   "condVal": "Happy",
+   "condCount": 2,
+   "statTarget": "performance",
+   "value": 130,
+   "desc": "ハッピータイプ2人以上で全員のパフォーマンスが130%UP"
+  },
+  "connect": {
+   "value": 190,
+   "desc": "範囲内のホロメンボード効果を190%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234521"
+ },
+ {
+  "id": "sakuramiko_sakurabloom",
+  "name": "サクラBloom",
+  "holomem": "さくらみこ",
+  "genCode": "0",
+  "genLabel": "0期生",
+  "type": "Happy",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7682,
+   "technique": 6803,
+   "sense": 11380
+  },
+  "special": {
+   "value": 145,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果145% スキル発動率が50%UP"
+  },
+  "active": {
+   "interval": 15,
+   "duration": 6,
+   "value": 55,
+   "probTier": "中",
+   "condition": "40コンボ以上でスコアが110%UP",
+   "desc": "15秒毎に中確率で6秒間スコアが55%UP 40コンボ以上でスコアが110%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Happy",
+   "condCount": 2,
+   "value": 11,
+   "desc": "ハッピータイプ2人のスコアサポート効果11%"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "sense",
+   "value": 120,
+   "desc": "全員のセンスが120%UP"
+  },
+  "connect": {
+   "value": 190,
+   "desc": "範囲内のホロメンボード効果を190%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234527"
+ },
+ {
+  "id": "akirosenthal_halfelf",
+  "name": "艶帯びたハーフエルフ",
+  "holomem": "アキ・ローゼンタール",
+  "genCode": "1",
+  "genLabel": "1期生",
+  "type": "Cute",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 6803,
+   "technique": 7682,
+   "sense": 11380
+  },
+  "special": {
+   "value": 145,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果145% スキル発動率が50%UP"
+  },
+  "active": {
+   "interval": 21,
+   "duration": 8,
+   "value": 55,
+   "probTier": "中",
+   "condition": "ライフ600以上でスコアが115%UP",
+   "desc": "21秒毎に中確率で8秒間スコアが55%UP ライフ600以上でスコアが115%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "1",
+   "condCount": 2,
+   "value": 43,
+   "desc": "1期生2人のセンスが43%UP"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "sense",
+   "value": 120,
+   "desc": "全員のセンスが120%UP"
+  },
+  "connect": {
+   "value": 270,
+   "desc": "範囲内のホロメンボード効果を270%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234533"
+ },
+ {
+  "id": "akaihaato_freestyle",
+  "name": "let's freestyle おやつタイム",
+  "holomem": "赤井はあと",
+  "genCode": "1",
+  "genLabel": "1期生",
+  "type": "Pure",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7682,
+   "technique": 11380,
+   "sense": 6803
+  },
+  "special": {
+   "value": 135,
+   "duration": 12,
+   "desc": "12秒間スコアサポート効果135%"
+  },
+  "active": {
+   "interval": 19,
+   "duration": 7,
+   "value": 60,
+   "probTier": "中",
+   "condition": "40コンボ以上でスコアが120%UP",
+   "desc": "19秒毎に中確率で7秒間スコアが60%UP 40コンボ以上でスコアが120%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Pure",
+   "condCount": 2,
+   "value": 11,
+   "desc": "ピュアタイプ2人のスコアサポート効果11%"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "technique",
+   "value": 120,
+   "desc": "全員のテクニックが120%UP"
+  },
+  "connect": {
+   "value": 270,
+   "desc": "範囲内のホロメンボード効果を270%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234536"
+ },
+ {
+  "id": "yuzukichoco_devilcharm",
+  "name": "悪魔な魅惑に手玉にとられて",
+  "holomem": "癒月ちょこ",
+  "genCode": "2",
+  "genLabel": "2期生",
+  "type": "Happy",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7366,
+   "technique": 7991,
+   "sense": 10672
+  },
+  "special": {
+   "value": 160,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果160%"
+  },
+  "active": {
+   "interval": 20,
+   "duration": 7,
+   "value": 120,
+   "probTier": "中",
+   "condition": null,
+   "desc": "20秒毎に中確率で7秒間スコアが120%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Happy",
+   "condCount": 2,
+   "value": 11,
+   "desc": "ハッピータイプ2人のスコアサポート効果11%"
+  },
+  "outfit": {
+   "condType": "type",
+   "condVal": "Happy",
+   "condCount": 2,
+   "statTarget": "all",
+   "value": 30,
+   "desc": "ハッピータイプ2人以上で全員の全パラメータが30%UP ハッピータイプ2人以上で全員のスコアサポート効果25%"
+  },
+  "connect": {
+   "value": 160,
+   "desc": "範囲内のホロメンボード効果を160%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234548"
+ },
+ {
+  "id": "nekomataokayu_secretplay",
+  "name": "宴の果てに、ナイショの戯れ",
+  "holomem": "猫又おかゆ",
+  "genCode": "gamers",
+  "genLabel": "ゲーマーズ",
+  "type": "Cute",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7682,
+   "technique": 11380,
+   "sense": 6803
+  },
+  "special": {
+   "value": 160,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果160%"
+  },
+  "active": {
+   "interval": 25,
+   "duration": 10,
+   "value": 55,
+   "probTier": "中",
+   "condition": "ライフ600以上でスコアが110%UP",
+   "desc": "25秒毎に中確率で10秒間スコアが55%UP ライフ600以上でスコアが110%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Cute",
+   "condCount": 2,
+   "value": 41,
+   "desc": "キュートタイプ2人のテクニックが41%UP"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "technique",
+   "value": 120,
+   "desc": "全員のテクニックが120%UP"
+  },
+  "connect": {
+   "value": 200,
+   "desc": "範囲内のホロメンボード効果を200%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234557"
+ },
+ {
+  "id": "inugamikorone_laughingskater",
+  "name": "Go! Go! Laughing Skater",
+  "holomem": "戌神ころね",
+  "genCode": "gamers",
+  "genLabel": "ゲーマーズ",
+  "type": "Happy",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7828,
+   "technique": 6947,
+   "sense": 11145
+  },
+  "special": {
+   "value": 145,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果145% 100コンボ以上でスキル発動率が55%UP"
+  },
+  "active": {
+   "interval": 17,
+   "duration": 6,
+   "value": 120,
+   "probTier": "中",
+   "condition": null,
+   "desc": "17秒毎に中確率で6秒間スコアが120%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Happy",
+   "condCount": 2,
+   "value": 11,
+   "desc": "ハッピータイプ2人のスコアサポート効果11%"
+  },
+  "outfit": {
+   "condType": "type",
+   "condVal": "Happy",
+   "condCount": 2,
+   "statTarget": "sense",
+   "value": 130,
+   "desc": "ハッピータイプ2人以上で全員のセンスが130%UP"
+  },
+  "connect": {
+   "value": 190,
+   "desc": "範囲内のホロメンボード効果を190%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234560"
+ },
+ {
+  "id": "usadapekora_bitfield",
+  "name": "愛嬌たっぷりビットフィールド",
+  "holomem": "兎田ぺこら",
+  "genCode": "3",
+  "genLabel": "3期生",
+  "type": "Cute",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7366,
+   "technique": 10672,
+   "sense": 7991
+  },
+  "special": {
+   "value": 115,
+   "duration": 14,
+   "desc": "14秒間スコアサポート効果115%"
+  },
+  "active": {
+   "interval": 30,
+   "duration": 12,
+   "value": 105,
+   "probTier": "中",
+   "condition": null,
+   "desc": "30秒毎に中確率で12秒間スコアが105%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Cute",
+   "condCount": 2,
+   "value": 32,
+   "desc": "キュートタイプ2人以上で自身の全パラメータが32%UP"
+  },
+  "outfit": {
+   "condType": "type",
+   "condVal": "Cute",
+   "condCount": 2,
+   "statTarget": "all",
+   "value": 30,
+   "desc": "キュートタイプ2人以上で全員の全パラメータが30%UP キュートタイプ2人以上で全員のスコアサポート効果25%"
+  },
+  "connect": {
+   "value": 160,
+   "desc": "範囲内のホロメンボード効果を160%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234563"
+ },
+ {
+  "id": "shiroganenoel_breezeknight",
+  "name": "風薫るおっとり騎士",
+  "holomem": "白銀ノエル",
+  "genCode": "3",
+  "genLabel": "3期生",
+  "type": "Happy",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7668,
+   "technique": 7981,
+   "sense": 10433
+  },
+  "special": {
+   "value": 160,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果160%"
+  },
+  "active": {
+   "interval": 19,
+   "duration": 7,
+   "value": 60,
+   "probTier": "中",
+   "condition": "ハッピータイプ2人以上でスコアが120%UP",
+   "desc": "19秒毎に中確率で7秒間スコアが60%UP ハッピータイプ2人以上でスコアが120%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Happy",
+   "condCount": 2,
+   "value": 32,
+   "desc": "ハッピータイプ2人以上で自身の全パラメータが32%UP"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "support",
+   "value": 60,
+   "desc": "全員のスコアサポート効果60%"
+  },
+  "connect": {
+   "value": 105,
+   "desc": "範囲内のホロメンボード効果を105%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234569"
+ },
+ {
+  "id": "tsunomakiwatame_woollysmilefestival",
+  "name": "Woolly Smile Festival",
+  "holomem": "角巻わため",
+  "genCode": "4",
+  "genLabel": "4期生",
+  "type": "Cute",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 10672,
+   "technique": 7991,
+   "sense": 7366
+  },
+  "special": {
+   "value": 145,
+   "duration": 11,
+   "desc": "11秒間スコアサポート効果145%"
+  },
+  "active": {
+   "interval": 15,
+   "duration": 6,
+   "value": 55,
+   "probTier": "中",
+   "condition": "キュートタイプ2人以上でスコアが110%UP",
+   "desc": "15秒毎に中確率で6秒間スコアが55%UP キュートタイプ2人以上でスコアが110%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Cute",
+   "condCount": 2,
+   "value": 11,
+   "desc": "キュートタイプ2人のスコアサポート効果11%"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "all",
+   "value": 45,
+   "desc": "全員の全パラメータが45%UP"
+  },
+  "connect": {
+   "value": 200,
+   "desc": "範囲内のホロメンボード効果を200%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234575"
+ },
+ {
+  "id": "tokoyamitowa_chillnightout",
+  "name": "ガチで終わらんチルい夜遊び",
+  "holomem": "常闇トワ",
+  "genCode": "4",
+  "genLabel": "4期生",
+  "type": "Pure",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7844,
+   "technique": 7221,
+   "sense": 10909
+  },
+  "special": {
+   "value": 145,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果145% スキル発動率が50%UP"
+  },
+  "active": {
+   "interval": 19,
+   "duration": 8,
+   "value": 95,
+   "probTier": "高",
+   "condition": null,
+   "desc": "19秒毎に高確率で8秒間スコアが95%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "4",
+   "condCount": 2,
+   "value": 45,
+   "desc": "4期生が2人以上で4期生2人のセンスが45%UP"
+  },
+  "outfit": {
+   "condType": "gen",
+   "condVal": "4",
+   "condCount": 2,
+   "statTarget": "all",
+   "value": 50,
+   "desc": "4期生が2人以上で全員の全パラメータが50%UP"
+  },
+  "connect": {
+   "value": 160,
+   "desc": "範囲内のホロメンボード効果を160%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234578"
+ },
+ {
+  "id": "omarupolka_polkacircus",
+  "name": "変幻自在！ポルカサーカス開演！",
+  "holomem": "尾丸ポルカ",
+  "genCode": "5",
+  "genLabel": "5期生",
+  "type": "Happy",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7366,
+   "technique": 7991,
+   "sense": 10672
+  },
+  "special": {
+   "value": 145,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果145% スキル発動率が50%UP"
+  },
+  "active": {
+   "interval": 21,
+   "duration": 8,
+   "value": 55,
+   "probTier": "中",
+   "condition": "ハッピータイプ2人以上でスコアが115%UP",
+   "desc": "21秒毎に中確率で8秒間スコアが55%UP ハッピータイプ2人以上でスコアが115%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Happy",
+   "condCount": 2,
+   "value": 11,
+   "desc": "ハッピータイプ2人のスコアサポート効果11%"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "all",
+   "value": 45,
+   "desc": "全員の全パラメータが45%UP"
+  },
+  "connect": {
+   "value": 160,
+   "desc": "範囲内のホロメンボード効果を160%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234593"
+ },
+ {
+  "id": "laplusdarknes_commanderskill",
+  "name": "作戦開始！見せろ総帥の手腕",
+  "holomem": "ラプラス・ダークネス",
+  "genCode": "holox",
+  "genLabel": "holoX",
+  "type": "Happy",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7221,
+   "technique": 10909,
+   "sense": 7844
+  },
+  "special": {
+   "value": 135,
+   "duration": 12,
+   "desc": "12秒間スコアサポート効果135%"
+  },
+  "active": {
+   "interval": 18,
+   "duration": 6,
+   "value": 125,
+   "probTier": "中",
+   "condition": null,
+   "desc": "18秒毎に中確率で6秒間スコアが125%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "holox",
+   "condCount": 2,
+   "value": 33,
+   "desc": "holoXが2人以上で自身の全パラメータが33%UP"
+  },
+  "outfit": {
+   "condType": "gen",
+   "condVal": "holox",
+   "condCount": 2,
+   "statTarget": "all",
+   "value": 50,
+   "desc": "holoXが2人以上で全員の全パラメータが50%UP"
+  },
+  "connect": {
+   "value": 200,
+   "desc": "範囲内のホロメンボード効果を200%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234596"
+ },
+ {
+  "id": "takanerui_eliteexec",
+  "name": "組織支える超敏腕幹部",
+  "holomem": "鷹嶺ルイ",
+  "genCode": "holox",
+  "genLabel": "holoX",
+  "type": "Cute",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7991,
+   "technique": 10672,
+   "sense": 7366
+  },
+  "special": {
+   "value": 115,
+   "duration": 14,
+   "desc": "14秒間スコアサポート効果115%"
+  },
+  "active": {
+   "interval": 21,
+   "duration": 8,
+   "value": 55,
+   "probTier": "中",
+   "condition": "キュートタイプ2人以上でスコアが115%UP",
+   "desc": "21秒毎に中確率で8秒間スコアが55%UP キュートタイプ2人以上でスコアが115%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Cute",
+   "condCount": 2,
+   "value": 32,
+   "desc": "キュートタイプ2人以上で自身の全パラメータが32%UP"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "all",
+   "value": 45,
+   "desc": "全員の全パラメータが45%UP"
+  },
+  "connect": {
+   "value": 135,
+   "desc": "範囲内のホロメンボード効果を135%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234599"
+ },
+ {
+  "id": "ayunda_risu_itazura_takuramu_komorebi",
+  "name": "いたずらたくらむ木漏れ日の森",
+  "holomem": "アユンダ・リス",
+  "genCode": "id1",
+  "genLabel": "ID1期生",
+  "type": "Happy",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 6947,
+   "technique": 11145,
+   "sense": 7828
+  },
+  "special": {
+   "value": 120,
+   "duration": 12,
+   "desc": "12秒間スコアサポート効果120% ライフ1000以上でスキル発動率が45%UP"
+  },
+  "active": {
+   "interval": 34,
+   "duration": 15,
+   "value": 90,
+   "probTier": "高",
+   "condition": null,
+   "desc": "34秒毎に高確率で15秒間スコアが90%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Happy",
+   "condCount": 2,
+   "value": 11,
+   "desc": "ハッピータイプ2人のスコアサポート効果11%"
+  },
+  "outfit": {
+   "condType": "type",
+   "condVal": "Happy",
+   "condCount": 2,
+   "statTarget": "technique",
+   "value": 130,
+   "desc": "ハッピータイプ2人以上で全員のテクニックが130%UP"
+  },
+  "connect": {
+   "value": 200,
+   "desc": "範囲内のホロメンボード効果を200%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234608"
+ },
+ {
+  "id": "muuna_hoshinova_lunar_songstress",
+  "name": "Lunar Songstress",
+  "holomem": "ムーナ・ホシノヴァ",
+  "genCode": "id1",
+  "genLabel": "ID1期生",
+  "type": "Cute",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7221,
+   "technique": 7844,
+   "sense": 10909
+  },
+  "special": {
+   "value": 120,
+   "duration": 12,
+   "desc": "12秒間スコアサポート効果120% スキル発動率が40%UP"
+  },
+  "active": {
+   "interval": 30,
+   "duration": 11,
+   "value": 110,
+   "probTier": "高",
+   "condition": null,
+   "desc": "30秒毎に高確率で11秒間スコアが110%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "id1",
+   "condCount": 2,
+   "value": 45,
+   "desc": "ID1期生が2人以上でID1期生2人のセンスが45%UP"
+  },
+  "outfit": {
+   "condType": "gen",
+   "condVal": "id1",
+   "condCount": 2,
+   "statTarget": "all",
+   "value": 50,
+   "desc": "ID1期生が2人以上で全員の全パラメータが50%UP"
+  },
+  "connect": {
+   "value": 105,
+   "desc": "範囲内のホロメンボード効果を105%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234611"
+ },
+ {
+  "id": "crazy_olie_z_nonstop_talker",
+  "name": "Z nonstop talker",
+  "holomem": "クレイジー・オリー",
+  "genCode": "id2",
+  "genLabel": "ID2期生",
+  "type": "Pure",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7991,
+   "technique": 10672,
+   "sense": 7366
+  },
+  "special": {
+   "value": 135,
+   "duration": 12,
+   "desc": "12秒間スコアサポート効果135%"
+  },
+  "active": {
+   "interval": 25,
+   "duration": 10,
+   "value": 55,
+   "probTier": "中",
+   "condition": "ピュアタイプ2人以上でスコアが110%UP",
+   "desc": "25秒毎に中確率で10秒間スコアが55%UP ピュアタイプ2人以上でスコアが110%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Pure",
+   "condCount": 2,
+   "value": 11,
+   "desc": "ピュアタイプ2人のスコアサポート効果11%"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "all",
+   "value": 45,
+   "desc": "全員の全パラメータが45%UP"
+  },
+  "connect": {
+   "value": 190,
+   "desc": "範囲内のホロメンボード効果を190%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234617"
+ },
+ {
+  "id": "anya_melfissa_sofa_ni_shizunde_mattari_game",
+  "name": "ソファに沈んでまったりゲーム",
+  "holomem": "アーニャ・メルフィッサ",
+  "genCode": "id2",
+  "genLabel": "ID2期生",
+  "type": "Cute",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7221,
+   "technique": 7844,
+   "sense": 10909
+  },
+  "special": {
+   "value": 115,
+   "duration": 14,
+   "desc": "14秒間スコアサポート効果115%"
+  },
+  "active": {
+   "interval": 24,
+   "duration": 10,
+   "value": 100,
+   "probTier": "中",
+   "condition": null,
+   "desc": "24秒毎に中確率で10秒間スコアが100%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "id2",
+   "condCount": 2,
+   "value": 33,
+   "desc": "ID2期生が2人以上で自身の全パラメータが33%UP"
+  },
+  "outfit": {
+   "condType": "gen",
+   "condVal": "id2",
+   "condCount": 2,
+   "statTarget": "all",
+   "value": 50,
+   "desc": "ID2期生が2人以上で全員の全パラメータが50%UP"
+  },
+  "connect": {
+   "value": 190,
+   "desc": "範囲内のホロメンボード効果を190%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234620"
+ },
+ {
+  "id": "kaela_kovalskia_kokoro_tsuyosa_wa_kajiba_de_togu",
+  "name": "こころ強さは鍛冶場で研ぐ",
+  "holomem": "カエラ・コヴァルスキア",
+  "genCode": "id3",
+  "genLabel": "ID3期生",
+  "type": "Cute",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7981,
+   "technique": 10433,
+   "sense": 7668
+  },
+  "special": {
+   "value": 135,
+   "duration": 12,
+   "desc": "12秒間スコアサポート効果135%"
+  },
+  "active": {
+   "interval": 19,
+   "duration": 7,
+   "value": 60,
+   "probTier": "中",
+   "condition": "キュートタイプ2人以上でスコアが120%UP",
+   "desc": "19秒毎に中確率で7秒間スコアが60%UP キュートタイプ2人以上でスコアが120%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Cute",
+   "condCount": 2,
+   "value": 41,
+   "desc": "キュートタイプ2人のテクニックが41%UP"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "support",
+   "value": 60,
+   "desc": "全員のスコアサポート効果60%"
+  },
+  "connect": {
+   "value": 190,
+   "desc": "範囲内のホロメンボード効果を190%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234629"
+ },
+ {
+  "id": "kobo_kanaeru_ame_agari_no_uki_uki_shaman",
+  "name": "あめ上がりの雨喜雨喜シャーマン",
+  "holomem": "こぼ・かなえる",
+  "genCode": "id3",
+  "genLabel": "ID3期生",
+  "type": "Pure",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 10672,
+   "technique": 7366,
+   "sense": 7991
+  },
+  "special": {
+   "value": 135,
+   "duration": 12,
+   "desc": "12秒間スコアサポート効果135%"
+  },
+  "active": {
+   "interval": 15,
+   "duration": 6,
+   "value": 55,
+   "probTier": "中",
+   "condition": "ピュアタイプ2人以上でスコアが110%UP",
+   "desc": "15秒毎に中確率で6秒間スコアが55%UP ピュアタイプ2人以上でスコアが110%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Pure",
+   "condCount": 2,
+   "value": 32,
+   "desc": "ピュアタイプ2人以上で自身の全パラメーターが32%UP"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "all",
+   "value": 45,
+   "desc": "全員の全パラメータが45%UP"
+  },
+  "connect": {
+   "value": 135,
+   "desc": "範囲内のホロメンボード効果を135%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234632"
+ },
+ {
+  "id": "ninomae_inanis_pokapoka_charge_na_hitotoki",
+  "name": "ぽかぽかチャージなひととき",
+  "holomem": "一伊那尓栖",
+  "genCode": "myth",
+  "genLabel": "Myth",
+  "type": "Pure",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7668,
+   "technique": 10433,
+   "sense": 7981
+  },
+  "special": {
+   "value": 115,
+   "duration": 14,
+   "desc": "14秒間スコアサポート効果115%"
+  },
+  "active": {
+   "interval": 32,
+   "duration": 14,
+   "value": 45,
+   "probTier": "高",
+   "condition": "ピュアタイプ2人以上でスコアが95%UP",
+   "desc": "32秒毎に高確率で14秒間スコアが45%UP ピュアタイプ2人以上でスコアが95%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Pure",
+   "condCount": 2,
+   "value": 32,
+   "desc": "ピュアタイプ2人以上で自身の全パラメータが32%UP"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "support",
+   "value": 60,
+   "desc": "全員のスコアサポート効果60%"
+  },
+  "connect": {
+   "value": 190,
+   "desc": "範囲内のホロメンボード効果を190%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234641"
+ },
+ {
+  "id": "irys_nephilim_sonority",
+  "name": "nephilim sonority",
+  "holomem": "IRyS",
+  "genCode": "promise",
+  "genLabel": "Promise",
+  "type": "Happy",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7221,
+   "technique": 10909,
+   "sense": 7844
+  },
+  "special": {
+   "value": 145,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果145% ライフ1000以上でスキル発動率が55%UP"
+  },
+  "active": {
+   "interval": 25,
+   "duration": 11,
+   "value": 95,
+   "probTier": "中",
+   "condition": null,
+   "desc": "25秒毎に中確率で11秒間スコアが95%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "promise",
+   "condCount": 2,
+   "value": 43,
+   "desc": "Promise2人のテクニックが43%UP"
+  },
+  "outfit": {
+   "condType": "gen",
+   "condVal": "promise",
+   "condCount": 2,
+   "statTarget": "all",
+   "value": 50,
+   "desc": "Promiseが2人以上で全員の全パラメータが50%UP"
+  },
+  "connect": {
+   "value": 250,
+   "desc": "範囲内のホロメンボード効果を250%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234644"
+ },
+ {
+  "id": "hakos_baelz_chaotic_powerful_rat",
+  "name": "Chaotic Powerful Rat",
+  "holomem": "ハコス・ベールズ",
+  "genCode": "promise",
+  "genLabel": "Promise",
+  "type": "Pure",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 11145,
+   "technique": 7828,
+   "sense": 6947
+  },
+  "special": {
+   "value": 135,
+   "duration": 12,
+   "desc": "12秒間スコアサポート効果135%"
+  },
+  "active": {
+   "interval": 25,
+   "duration": 11,
+   "value": 90,
+   "probTier": "高",
+   "condition": null,
+   "desc": "25秒毎に高確率で11秒間スコアが90%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Pure",
+   "condCount": 2,
+   "value": 11,
+   "desc": "ピュアタイプ2人のスコアサポート効果11%"
+  },
+  "outfit": {
+   "condType": "type",
+   "condVal": "Pure",
+   "condCount": 2,
+   "statTarget": "performance",
+   "value": 130,
+   "desc": "ピュアタイプ2人以上で全員のパフォーマンスが130%UP"
+  },
+  "connect": {
+   "value": 250,
+   "desc": "範囲内のホロメンボード効果を250%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234650"
+ },
+ {
+  "id": "furuishi_bijou_kirakkira_crystal_place",
+  "name": "キラッキラCrystal place",
+  "holomem": "古石ビジュー",
+  "genCode": "advent",
+  "genLabel": "Advent",
+  "type": "Pure",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 6803,
+   "technique": 7682,
+   "sense": 11380
+  },
+  "special": {
+   "value": 145,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果145% スキル発動率が50%UP"
+  },
+  "active": {
+   "interval": 27,
+   "duration": 9,
+   "value": 65,
+   "probTier": "中",
+   "condition": "40コンボ以上でスコアが130%UP",
+   "desc": "27秒毎に中確率で9秒間スコアが65%UP 40コンボ以上でスコアが130%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Pure",
+   "condCount": 2,
+   "value": 11,
+   "desc": "ピュアタイプ2人のスコアサポート効果11%"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "sense",
+   "value": 120,
+   "desc": "全員のセンスが120%UP"
+  },
+  "connect": {
+   "value": 190,
+   "desc": "範囲内のホロメンボード効果を190%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234656"
+ },
+ {
+  "id": "nerissa_ravencroft_uta_ni_yurameku_nocturne",
+  "name": "歌に揺らめくノクターン",
+  "holomem": "ネリッサ・レイヴンクロフト",
+  "genCode": "advent",
+  "genLabel": "Advent",
+  "type": "Pure",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7844,
+   "technique": 10909,
+   "sense": 7221
+  },
+  "special": {
+   "value": 135,
+   "duration": 12,
+   "desc": "12秒間スコアサポート効果135%"
+  },
+  "active": {
+   "interval": 15,
+   "duration": 7,
+   "value": 90,
+   "probTier": "中",
+   "condition": null,
+   "desc": "15秒毎に中確率で7秒間スコアが90%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "advent",
+   "condCount": 2,
+   "value": 33,
+   "desc": "Adventが2人以上で自身の全パラメータが33%UP"
+  },
+  "outfit": {
+   "condType": "gen",
+   "condVal": "advent",
+   "condCount": 2,
+   "statTarget": "all",
+   "value": 50,
+   "desc": "Adventが2人以上で全員の全パラメータが50%UP"
+  },
+  "connect": {
+   "value": 105,
+   "desc": "範囲内のホロメンボード効果を105%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234659"
+ },
+ {
+  "id": "fuwawa_abyssgard_powawa_donut_party",
+  "name": "ぽわぽわドーナツパーティー♪",
+  "holomem": "フワワ・アビスガード",
+  "genCode": "advent",
+  "genLabel": "Advent",
+  "type": "Cute",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7682,
+   "technique": 11380,
+   "sense": 6803
+  },
+  "special": {
+   "value": 145,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果145% スキル発動率が50%UP"
+  },
+  "active": {
+   "interval": 20,
+   "duration": 8,
+   "value": 55,
+   "probTier": "中",
+   "condition": null,
+   "desc": "20秒毎に中確率で8秒間スコアが55%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Cute",
+   "condCount": 2,
+   "value": 41,
+   "desc": "キュートタイプ2人のテクニックが41%UP"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "technique",
+   "value": 120,
+   "desc": "全員のテクニックが120%UP"
+  },
+  "connect": {
+   "value": 190,
+   "desc": "範囲内のホロメンボード効果を190%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://appmedia.jp/hololive-dreams/80234662"
+ },
+ {
+  "id": "白銀ノエル_mizugi",
+  "name": "波まとうゆるふわKnight（水着白銀ノエル）",
+  "holomem": "白銀ノエル",
+  "genCode": "3",
+  "genLabel": "3期生",
+  "type": "Cute",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 11145,
+   "technique": 6947,
+   "sense": 7828
+  },
+  "special": {
+   "value": 120,
+   "duration": 12,
+   "desc": "12秒間スコアサポート効果120% 3期生が2人以上で3期生2人のスコアサポート効果12%"
+  },
+  "active": {
+   "interval": 21,
+   "duration": 7,
+   "value": 120,
+   "probTier": "高",
+   "condition": null,
+   "desc": "21秒毎に高確率で7秒間スコアが120%UP"
+  },
+  "passive": {
+   "condType": "gen",
+   "condVal": "3",
+   "condCount": 2,
+   "value": 12,
+   "desc": "3期生が2人以上で3期生2人のスコアサポート効果12%"
+  },
+  "outfit": {
+   "condType": "gen",
+   "condVal": "3",
+   "condCount": 2,
+   "statTarget": "performance",
+   "value": 135,
+   "desc": "3期生が2人以上で全員のパフォーマンスが135%UP"
+  },
+  "connect": {
+   "value": 135,
+   "desc": "8マス効果 範囲内のホロメンボード効果を135%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://game8.jp/hololive-dreams/801998"
+ },
+ {
+  "id": "大空スバル_mizugi",
+  "name": "Energeticスプラッシュ！（水着大空スバル）",
+  "holomem": "大空スバル",
+  "genCode": "2",
+  "genLabel": "2期生",
+  "type": "Pure",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7981,
+   "technique": 7668,
+   "sense": 10433
+  },
+  "special": {
+   "value": 160,
+   "duration": 10,
+   "desc": "10秒間スコアサポート効果160%"
+  },
+  "active": {
+   "interval": 17,
+   "duration": 7,
+   "value": 55,
+   "probTier": "中",
+   "condition": "40コンボ以上でスコアが105%UP",
+   "desc": "17秒毎に中確率で7秒間スコアが55%UP 40コンボ以上でスコアが105%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Pure",
+   "condCount": 2,
+   "value": 15,
+   "desc": "ピュアタイプ2人の全パラメータが15%UP"
+  },
+  "outfit": {
+   "condType": null,
+   "condVal": null,
+   "condCount": null,
+   "statTarget": "support",
+   "value": 60,
+   "desc": "全員のスコアサポート効果60%"
+  },
+  "connect": {
+   "value": 200,
+   "desc": "4マス効果 範囲内のホロメンボード効果を200%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://game8.jp/hololive-dreams/802000"
+ },
+ {
+  "id": "不知火フレア_mizugi",
+  "name": "sparks sunset（水着不知火フレア）",
+  "holomem": "不知火フレア",
+  "genCode": "3",
+  "genLabel": "3期生",
+  "type": "Happy",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 7828,
+   "technique": 11145,
+   "sense": 6947
+  },
+  "special": {
+   "value": 120,
+   "duration": 12,
+   "desc": "12秒間スコアサポート効果120% スキル発動率が40%UP"
+  },
+  "active": {
+   "interval": 33,
+   "duration": 11,
+   "value": 60,
+   "probTier": "高",
+   "condition": "ハッピータイプ2人以上でスコアが125%UP",
+   "desc": "33秒毎に高確率で11秒間スコアが60%UP ハッピータイプ2人以上でスコアが125%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Happy",
+   "condCount": 2,
+   "value": 11,
+   "desc": "ハッピータイプ2人のスコアサポート効果11%"
+  },
+  "outfit": {
+   "condType": "type",
+   "condVal": "Happy",
+   "condCount": 2,
+   "statTarget": "technique",
+   "value": 80,
+   "desc": "ハッピータイプ2人以上で全員のテクニックが80%UP、ハッピータイプ2人以上で全員のスコアサポート効果25%"
+  },
+  "connect": {
+   "value": 160,
+   "desc": "6マス効果 範囲内のホロメンボード効果を160%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://game8.jp/hololive-dreams/801999"
+ },
+ {
+  "id": "角巻わため_mizugi",
+  "name": "真夏のもふもふフロートタイム（水着角巻わため）",
+  "holomem": "角巻わため",
+  "genCode": "4",
+  "genLabel": "4期生",
+  "type": "Happy",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 6947,
+   "technique": 7828,
+   "sense": 11145
+  },
+  "special": {
+   "value": 130,
+   "duration": 11,
+   "desc": "11秒間スコアサポート効果130% スキル発動率が45%UP"
+  },
+  "active": {
+   "interval": 35,
+   "duration": 12,
+   "value": 60,
+   "probTier": "高",
+   "condition": "ハッピータイプ2人以上でスコアが120%UP",
+   "desc": "35秒毎に高確率で12秒間スコアが60%UP ハッピータイプ2人以上でスコアが120%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Happy",
+   "condCount": 2,
+   "value": 11,
+   "desc": "ハッピータイプ2人のスコアサポート効果11%"
+  },
+  "outfit": {
+   "condType": "type",
+   "condVal": "Happy",
+   "condCount": 2,
+   "statTarget": "sense",
+   "value": 80,
+   "desc": "ハッピータイプ2人以上で全員のセンスが80%UP、ハッピータイプ2人以上で全員のスコアサポート効果25%"
+  },
+  "connect": {
+   "value": 200,
+   "desc": "5マス効果 範囲内のホロメンボード効果を200%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://game8.jp/hololive-dreams/801997"
+ },
+ {
+  "id": "音乃瀬奏_mizugi",
+  "name": "潮風にのせる、笑顔のハーモニー（水着音乃瀬奏）",
+  "holomem": "音乃瀬奏",
+  "genCode": "regloss",
+  "genLabel": "ReGLOSS",
+  "type": "Happy",
+  "typeConfirmed": true,
+  "rarity": 5,
+  "stats": {
+   "performance": 11380,
+   "technique": 7682,
+   "sense": 6803
+  },
+  "special": {
+   "value": 115,
+   "duration": 14,
+   "desc": "14秒間スコアサポート効果115%"
+  },
+  "active": {
+   "interval": 23,
+   "duration": 8,
+   "value": 120,
+   "probTier": "中",
+   "condition": null,
+   "desc": "23秒毎に中確率で8秒間スコアが120%UP"
+  },
+  "passive": {
+   "condType": "type",
+   "condVal": "Happy",
+   "condCount": 2,
+   "value": 43,
+   "desc": "ハッピータイプ2人以上でハッピータイプ2人のパフォーマンスが43%UP"
+  },
+  "outfit": {
+   "condType": "type",
+   "condVal": "Happy",
+   "condCount": 2,
+   "statTarget": "performance",
+   "value": 130,
+   "desc": "ハッピータイプ2人以上で全員のパフォーマンスが130%UP"
+  },
+  "connect": {
+   "value": 160,
+   "desc": "6マス効果 範囲内のホロメンボード効果を160%UP"
+  },
+  "board": "個別面板效果未列出",
+  "source": "https://game8.jp/hololive-dreams/801996"
+ }
+];
+
+/* ================= DATA: SONGS (title, performer, seconds, EXPERT lv) ================= */
+const SONGS = [
+["恋愛サーキュレーション","角巻わため",90,24],["失礼しますが、RIP♡","森カリオペ",91,27],["PSYCHO","ハコス・ベールズ",95,29],
+["ぷ・れ・あ・で・す！","大空スバル",96,26],["全力ジャンピング！","不知火フレア",97,24],["Daydream","オーロ・クロニー",97,23],
+["Shiny Smily Story(2022 ver.)","hololive IDOL PROJECT",100,22],["Howling","大神ミオ",100,25],["宵の余、良い！","百鬼あやめ",100,25],
+["美少女無罪♡パイレーツ","宝鐘マリン",100,25],["唱","戌神ころね",101,24],["夢見る空へ","hololive IDOL PROJECT",102,25],
+["どぅーまいべすと！","大空スバル",103,26],["Dreaming Days","hololive IDOL PROJECT",103,23],["SPARKS","小鳥遊キアラ",104,25],
+["UNDEAD","不知火フレア",104,26],["刹那ティックコード","SorAZ（ときのそら・AZKi）",105,26],["神っぽいな","ラプラス・ダークネス",107,26],
+["Let Me Be With You","FUWAMOCO",108,24],["勇者","雪花ラミィ",108,26],["あすいろClearSky","hololive IDOL PROJECT",108,24],
+["Ahoy!! 我ら宝鐘海賊団☆","宝鐘マリン",108,25],["鏡面の波","古石ビジュー",109,24],["brave heart","カエラ・コヴァルスキア",109,22],
+["いのち(2024 ver.)","AZKi",109,22],["キラメキライダー☆","hololive IDOL PROJECT",109,24],["選んでくれてありがとう。","IRyS・ハコス・ベールズ",110,23],
+["Mantra Hujan","こぼ・かなえる",110,25],["青春アーカイブ","hololive IDOL PROJECT",110,24],["Prism Melody","hololive IDOL PROJECT",110,25],
+["守護ってルーナイト","姫森ルーナ",111,26],["今日も大天才っ！","一条莉々華",112,27],["オーバード","鷹嶺ルイ",112,27],
+["HI-15","アユンダ・リス/ムーナ・ホシノヴァ/アイラニ・イオフィフティーン",113,26],["Rebellion","シオリ・ノヴェラ/古石ビジュー/ネリッサ/フワワ/モココ",113,25],
+["ぺこらんだむぶれいん！","兎田ぺこら",113,27],["また傷に触れる","不知火フレア・常闇トワ",114,26],["夏宿り","大神ミオ",114,26],
+["Snow halation","アユンダ・リス",116,24],["寝起きヤシの木","白銀ノエル",116,25],["常夜リペイント","秘密結社holoX",116,27],
+["ぎゅーどんかーにばる！","白銀ノエル",116,27],["シル・ヴ・プレジデント","白上フブキ",117,25],["Suspect","ロボ子さん/アキ・ローゼンタール/百鬼あやめ",117,25],
+["flower rhapsody","さくらみこ",117,25],["Capture the Moment","hololive IDOL PROJECT",117,23],["美少女戦士まつりみっとZero","夏色まつり",117,26],
+["妄想税","癒月ちょこ",118,25],["Carbonated Love","IRyS",118,28],["SUPERNOVA","白上フブキ",118,26],
+["ししわたクッキング feat.獅白ぼたん","獅白ぼたん・角巻わため",119,25],["JOLLIE JOLLIE","クレイジー・オリー",119,25],
+["Lioness' Pride","獅白ぼたん",120,26],["Dream☆Story","ときのそら",120,25],["DEAD BEATS","森カリオペ",120,27],
+["Colorful Universe","大神ミオ",120,27],["DAI DAI DAI ファンタジスタ","さくらみこ",120,25],["Bling-Bang-Bang-Born","一伊那尓栖・ハコス・ベールズ",120,26],
+["TwiLight","IRyS",120,24],["ヴァンパイア","小鳥遊キアラ",121,26],["マーシャル・マキシマイザー","アーニャ・メルフィッサ",121,28],
+["ねねねねねねねね!大爆走","桃鈴ねね",122,27],["もぐもぐYUMMY！","猫又おかゆ",122,25],["ビビデバ","星街すいせい",122,25],
+["ちゅ、多様性。","桃鈴ねね",123,25],["ORANGE PARADE feat.戌神ころね","猫又おかゆ・戌神ころね",123,27],["アンリアルヴェイル","アーニャ・メルフィッサ",123,26],
+["可愛くてごめん","ベスティア・ゼータ",124,23],["Wicked feat. Mori Calliope","星街すいせい・森カリオペ",124,26],["Myth or Treat","森カリオペ/小鳥遊キアラ/一伊那尓栖",124,26],
+["青く在れ","不知火フレア・IRyS",125,28],["GREATEST","音乃瀬奏",125,26],["ハオ","角巻わため・パヴォリア・レイネ",126,26],
+["アイドル","IRyS",126,26],["きゅうくらりん","風真いろは",126,27],["フクロウさん","鷹嶺ルイ",126,26],
+["みっころね×しょうたいむ!!","戌神ころね・さくらみこ",126,26],["ブライダルドリーム","宝鐘マリン・兎田ぺこら",126,27],["グッバイ宣言","百鬼あやめ",127,26],
+["My song","角巻わため",127,27],["Doggy god's street","戌神ころね",127,26],["雪の華","ネリッサ・レイヴンクロフト",128,22],
+["Overdose","こぼ・かなえる",128,24],["BLUE CLAPPER","桃鈴ねね/獅白ぼたん/尾丸ポルカ",128,26],["Lifetime Showtime","FUWAMOCO",128,28],
+["What an amazing swing","角巻わため",128,27],["Slap by Step","クレイジー・オリー/アーニャ・メルフィッサ/パヴォリア・レイネ",129,28],
+["興味ないよ","ラプラス・ダークネス",129,25],["スタースタースタート","ときのそら",129,25],["神のまにまに","癒月ちょこ/大空スバル/姫森ルーナ",130,25],
+["再会","星街すいせい・ムーナ・ホシノヴァ",130,22],["ノンブレス・オブリージュ","獅白ぼたん",130,27],["ふわふわ時間","姫森ルーナ",130,24],
+["High Tide","ムーナ・ホシノヴァ",130,26],["ALiCE＆u","hololive IDOL PROJECT",130,24],["いろはすてっぷ！","風真いろは",130,25],
+["キュートなカノジョ","FUWAMOCO",131,26],["狂乱 Hey Kids!!","クレイジー・オリー",131,26],["なかま歌","不知火建設（さくらみこ/星街すいせい/不知火フレア/白銀ノエル/尾丸ポルカ）",131,28],
+["瞬間ハートビート","ReGLOSS（音乃瀬奏/一条莉々華/儒烏風亭らでん/轟はじめ）",131,24],["HELP！！","こぼ・かなえる",131,25],
+["デビルじゃないもん","風真いろは・AZKi",132,27],["ツッパリHigh School Rock'n Roll(登校編)","轟はじめ",132,24],["ないない","一伊那尓栖",132,25],
+["鬼ノ宴","ロボ子さん",132,25],["Our Promise","IRyS/オーロ・クロニー/ハコス・ベールズ",132,24],["ヒャダインのじょーじょーゆーじょー","猫又おかゆ・戌神ころね",133,29],
+["明日への境界線","雪花ラミィ",133,25],["ネコカブリーナ","猫又おかゆ",133,26],["オレンジ","小鳥遊キアラ・桃鈴ねね",133,24],
+["Los! Los! Los!","ハコス・ベールズ",134,27],["マフィア","オーロ・クロニー",134,25],["うっせぇわ","パヴォリア・レイネ",134,25],
+["JAPANの美術史♪お・ぼ・え・ま・SHOW！","儒烏風亭らでん",134,26],["メギツネ","hololive English -Advent-",135,28],
+["強風オールバック","シオリ・ノヴェラ",135,24],["エンヴィーベイビー","尾丸ポルカ",135,26],["怪物","不知火フレア",135,26],
+["dahlah.","カエラ・コヴァルスキア",135,24],["FIRE BIRD","ムーナ・ホシノヴァ",136,29],["ブタサンダー","赤井はあと",136,23],
+["save our hearts","ベスティア・ゼータ/カエラ・コヴァルスキア/こぼ・かなえる",136,26],["VIOLET","一伊那尓栖",136,24],
+["爆夏！！トロピカバケーション","音乃瀬奏/角巻わため/白銀ノエル/不知火フレア/大空スバル",136,27],["ホットダック！","大空スバル",136,28],
+["Secret Garden","hololive 1st Generation（アキ/赤井はあと/白上フブキ/夏色まつり）",137,27],["Say My Name","ネリッサ・レイヴンクロフト",137,24],
+["ω猫","AZKi",137,28],["Our Bright Parade","hololive IDOL PROJECT",137,27],["Stellar Stellar","星街すいせい",138,25],
+["エイリアンエイリアン","アイラニ・イオフィフティーン",139,26],["プリズムの魔法","古石ビジュー",139,23],["回レ！雪月花","AZKi/白上フブキ/宝鐘マリン",141,27],
+["Monsters and Men","シオリ・ノヴェラ",141,29],["ぽ","尾丸ポルカ",141,28],["全人類 兎化計画！","兎田ぺこら",141,26],
+["チェリーポップ","一条莉々華",142,28],["リルビ","ロボ子さん",142,26],["い〜やい〜やい〜や","小鳥遊キアラ・一伊那尓栖",143,26],
+["ピ ピカソ","儒烏風亭らでん",144,25],["同担☆拒否","夏色まつり",144,25],["地獄であおうぜ！スバちょこるなたん","癒月ちょこ/大空スバル/姫森ルーナ/獅白ぼたん",144,28],
+["Countach","轟はじめ",144,26],["Q＆A＝E","アイラニ・イオフィフティーン",144,24],["感触","赤井はあと",144,27],
+["Gate Open: START!","パヴォリア・レイネ",145,26],["わたしの一番かわいいところ","モココ/フワワ/アイラニ/姫森ルーナ",146,26],
+["-ERROR","常闇トワ",146,25],["III","宝鐘マリン・こぼ・かなえる",146,26],["おにけもだんす","いろはにほへっとあやふぶみ（白上フブキ/百鬼あやめ/大神ミオ）",146,27],
+["シャルイース","アキ・ローゼンタール",146,23],["ほめのび","白銀ノエル",146,23],["毒の王子さま","猫又おかゆ",146,26],
+["気まぐれメルシィ","アキ・ローゼンタール",149,27],["You're Mine","ベスティア・ゼータ",150,24],["Born to be \"BAU\"DOL☆★","FUWAMOCO",152,27],
+["NoDistance","癒月ちょこ",152,26],["ギミギミエンターテイメント","hololive IDOL PROJECT",152,27],["Palette","常闇トワ",153,24],
+["ばーちゃらぶ","夏色まつり",155,28],["六兆年と一夜物語(cover)","SorAZ",155,30],["夢色ワンダー","hololive IDOL PROJECT（主題歌）",157,29],
+["You＆合図","音乃瀬奏",157,25],["WAO!!(2025 ver.)","博衣こより",159,25],["Ridin' on Dreams","hololive IDOL PROJECT",159,25],
+["Color Rise Harmony","hololive IDOL PROJECT",159,27],["God knows...","博衣こより",160,26],["奏（かなで）","音乃瀬奏",166,23]
+].map((r,i)=>({id:"song_"+i,title:r[0],performer:r[1],duration:r[2],exLevel:r[3]}));
+
+const GEN_LABELS = {"0":"0期生","1":"1期生","2":"2期生","3":"3期生","4":"4期生","5":"5期生","gamers":"ゲーマーズ","holox":"holoX","promise":"Promise","regloss":"ReGLOSS","advent":"Advent","myth":"Myth","id1":"ID1期生","id2":"ID2期生","id3":"ID3期生"};
+const TYPES = ["Happy","Cute","Pure"];
+const TEAM_SIZE = 5; // 依 Game8/Gamerch：1隊 = 5張卡，其中1張為Leader（AppMedia最強編成頁確認）
+const WEIGHTS = {leader:30,passive:25,timeline:20,coverage:10,special:5,connect:5,board:5};
+const WEIGHT_SUM = Object.values(WEIGHTS).reduce((a,b)=>a+b,0); // 105 -> normalize
+
+/* ================= STORAGE ================= */
+function loadCards(){
+  const raw = localStorage.getItem("hd_cards");
+  if(raw){ try{ return JSON.parse(raw); }catch(e){} }
+  return JSON.parse(JSON.stringify(DEFAULT_CARDS));
+}
+function saveCards(cards){ localStorage.setItem("hd_cards", JSON.stringify(cards)); }
+function loadOwned(){ try{ return JSON.parse(localStorage.getItem("hd_owned")||"{}"); }catch(e){ return {}; } }
+function saveOwned(o){ localStorage.setItem("hd_owned", JSON.stringify(o)); }
+function loadBoard(){ try{ return JSON.parse(localStorage.getItem("hd_board")||"{}"); }catch(e){ return {}; } }
+function saveBoard(b){ localStorage.setItem("hd_board", JSON.stringify(b)); }
+
+let CARDS = loadCards();
+let OWNED = loadOwned();   // {cardId:true}
+let BOARD = loadBoard();   // {cardId: percent}
+
+/* ================= ENGINE ================= */
+function ownedCardList(){ return CARDS.filter(c=>OWNED[c.id]); }
+function cardById(id){ return CARDS.find(c=>c.id===id); }
+
+function computeCounts(team){
+  const gen={}, type={};
+  team.forEach(m=>{
+    const c=m.card;
+    gen[c.genCode]=(gen[c.genCode]||0)+1;
+    if(c.type && c.type!=="unknown") type[c.type]=(type[c.type]||0)+1;
+  });
+  return {gen,type};
+}
+
+function condMet(condType,condVal,condCount,counts){
+  if(!condType) return true; // 無條件
+  const map = condType==="gen"?counts.gen:counts.type;
+  return (map[condVal]||0) >= condCount;
+}
+
+function conditionReport(team,leaderId,counts){
+  return team.map(m=>{
+    const c=m.card;
+    const isLeader = c.id===leaderId;
+    const leaderCard = team.find(x=>x.card.id===leaderId).card;
+    let leaderOutfitCol="N/A";
+    if(leaderCard.outfit && leaderCard.outfit.condType){
+      if(leaderCard.outfit.condType==="gen") leaderOutfitCol = (c.genCode===leaderCard.outfit.condVal)?"PASS":"FAIL";
+      else leaderOutfitCol = (c.type===leaderCard.outfit.condVal)?"PASS":"FAIL";
+    } else if(leaderCard.outfit){ leaderOutfitCol="PASS(無條件)"; }
+    let passiveCol="N/A";
+    if(c.passive){ passiveCol = condMet(c.passive.condType,c.passive.condVal,c.passive.condCount,counts)?"PASS":"FAIL"; }
+    else if(c.outfit===undefined){ passiveCol="資料缺"; }
+    else { passiveCol = "資料缺"; }
+    const typeCol = (c.type && c.type!=="unknown") ? ((counts.type[c.type]||0)>=2?"PASS":"FAIL") : "資料缺";
+    const genCol = (counts.gen[c.genCode]||0)>=2 ? "PASS":"FAIL";
+    return {card:c,isLeader,leaderOutfitCol,passiveCol,typeCol,genCol};
+  });
+}
+
+function buildTimeline(team,leaderId,songLen,order){
+  // order: array of card ids in stage order (for Special sequencing)
+  const events=[]; // {who, kind:'active'|'special', start, end}
+  team.forEach(m=>{
+    const c=m.card;
+    if(c.active && c.active.interval && c.active.duration){
+      let t=c.active.interval;
+      while(t < songLen){
+        const start=t, end=Math.min(t+c.active.duration, songLen);
+        events.push({who:c.name, holomem:c.holomem, kind:"active", start, end});
+        t += c.active.interval;
+      }
+    }
+  });
+  // Special: fire sequentially in stage order, each starts when previous ends (starting at t=0)
+  let cursor=0;
+  order.forEach(cid=>{
+    const m=team.find(x=>x.card.id===cid);
+    if(!m) return;
+    const c=m.card;
+    if(c.special && c.special.duration){
+      const start=cursor, end=Math.min(cursor+c.special.duration, songLen);
+      if(start<songLen) events.push({who:c.name, holomem:c.holomem, kind:"special", start, end});
+      cursor = end;
+    }
+  });
+  return events;
+}
+
+function coverageMetrics(events,songLen){
+  const STEP=0.5;
+  let covered=0, overlapT=0, n=Math.round(songLen/STEP);
+  for(let i=0;i<n;i++){
+    const t=i*STEP;
+    let cnt=0;
+    events.forEach(e=>{ if(t>=e.start && t<e.end) cnt++; });
+    if(cnt>=1) covered+=STEP;
+    if(cnt>=2) overlapT+=STEP;
+  }
+  const coverage = Math.min(100, covered/songLen*100);
+  const overlap = Math.min(100, overlapT/songLen*100);
+  const idle = Math.max(0, 100-coverage);
+  return {coverage,overlap,idle};
+}
+
+function bestSpecialOrder(team,songLen){
+  // try permutations (5! = 120, cheap) to minimize special-vs-active overlap
+  const ids = team.map(m=>m.card.id);
+  function permutations(arr){
+    if(arr.length<=1) return [arr];
+    const res=[];
+    arr.forEach((v,i)=>{
+      const rest=arr.slice(0,i).concat(arr.slice(i+1));
+      permutations(rest).forEach(p=>res.push([v,...p]));
+    });
+    return res;
+  }
+  let best=null, bestScore=-1;
+  permutations(ids).forEach(order=>{
+    const events = buildTimeline(team, team.find(m=>true).card.id, songLen, order);
+    const specials = events.filter(e=>e.kind==="special");
+    const actives = events.filter(e=>e.kind==="active");
+    let wasted=0, total=0;
+    specials.forEach(s=>{
+      total += (s.end-s.start);
+      actives.forEach(a=>{
+        const ov = Math.max(0, Math.min(s.end,a.end)-Math.max(s.start,a.start));
+        wasted += ov;
+      });
+    });
+    const score = total>0 ? (1 - wasted/total) : 1;
+    if(score>bestScore){ bestScore=score; best=order; }
+  });
+  return {order:best||ids, specialEfficiency:(bestScore<0?100:bestScore*100)};
+}
+
+function scoreTeam(ownedTeamCards, leaderId, song){
+  // ownedTeamCards: array of card objects length TEAM_SIZE
+  const team = ownedTeamCards.map(c=>({card:c}));
+  const counts = computeCounts(team);
+  const leader = team.find(m=>m.card.id===leaderId).card;
+
+  // 1. Leader outfit
+  let leaderPass=true, leaderScore=0, leaderNote="";
+  if(!leader.outfit){ leaderPass=false; leaderNote="Leader此卡尚無Outfit資料"; }
+  else if(!leader.outfit.condType){ leaderPass=true; leaderScore=100; leaderNote="無條件啟動"; }
+  else {
+    leaderPass = condMet(leader.outfit.condType, leader.outfit.condVal, leader.outfit.condCount, counts);
+    leaderScore = leaderPass?100:0;
+    leaderNote = (leader.outfit.condType==="gen"?GEN_LABELS[leader.outfit.condVal]:leader.outfit.condVal)+" ≥ "+leader.outfit.condCount+"（目前："+((leader.outfit.condType==="gen"?counts.gen[leader.outfit.condVal]:counts.type[leader.outfit.condVal])||0)+"）";
+  }
+
+  // 2. Passive
+  const passiveDetails=[];
+  let passiveOkCount=0, passiveKnownCount=0;
+  team.forEach(m=>{
+    const c=m.card;
+    if(c.passive){
+      passiveKnownCount++;
+      const ok = condMet(c.passive.condType,c.passive.condVal,c.passive.condCount,counts);
+      if(ok) passiveOkCount++;
+      passiveDetails.push({name:c.name,ok,desc:c.passive.desc});
+    } else {
+      passiveDetails.push({name:c.name,ok:null,desc:"資料缺"});
+    }
+  });
+  const passiveScore = passiveKnownCount>0 ? (passiveOkCount/passiveKnownCount*100) : 0;
+
+  // 3/5/6/7. timeline / coverage / special
+  const {order, specialEfficiency} = bestSpecialOrder(team, song.duration);
+  const events = buildTimeline(team, leaderId, song.duration, order);
+  const {coverage, overlap, idle} = coverageMetrics(events, song.duration);
+  const timelineScore = coverage;
+  const coverageScore = Math.max(0, coverage-overlap);
+  const specialScore = specialEfficiency;
+
+  // 8. connect (informational, normalized)
+  const connectVals = team.map(m=>m.card.connect?m.card.connect.value:0).filter(v=>v>0);
+  const connectScore = connectVals.length? Math.min(100, (connectVals.reduce((a,b)=>a+b,0)/connectVals.length)/2) : 0;
+
+  // 9. board (user-entered %)
+  const boardVals = team.map(m=> BOARD[m.card.id]||0);
+  const boardScore = Math.min(100, (boardVals.reduce((a,b)=>a+b,0)/team.length));
+
+  const overallRaw = leaderScore*WEIGHTS.leader + passiveScore*WEIGHTS.passive + timelineScore*WEIGHTS.timeline +
+    coverageScore*WEIGHTS.coverage + specialScore*WEIGHTS.special + connectScore*WEIGHTS.connect + boardScore*WEIGHTS.board;
+  const overall = overallRaw/(WEIGHT_SUM*100)*100;
+
+  return {
+    team, leaderId, counts, leaderPass, leaderScore, leaderNote,
+    passiveScore, passiveDetails,
+    timelineScore, coverageScore, coverage, overlap, idle,
+    specialScore, order, events,
+    connectScore, boardScore, overall,
+    conditionReport: conditionReport(team, leaderId, counts)
+  };
+}
+
+/* ================= OPTIMIZER ================= */
+function combinations(arr,k){
+  const res=[];
+  function go(start,combo){
+    if(combo.length===k){ res.push(combo.slice()); return; }
+    for(let i=start;i<arr.length;i++){ combo.push(arr[i]); go(i+1,combo); combo.pop(); }
+  }
+  go(0,[]);
+  return res;
+}
+
+function findBestTeamForLeader(leader, pool, song){
+  // pool: owned cards excluding leader's holomem, unique holomem only (pick best card per holomem to reduce search)
+  const byHolomem={};
+  pool.forEach(c=>{ if(!byHolomem[c.holomem]) byHolomem[c.holomem]=[]; byHolomem[c.holomem].push(c); });
+  const holomemList = Object.keys(byHolomem);
+  let candidateSets;
+  if(holomemList.length<=9){
+    // brute force over holomem choice, and within each holomem try all its cards (usually 1-3)
+    candidateSets = combinations(holomemList, Math.min(TEAM_SIZE-1, holomemList.length));
+  } else {
+    candidateSets = null; // will use greedy
+  }
+  let best=null, bestScore=-1;
+
+  function evalMemberSet(memberHolomems){
+    // for each holomem pick the card variant that yields best score (try all, small numbers)
+    function pickBest(idx, chosen){
+      if(idx===memberHolomems.length){
+        if(chosen.length < TEAM_SIZE-1) return;
+        const r = scoreTeam([leader,...chosen], leader.id, song);
+        if(r.overall>bestScore){ bestScore=r.overall; best=r; }
+        return;
+      }
+      const variants = byHolomem[memberHolomems[idx]];
+      variants.forEach(v=>{ chosen.push(v); pickBest(idx+1,chosen); chosen.pop(); });
+    }
+    pickBest(0,[]);
+  }
+
+  if(candidateSets){
+    candidateSets.forEach(set=>evalMemberSet(set));
+  } else {
+    // greedy construction then local swap improvement
+    let chosenHolomem=[];
+    let remaining = holomemList.slice();
+    for(let slot=0; slot<TEAM_SIZE-1; slot++){
+      let bestH=null,bestS=-1,bestCard=null;
+      remaining.forEach(h=>{
+        byHolomem[h].forEach(v=>{
+          const trial=[leader,...chosenHolomem.map(x=>x.card),v];
+          if(trial.length<2) return;
+          const r=scoreTeam(trial, leader.id, song);
+          if(r.overall>bestS){ bestS=r.overall; bestH=h; bestCard=v; }
+        });
+      });
+      if(!bestH) break;
+      chosenHolomem.push({holomem:bestH,card:bestCard});
+      remaining = remaining.filter(h=>h!==bestH);
+    }
+    // local swap improvement (2 passes)
+    for(let pass=0; pass<2; pass++){
+      for(let i=0;i<chosenHolomem.length;i++){
+        let curScore = scoreTeam([leader,...chosenHolomem.map(x=>x.card)], leader.id, song).overall;
+        let improved=false;
+        remaining.forEach(h=>{
+          byHolomem[h].forEach(v=>{
+            const trial = chosenHolomem.map(x=>x.card); trial[i]=v;
+            const r = scoreTeam([leader,...trial], leader.id, song);
+            if(r.overall>curScore){ curScore=r.overall; chosenHolomem[i]={holomem:h,card:v}; improved=true; }
+          });
+        });
+        remaining = holomemList.filter(h=>!chosenHolomem.some(x=>x.holomem===h));
+      }
+    }
+    const finalTeam=[leader,...chosenHolomem.map(x=>x.card)];
+    best = scoreTeam(finalTeam, leader.id, song);
+    bestScore = best.overall;
+  }
+  return best;
+}
+
+function findBestTeamOverall(owned, song, forcedLeaderId){
+  let candidates = forcedLeaderId ? owned.filter(c=>c.id===forcedLeaderId) : owned;
+  let best=null;
+  candidates.forEach(leader=>{
+    const pool = owned.filter(c=>c.holomem!==leader.holomem);
+    if(pool.length < TEAM_SIZE-1) return; // not enough for full team
+    const r = findBestTeamForLeader(leader, pool, song);
+    if(r && (!best || r.overall>best.overall)) best=r;
+  });
+  return best;
+}
+
+/* ================= UI ================= */
+function switchTab(name){
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active", b.dataset.tab===name));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.id==="tab-"+name));
+}
+document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
+
+function updateDbStat(){
+  document.getElementById("dbstat").textContent = `資料庫：${CARDS.length} 張卡 · ${SONGS.length} 首歌曲 · 持有 ${ownedCardList().length} 張`;
+  document.getElementById("cardCountLabel").textContent = CARDS.length;
+}
+
+function renderRoster(){
+  const q = document.getElementById("rosterSearch").value.trim().toLowerCase();
+  const list = document.getElementById("rosterList");
+  list.innerHTML="";
+  const byHolomem={};
+  CARDS.forEach(c=>{ if(!byHolomem[c.holomem]) byHolomem[c.holomem]=[]; byHolomem[c.holomem].push(c); });
+  Object.keys(byHolomem).sort().forEach(h=>{
+    if(q && !h.toLowerCase().includes(q) && !byHolomem[h].some(c=>c.name.toLowerCase().includes(q)||GEN_LABELS[c.genCode].toLowerCase().includes(q))) return;
+    const group=document.createElement("div");
+    group.innerHTML = `<div style="margin:8px 0 2px;font-weight:700;color:var(--accent2);font-size:12.5px;">${h}</div>`;
+    byHolomem[h].forEach(c=>{
+      const row=document.createElement("div");
+      row.className="roster-item";
+      row.innerHTML = `
+        <input type="checkbox" ${OWNED[c.id]?"checked":""} onchange="toggleOwned('${c.id}',this.checked)">
+        <span class="name">${c.name} <span class="tag">[${GEN_LABELS[c.genCode]}${c.type!=="unknown"?" / "+c.type:""}]</span></span>
+        <span class="small">Board加成%</span>
+        <input type="number" value="${BOARD[c.id]||0}" min="0" max="300" onchange="setBoard('${c.id}',this.value)">
+      `;
+      group.appendChild(row);
+    });
+    list.appendChild(group);
+  });
+}
+function toggleOwned(id,val){ OWNED[id]=val; saveOwned(OWNED); updateDbStat(); populateSelectors(); }
+function setBoard(id,val){ BOARD[id]=parseFloat(val)||0; saveBoard(BOARD); }
+function rosterSelectAll(val){ CARDS.forEach(c=>OWNED[c.id]=val); saveOwned(OWNED); renderRoster(); updateDbStat(); populateSelectors(); }
+
+function populateSelectors(){
+  const songSel=document.getElementById("songSelect");
+  const roiSongSel=document.getElementById("roiSongSelect");
+  [songSel,roiSongSel].forEach(sel=>{
+    const cur=sel.value;
+    sel.innerHTML = SONGS.map(s=>`<option value="${s.id}">${s.title}（${s.performer}）· ${s.duration}秒 · EX${s.exLevel}</option>`).join("");
+    if(cur) sel.value=cur;
+  });
+  const leaderSel=document.getElementById("leaderSelect");
+  const owned=ownedCardList();
+  leaderSel.innerHTML = `<option value="">（自動選擇最佳Leader）</option>` + owned.map(c=>`<option value="${c.id}">${c.holomem} - ${c.name}</option>`).join("");
+
+  const slots=document.getElementById("manualSlots");
+  slots.innerHTML="";
+  for(let i=0;i<TEAM_SIZE;i++){
+    const sel=document.createElement("select");
+    sel.id="slot"+i;
+    sel.innerHTML = `<option value="">（空）</option>` + owned.map(c=>`<option value="${c.id}">${c.holomem} - ${c.name}</option>`).join("");
+    const wrap=document.createElement("div");
+    wrap.innerHTML=`<label class="small">位置 ${i+1}${i===0?"（預設Leader，可於上方Leader選單覆蓋）":""}</label>`;
+    wrap.appendChild(sel);
+    slots.appendChild(wrap);
+  }
+}
+
+function renderResult(result, song){
+  const el = document.getElementById("resultArea");
+  const leaderCard = result.team.find(m=>m.card.id===result.leaderId).card;
+
+  let banner = result.leaderPass
+    ? `<div class="ok-banner">✅ Leader Outfit 已啟動：${leaderCard.name}（${leaderCard.outfit?leaderCard.outfit.desc:""}）</div>`
+    : `<div class="warn-banner">⚠️ Leader Outfit 條件未滿足（${result.leaderNote}）——依規格，整隊視為「不完整」，Overall Score 已大幅扣分，建議調整隊員屬性/期別組成。</div>`;
+
+  const condRows = result.conditionReport.map(r=>`
+    <tr>
+      <td>${r.isLeader?"👑 ":""}${r.card.holomem}<br><span class="small">${r.card.name}</span></td>
+      <td>${pillFor(r.leaderOutfitCol)}</td>
+      <td>${pillFor(r.passiveCol)}</td>
+      <td>${pillFor(r.typeCol)}</td>
+      <td>${pillFor(r.genCol)}</td>
+    </tr>`).join("");
+
+  const timelineRows = result.team.map((m,idx)=>{
+    const c=m.card;
+    const myEvents = result.events.filter(e=>e.who===c.name);
+    const segs = myEvents.map(e=>`<div class="seg ${e.kind}" style="left:${e.start/song.duration*100}%;width:${(e.end-e.start)/song.duration*100}%;" title="${e.kind} ${e.start}s-${e.end}s"></div>`).join("");
+    return `<div class="timeline-row"><div class="who">${c.holomem}<br><span class="small">${c.name.slice(0,10)}</span></div><div class="timeline-track">${segs}</div></div>`;
+  }).join("");
+
+  const orderChips = result.order.map(id=>{
+    const c=cardById(id);
+    return `<div class="order-chip ${id===result.leaderId?'leader':''}">${c.holomem}${id===result.leaderId?' 👑':''}</div>`;
+  }).join("");
+
+  el.innerHTML = `
+    <div class="card">
+      <div class="flex-between">
+        <h2>分析結果 — ${song.title}（${song.duration}秒）</h2>
+        <div class="overall-score">${result.overall.toFixed(1)} <span style="font-size:14px;color:var(--sub);">/ 100</span></div>
+      </div>
+      ${banner}
+      <h3>Overall Score 組成（權重已正規化，原始105% → 100%）</h3>
+      ${scoreBar("Leader Outfit",WEIGHTS.leader,result.leaderScore)}
+      ${scoreBar("Member Passive",WEIGHTS.passive,result.passiveScore)}
+      ${scoreBar("Timeline (Coverage)",WEIGHTS.timeline,result.timelineScore)}
+      ${scoreBar("Coverage效率(非重疊)",WEIGHTS.coverage,result.coverageScore)}
+      ${scoreBar("Special Order",WEIGHTS.special,result.specialScore)}
+      ${scoreBar("Connect(board加成)",WEIGHTS.connect,result.connectScore)}
+      ${scoreBar("Board",WEIGHTS.board,result.boardScore)}
+
+      <h3>Condition Report（每位隊員 PASS/FAIL）</h3>
+      <table><thead><tr><th>隊員</th><th>Leader Outfit</th><th>Passive</th><th>Type搭配</th><th>Generation搭配</th></tr></thead>
+      <tbody>${condRows}</tbody></table>
+
+      <h3>建議出場順序（Special依此順序發動，最小化與Active重疊）</h3>
+      <div class="order-list">${orderChips}</div>
+
+      <h3>Active / Special Skill Timeline</h3>
+      <div class="metric-row">
+        <div class="metric-box"><div class="num">${result.coverage.toFixed(1)}%</div><div class="lbl">Coverage 覆蓋率</div></div>
+        <div class="metric-box"><div class="num">${result.overlap.toFixed(1)}%</div><div class="lbl">Overlap 重疊(浪費)</div></div>
+        <div class="metric-box"><div class="num">${result.idle.toFixed(1)}%</div><div class="lbl">Idle 空檔</div></div>
+      </div>
+      <div class="legend"><span><i style="background:var(--accent2)"></i>Active Skill</span><span><i style="background:var(--accent)"></i>Special Skill</span></div>
+      <div class="timeline-wrap">${timelineRows}</div>
+      <p class="small">＊沒有時間軸資料的卡片（Active資料為 unknown）不會顯示色塊，代表該卡目前無法納入時間軸計算，僅其Outfit/Passive/Leader效果仍計入評分。</p>
+    </div>
+  `;
+}
+function pillFor(v){
+  if(v==="PASS"||v==="PASS(無條件)") return `<span class="pill g">PASS</span>`;
+  if(v==="FAIL") return `<span class="pill r">FAIL</span>`;
+  if(v==="N/A") return `<span class="pill y">N/A</span>`;
+  return `<span class="pill y">資料缺</span>`;
+}
+function scoreBar(label,weight,score){
+  return `<div class="score-bar-row"><div class="label">${label}（${weight}%）</div><div class="score-bar-track"><div class="score-bar-fill" style="width:${score}%;"></div></div><div class="score-bar-val">${score.toFixed(1)}</div></div>`;
+}
+
+function runAutoBuild(){
+  const owned = ownedCardList();
+  if(owned.length < TEAM_SIZE){ alert("持有角色不足 "+TEAM_SIZE+" 張（需來自至少 "+TEAM_SIZE+" 位不同Holomem），請先到「①我的角色庫」勾選。"); return; }
+  const uniqueHolomem = [...new Set(owned.map(c=>c.holomem))];
+  if(uniqueHolomem.length < TEAM_SIZE){ alert("持有角色的『不同Holomem』數量不足 "+TEAM_SIZE+" 位，同一位Holomem不能同時上場多張卡。"); return; }
+  const song = SONGS.find(s=>s.id===document.getElementById("songSelect").value) || SONGS[0];
+  const forcedLeader = document.getElementById("leaderSelect").value || null;
+  const result = findBestTeamOverall(owned, song, forcedLeader);
+  if(!result){ alert("找不到可行隊伍，請確認角色庫是否足夠多樣。"); return; }
+  renderResult(result, song);
+  // reflect into manual slots for visibility
+  result.team.forEach((m,i)=>{ const sel=document.getElementById("slot"+i); if(sel) sel.value=m.card.id; });
+  document.getElementById("leaderSelect").value = result.leaderId;
+}
+
+function runAnalyzeManual(){
+  const song = SONGS.find(s=>s.id===document.getElementById("songSelect").value) || SONGS[0];
+  const ids=[];
+  for(let i=0;i<TEAM_SIZE;i++){ const v=document.getElementById("slot"+i).value; if(v) ids.push(v); }
+  if(ids.length!==TEAM_SIZE){ alert("請於「隊伍組成」5個欄位都選好卡片，或改用「自動建議最佳隊伍」。"); return; }
+  const holomemSet = new Set(ids.map(id=>cardById(id).holomem));
+  if(holomemSet.size!==TEAM_SIZE){ alert("隊伍中有重複的 Holomem，同一位角色不能同時上場多張卡。"); return; }
+  const leaderId = document.getElementById("leaderSelect").value || ids[0];
+  const cards = ids.map(id=>cardById(id));
+  const result = scoreTeam(cards, leaderId, song);
+  renderResult(result, song);
+}
+
+function runROI(){
+  const owned = ownedCardList();
+  const mode = document.getElementById("roiMode").value;
+  const songs = mode==="single" ? [SONGS.find(s=>s.id===document.getElementById("roiSongSelect").value)||SONGS[0]]
+    : [SONGS.reduce((a,b)=>a.duration<b.duration?a:b), SONGS[Math.floor(SONGS.length/2)], SONGS.reduce((a,b)=>a.duration>b.duration?a:b)];
+
+  if(owned.length < TEAM_SIZE-1){ alert("持有角色數過少，至少需 "+(TEAM_SIZE-1)+" 張才能模擬 ROI。"); return; }
+
+  function avgBest(pool){
+    let sum=0, n=0;
+    songs.forEach(s=>{ const r=findBestTeamOverall(pool, s, null); if(r){ sum+=r.overall; n++; } });
+    return n? sum/n : 0;
+  }
+  const baseline = avgBest(owned);
+  const unowned = CARDS.filter(c=>!OWNED[c.id]);
+  const rows=[];
+  unowned.forEach(cand=>{
+    const trialPool = owned.concat([cand]);
+    const withScore = avgBest(trialPool);
+    rows.push({card:cand, delta: withScore-baseline});
+  });
+  rows.sort((a,b)=>b.delta-a.delta);
+  const top = rows.slice(0,15);
+  document.getElementById("roiResult").style.display="block";
+  document.getElementById("roiList").innerHTML = `
+    <p class="small">目前角色庫最佳隊伍平均分：<b>${baseline.toFixed(1)}</b>（基準：${songs.map(s=>s.title).join(" / ")}）</p>
+    ` + top.map((r,i)=>`
+    <div class="roi-row">
+      <div class="roi-rank">#${i+1}</div>
+      <div class="roi-name">${r.card.holomem} — ${r.card.name}<span class="sub">${GEN_LABELS[r.card.genCode]}${r.card.type!=="unknown"?" / "+r.card.type:""} · <a href="${r.card.source}" target="_blank" class="badge-src">資料來源</a></span></div>
+      <div class="roi-delta">${r.delta>=0?"+":""}${r.delta.toFixed(2)}</div>
+    </div>`).join("");
+}
+
+/* ================= EDITOR ================= */
+function renderCardTable(){
+  const tbody=document.querySelector("#cardTable tbody");
+  tbody.innerHTML = CARDS.map(c=>`
+    <tr>
+      <td>${c.holomem}</td>
+      <td>${c.name}<br><span class="small">${c.id}</span></td>
+      <td>${GEN_LABELS[c.genCode]||c.genCode}</td>
+      <td>${c.type}${c.typeConfirmed===false?" (推測)":""}</td>
+      <td>${c.outfit? (c.outfit.condType? (c.outfit.condType==="gen"?GEN_LABELS[c.outfit.condVal]:c.outfit.condVal)+"≥"+c.outfit.condCount : "無條件") : "unknown"}</td>
+      <td>${c.outfit? c.outfit.value+"%" : "unknown"}</td>
+      <td>${c.active? "interval "+c.active.interval+"s/dur "+c.active.duration+"s" : "unknown"}</td>
+      <td><a href="${c.source}" target="_blank">來源</a></td>
+      <td><button class="btn secondary small" onclick='loadCardToEditor("${c.id}")'>編輯</button> <button class="btn secondary small" onclick="deleteCard('${c.id}')">刪除</button></td>
+    </tr>
+  `).join("");
+}
+function loadCardToEditor(id){
+  const c=cardById(id);
+  document.getElementById("cardJsonEditor").value = JSON.stringify(c,null,2);
+  switchTab("editor");
+}
+function upsertCardFromEditor(){
+  let obj;
+  try{ obj=JSON.parse(document.getElementById("cardJsonEditor").value); }
+  catch(e){ alert("JSON 格式錯誤："+e.message); return; }
+  if(!obj.id){ alert("卡片需要有 id 欄位"); return; }
+  const idx=CARDS.findIndex(c=>c.id===obj.id);
+  if(idx>=0) CARDS[idx]=obj; else CARDS.push(obj);
+  saveCards(CARDS);
+  renderCardTable(); updateDbStat(); renderRoster(); populateSelectors();
+  alert("已儲存卡片："+obj.id);
+}
+function deleteCard(id){
+  if(!confirm("確定刪除這張卡片？")) return;
+  CARDS = CARDS.filter(c=>c.id!==id);
+  delete OWNED[id]; delete BOARD[id];
+  saveCards(CARDS); saveOwned(OWNED); saveBoard(BOARD);
+  renderCardTable(); updateDbStat(); renderRoster(); populateSelectors();
+}
+function exportData(){
+  const blob = new Blob([JSON.stringify({cards:CARDS, owned:OWNED, board:BOARD},null,2)], {type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="hololive_dreams_data.json"; a.click();
+}
+function importData(ev){
+  const file=ev.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const obj=JSON.parse(reader.result);
+      if(obj.cards) CARDS=obj.cards;
+      if(obj.owned) OWNED=obj.owned;
+      if(obj.board) BOARD=obj.board;
+      saveCards(CARDS); saveOwned(OWNED); saveBoard(BOARD);
+      renderCardTable(); renderRoster(); updateDbStat(); populateSelectors();
+      alert("匯入完成");
+    }catch(e){ alert("匯入失敗："+e.message); }
+  };
+  reader.readAsText(file);
+}
+function resetToDefault(){
+  if(!confirm("將還原成內建預設資料庫，你的自訂編輯將會被清除，確定？")) return;
+  CARDS = JSON.parse(JSON.stringify(DEFAULT_CARDS));
+  saveCards(CARDS); renderCardTable(); updateDbStat(); renderRoster(); populateSelectors();
+}
+
+/* ================= INIT ================= */
+function init(){
+  updateDbStat();
+  renderRoster();
+  populateSelectors();
+  renderCardTable();
+}
+init();
+</script>
+</body>
+</html>
