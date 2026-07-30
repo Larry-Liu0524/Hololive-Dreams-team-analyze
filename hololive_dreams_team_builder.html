@@ -3801,7 +3801,7 @@ function renderResult(result, song, targetId, highlightOwned){
       <table><thead><tr><th>隊員</th>${highlightOwned? "<th>持有狀態</th>":""}<th>隊長服裝</th><th>被動</th><th>屬性搭配</th><th>期別搭配</th></tr></thead>
       <tbody>${condRows}</tbody></table>
 
-      <h3>建議出場順序（必殺技依此順序發動，最小化與主動技重疊）</h3>
+      <h3>建議出場順序（必殺技依此順序發動，優先填補完全沒有技能生效的空檔）</h3>
       <div class="order-list">${orderChips}</div>
 
       <h3>主動技／必殺技時間軸</h3>
