@@ -3917,10 +3917,11 @@ function runFindBestForLeader(){
   const leaderCard = cardById(leaderId);
   if(!leaderCard){ alert("找不到這張隊長卡片，請重新選擇。"); return; }
 
-  const fixedCards = getLeaderPickFixedCards();
-  // 檢查鎖定欄位彼此、以及跟隊長之間，沒有重複的 Holomem
+  // 如果隊長那張卡本人也被放進手動欄位（代表「這格就是隊長的位置」），視為同一位，不算重複；
+  // 只有當某個欄位放了「同一位 Holomem 的另一張不同卡」時，才是真的衝突（同一角色不能上場兩次）。
+  const fixedCards = getLeaderPickFixedCards().filter(c=>c.id!==leaderId);
   const combinedHolomem = [leaderCard.holomem, ...fixedCards.map(c=>c.holomem)];
-  if(new Set(combinedHolomem).size !== combinedHolomem.length){ alert("鎖定的欄位跟隊長之間有重複的 Holomem，同一位角色不能同時上場多張卡。"); return; }
+  if(new Set(combinedHolomem).size !== combinedHolomem.length){ alert("鎖定的欄位裡有跟隊長同一位 Holomem、但不同卡的情況，同一位角色不能同時上場多張卡。"); return; }
 
   const song = {id:"leaderpick", title:"指定隊長最佳隊伍（不指定歌曲，從全部卡片挑選）", performer:"", duration:200, exLevel:null};
 
