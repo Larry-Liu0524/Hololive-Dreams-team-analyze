@@ -43,8 +43,9 @@ th{color:var(--sub);font-weight:600;position:sticky;top:0;background:var(--panel
 .pill.r{background:rgba(255,95,126,.15);color:var(--bad);}
 .pill.y{background:rgba(255,199,95,.15);color:var(--warn);}
 .roster-list{max-height:520px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px;}
-.roster-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;font-size:12.5px;}
+.roster-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;font-size:12.5px;cursor:pointer;}
 .roster-item:hover{background:var(--panel2);}
+.roster-item input[type=checkbox]{cursor:pointer;}
 .roster-item .name{flex:1;}
 .roster-item .tag{color:var(--sub);font-size:11px;}
 .roster-item input[type=number]{width:64px;padding:3px 6px;font-size:11px;}
@@ -3187,6 +3188,7 @@ const SONGS = [
 ].map((r,i)=>({id:"song_"+i,title:r[0],performer:r[1],duration:r[2],exLevel:r[3]}));
 
 const GEN_LABELS = {"0":"0期生","1":"1期生","2":"2期生","3":"3期生","4":"4期生","5":"5期生","gamers":"ゲーマーズ","holox":"holoX","promise":"Promise","regloss":"ReGLOSS","advent":"Advent","myth":"Myth","id1":"ID1期生","id2":"ID2期生","id3":"ID3期生"};
+const GEN_ORDER = ["0","1","2","3","4","5","gamers","holox","myth","promise","regloss","advent","id1","id2","id3"];
 const TYPES = ["Happy","Cute","Pure"];
 const TEAM_SIZE = 5; // 依 Game8/Gamerch：1隊 = 5張卡，其中1張為Leader（AppMedia最強編成頁確認）
 const WEIGHTS = {leader:30,passive:25,timeline:20,coverage:10,special:5,connect:5,board:5};
@@ -3496,25 +3498,49 @@ function renderRoster(){
   const q = document.getElementById("rosterSearch").value.trim().toLowerCase();
   const list = document.getElementById("rosterList");
   list.innerHTML="";
-  const byHolomem={};
-  CARDS.forEach(c=>{ if(!byHolomem[c.holomem]) byHolomem[c.holomem]=[]; byHolomem[c.holomem].push(c); });
-  Object.keys(byHolomem).sort().forEach(h=>{
-    if(q && !h.toLowerCase().includes(q) && !byHolomem[h].some(c=>c.name.toLowerCase().includes(q)||GEN_LABELS[c.genCode].toLowerCase().includes(q))) return;
+
+  // filter first (match holomem / card name / generation / type), then group by generation
+  const filtered = CARDS.filter(c=>{
+    if(!q) return true;
+    return c.holomem.toLowerCase().includes(q) ||
+           c.name.toLowerCase().includes(q) ||
+           (GEN_LABELS[c.genCode]||"").toLowerCase().includes(q) ||
+           (c.type||"").toLowerCase().includes(q);
+  });
+
+  const byGen={};
+  filtered.forEach(c=>{ if(!byGen[c.genCode]) byGen[c.genCode]=[]; byGen[c.genCode].push(c); });
+
+  // known gen codes in canonical order, then any unrecognized codes appended at the end
+  const orderedCodes = [...GEN_ORDER, ...Object.keys(byGen).filter(g=>!GEN_ORDER.includes(g))];
+
+  orderedCodes.forEach(gcode=>{
+    const cards = byGen[gcode];
+    if(!cards || !cards.length) return;
+    cards.sort((a,b)=> a.holomem.localeCompare(b.holomem,"ja") || a.name.localeCompare(b.name,"ja"));
     const group=document.createElement("div");
-    group.innerHTML = `<div style="margin:8px 0 2px;font-weight:700;color:var(--accent2);font-size:12.5px;">${h}</div>`;
-    byHolomem[h].forEach(c=>{
+    group.innerHTML = `<div style="margin:8px 0 2px;font-weight:700;color:var(--accent2);font-size:12.5px;">${GEN_LABELS[gcode]||gcode}</div>`;
+    cards.forEach(c=>{
       const row=document.createElement("div");
       row.className="roster-item";
+      row.onclick = (e)=>rowClicked(e, c.id);
       row.innerHTML = `
-        <input type="checkbox" ${OWNED[c.id]?"checked":""} onchange="toggleOwned('${c.id}',this.checked)">
-        <span class="name">${c.name} <span class="tag">[${GEN_LABELS[c.genCode]}${c.type!=="unknown"?" / "+c.type:""}]</span></span>
+        <input type="checkbox" id="chk_${c.id}" ${OWNED[c.id]?"checked":""} onchange="toggleOwned('${c.id}',this.checked)">
+        <span class="name"><b>${c.holomem}</b> — ${c.name} <span class="tag">${c.type!=="unknown"?"["+c.type+"]":""}</span></span>
         <span class="small">Board加成%</span>
-        <input type="number" value="${BOARD[c.id]||0}" min="0" max="300" onchange="setBoard('${c.id}',this.value)">
+        <input type="number" value="${BOARD[c.id]||0}" min="0" max="300" onchange="setBoard('${c.id}',this.value)" onclick="event.stopPropagation()">
       `;
       group.appendChild(row);
     });
     list.appendChild(group);
   });
+}
+function rowClicked(e, cardId){
+  if(e.target.tagName === "INPUT") return; // checkbox/number inputs handle themselves via onchange
+  const cb = document.getElementById("chk_"+cardId);
+  if(!cb) return;
+  cb.checked = !cb.checked;
+  toggleOwned(cardId, cb.checked);
 }
 function toggleOwned(id,val){ OWNED[id]=val; saveOwned(OWNED); updateDbStat(); populateSelectors(); }
 function setBoard(id,val){ BOARD[id]=parseFloat(val)||0; saveBoard(BOARD); }
