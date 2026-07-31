@@ -176,7 +176,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <div class="tab" id="tab-roi">
 <div class="card">
 <h2>抽卡投資報酬率（ROI）推薦</h2>
-<p class="small">邏輯：先依你目前持有的角色，找出「目前最佳隊伍」（不指定歌曲，用跟②相同的長評估區間，避免受特定歌曲秒數影響）。接著針對每一張你「未持有」的卡，測試把它換進這隊<b>每一個位置</b>（含隊長），取「換進去能讓總分提升最多」的那一格——也就是這隊<b>目前最弱、最該被換掉的一位</b>。分數提升幅度越大，代表這張卡越能補上你這隊<b>現在實際缺的東西</b>（隊長服裝條件沒過、被動觸發不了、屬性或期別搭配 FAIL、技能節奏空檔多…），而不是重新洗出一支跟你現在隊伍無關的全新隊伍。</p>
+<p class="small">這一頁<b>不會自己重新搜尋隊伍</b>，而是直接沿用你在「②隊伍養成分析」或「③指定隊長找最佳隊伍」最後一次按「自動建議最佳隊伍」或「分析目前手動隊伍」找出的那支隊伍，當作 ROI 計算基準。針對每一張你「未持有」的卡，測試把它換進這隊<b>每一個位置</b>（含隊長），取「換進去能讓總分提升最多」的那一格——也就是這隊<b>目前最弱、最該被換掉的一位</b>。分數提升幅度越大，代表這張卡越能補上你這隊<b>現在實際缺的東西</b>（隊長服裝條件沒過、被動觸發不了、屬性或期別搭配 FAIL、技能節奏空檔多…）。請先到②或③找出一支隊伍，再回來按下方按鈕計算。</p>
 <div style="display:flex;gap:8px;">
 <button class="btn" onclick="runROI()">🎯 計算 ROI 排行</button>
 <button class="btn secondary" onclick="clearROI()">🗑 清空</button>
@@ -3222,6 +3222,11 @@ let CARDS = loadCards();
 let OWNED = loadOwned(); // {cardId:true}
 let BOARD = loadBoard(); // {cardId: percent}
 
+// ROI（④）的計算基準：直接沿用②「隊伍養成分析」或③「指定隊長找最佳隊伍」最後一次算出的隊伍結果，
+// 而不是自己在④裡另外重新搜尋一次——這樣 ROI 排行才是「以你在②/③實際找到／確認過的那支隊伍」為基準，
+// 找出換掉哪一位、換上哪張未持有的卡最划算，符合「這隊缺哪一位」的直覺，而不是每次都自己重新洗一支不相干的隊伍。
+let ROI_BASE = null; // {result, song, sourceLabel}
+
 /* ================= ENGINE ================= */
 function ownedCardList(){ return CARDS.filter(c=>OWNED[c.id]); }
 function cardById(id){ return CARDS.find(c=>c.id===id); }
@@ -3838,6 +3843,7 @@ if(!result){ alert("找不到可行隊伍，請確認角色庫是否足夠多樣
 renderResult(result, song, "resultAreaPractice");
 result.order.forEach((id,i)=>{ const sel=document.getElementById("pslot"+i); if(sel) sel.value=id; });
 document.getElementById("leaderSelectPractice").value = result.leaderId;
+ROI_BASE = {result, song, sourceLabel:"② 隊伍養成分析（依現有角色）"};
 }
 
 function runAnalyzeManualPractice(){
@@ -3851,6 +3857,7 @@ const leaderId = document.getElementById("leaderSelectPractice").value || ids[0]
 const cards = ids.map(id=>cardById(id));
 const result = scoreTeam(cards, leaderId, song);
 renderResult(result, song, "resultAreaPractice");
+ROI_BASE = {result, song, sourceLabel:"② 隊伍養成分析（依現有角色）"};
 }
 
 function clearPractice(){
@@ -3892,6 +3899,7 @@ if(!result){ alert("找不到可行隊伍，請確認資料庫是否足夠多樣
 }
 renderResult(result, song, "resultAreaLeaderPick", true);
 result.order.forEach((id,i)=>{ const sel=document.getElementById("lpslot"+i); if(sel) sel.value=id; });
+ROI_BASE = {result, song, sourceLabel:"③ 指定隊長找最佳隊伍"};
 }
 
 function runAnalyzeManualLeaderPick(){
@@ -3905,6 +3913,7 @@ if(!fixedCards.some(c=>c.id===leaderId)){ alert("上方選的隊長必須也出�
 const song = {id:"leaderpick", title:"指定隊長最佳隊伍（不指定歌曲，從全部卡片挑選）", performer:"", duration:200, exLevel:null};
 const result = scoreTeam(fixedCards, leaderId, song);
 renderResult(result, song, "resultAreaLeaderPick", true);
+ROI_BASE = {result, song, sourceLabel:"③ 指定隊長找最佳隊伍"};
 }
 
 function clearLeaderPick(){
@@ -3945,14 +3954,8 @@ return parts.join("、");
 }
 
 function runROI(){
-const owned = ownedCardList();
-if(owned.length < TEAM_SIZE){ alert("持有角色不足 "+TEAM_SIZE+" 張（需來自至少 "+TEAM_SIZE+" 位不同 Holomem），請先到「①我的角色庫」勾選。"); return; }
-const uniqueHolomem = [...new Set(owned.map(c=>c.holomem))];
-if(uniqueHolomem.length < TEAM_SIZE){ alert("持有角色的『不同 Holomem』數量不足 "+TEAM_SIZE+" 位，同一位 Holomem 不能同時上場多張卡，無法組出完整隊伍作為 ROI 分析基準。"); return; }
-
-const song = getPracticeSong();
-const current = findBestTeamOverall(owned, song, null);
-if(!current){ alert("找不到可行的目前最佳隊伍，請確認角色庫是否足夠多樣。"); return; }
+if(!ROI_BASE){ alert("請先到「②隊伍養成分析」或「③指定隊長找最佳隊伍」按「自動建議最佳隊伍」或「分析目前手動隊伍」找出一支隊伍，ROI 會直接以那支隊伍為基準計算，不會在這裡另外重新搜尋。"); return; }
+const {result: current, song, sourceLabel} = ROI_BASE;
 
 const unowned = CARDS.filter(c=>!OWNED[c.id]);
 const rows=[];
@@ -3975,7 +3978,7 @@ const condRows = current.conditionReport.map(r=>`
 <td>${pillFor(r.genCol)}</td>
 </tr>`).join("");
 document.getElementById("roiBaseline").innerHTML = `
-<p class="small">Leader：<b>${leaderCard.holomem}</b> — ${leaderCard.name}　總分：<b>${current.overall.toFixed(1)} / 100</b>（依你目前持有角色能組出的最佳隊伍；下方 ROI 排行以這隊為基準，找出換掉哪一位、換上哪張未持有的卡，能讓分數提升最多）</p>
+<p class="small">基準隊伍來源：<b>${sourceLabel}</b>　Leader：<b>${leaderCard.holomem}</b> — ${leaderCard.name}　總分：<b>${current.overall.toFixed(1)} / 100</b>（下方 ROI 排行以這隊為基準，找出換掉哪一位、換上哪張未持有的卡，能讓分數提升最多；想換一支隊伍當基準，回②或③重新跑一次再回來按「計算 ROI 排行」即可）</p>
 <table><thead><tr><th>隊員</th><th>隊長服裝</th><th>被動</th><th>屬性搭配</th><th>期別搭配</th></tr></thead>
 <tbody>${condRows}</tbody></table>
 `;
