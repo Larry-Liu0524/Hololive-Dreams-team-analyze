@@ -81,6 +81,9 @@ textarea{width:100%;min-height:260px;background:var(--panel2);border:1px solid v
 .roi-name .sub{display:block;color:var(--sub);font-size:11px;}
 .roi-delta{font-weight:800;font-size:15px;color:var(--good);width:90px;text-align:right;}
 .badge-src{font-size:10px;color:var(--sub);}
+.roi-source-option{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:var(--panel2);font-size:13px;}
+.roi-source-option input[type=radio]{margin-top:3px;cursor:pointer;flex-shrink:0;}
+.roi-source-option:has(input:checked){border-color:var(--accent2);}
 a{color:var(--accent2);}
 .flex-between{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
 .order-list{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;}
@@ -176,16 +179,26 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <div class="tab" id="tab-roi">
 <div class="card">
 <h2>抽卡投資報酬率（ROI）推薦</h2>
-<p class="small">這一頁<b>不會自己重新搜尋隊伍</b>，而是直接沿用你在「②隊伍養成分析」或「③指定隊長找最佳隊伍」最後一次按「自動建議最佳隊伍」或「分析目前手動隊伍」找出的那支隊伍，當作 ROI 計算基準。針對每一張你「未持有」的卡，測試把它換進這隊<b>每一個位置</b>（含隊長），取「換進去能讓總分提升最多」的那一格——也就是這隊<b>目前最弱、最該被換掉的一位</b>。分數提升幅度越大，代表這張卡越能補上你這隊<b>現在實際缺的東西</b>（隊長服裝條件沒過、被動觸發不了、屬性或期別搭配 FAIL、技能節奏空檔多…）。請先到②或③找出一支隊伍，再回來按下方按鈕計算。</p>
+<p class="small">這一頁<b>不會自己重新搜尋隊伍</b>，而是直接沿用你在②或③算出的隊伍當基準——但②和③問的問題本質不同，所以分成兩種模式：<b>②的隊伍</b>只從你「目前持有」的角色組成，還有優化空間，這裡會告訴你「抽哪張未持有的卡、換掉哪一位，分數提升最多」。<b>③的隊伍</b>本來就是從資料庫全部卡片搜尋出的理論最佳隊伍，未持有的格位已經是那個位置客觀最好的選擇，換別的未持有卡不會更好——這裡改成告訴你「如果抽不到這張、只能用你現有角色頂替，分數會掉多少」，掉越多代表越該優先抽。請先在下方選擇要以哪一頁的隊伍為基準，再按「計算」。</p>
+<div class="grid cols2" style="margin-bottom:10px;">
+<label class="roi-source-option">
+<input type="radio" name="roiSource" value="practice" checked onchange="updateRoiSourceStatus()">
+<div><b>② 隊伍養成分析</b>目前隊伍<div class="small" id="roiSrcPracticeStatus">（尚未在②跑出隊伍）</div></div>
+</label>
+<label class="roi-source-option">
+<input type="radio" name="roiSource" value="leaderpick" onchange="updateRoiSourceStatus()">
+<div><b>③ 指定隊長找最佳隊伍</b>目前隊伍<div class="small" id="roiSrcLeaderpickStatus">（尚未在③跑出隊伍）</div></div>
+</label>
+</div>
 <div style="display:flex;gap:8px;">
-<button class="btn" onclick="runROI()">🎯 計算 ROI 排行</button>
+<button class="btn" onclick="runROI()">🎯 計算</button>
 <button class="btn secondary" onclick="clearROI()">🗑 清空</button>
 </div>
 </div>
 <div class="card" id="roiResult" style="display:none;">
-<h2>目前最佳隊伍（分析基準）</h2>
+<h2>目前基準隊伍</h2>
 <div id="roiBaseline"></div>
-<h2 style="margin-top:18px;">ROI 排行榜（換掉最弱一位後的分數提升幅度）</h2>
+<h2 style="margin-top:18px;" id="roiListTitle">ROI 排行榜</h2>
 <div id="roiList"></div>
 </div>
 </div>
@@ -3223,9 +3236,11 @@ let OWNED = loadOwned(); // {cardId:true}
 let BOARD = loadBoard(); // {cardId: percent}
 
 // ROI（④）的計算基準：直接沿用②「隊伍養成分析」或③「指定隊長找最佳隊伍」最後一次算出的隊伍結果，
-// 而不是自己在④裡另外重新搜尋一次——這樣 ROI 排行才是「以你在②/③實際找到／確認過的那支隊伍」為基準，
-// 找出換掉哪一位、換上哪張未持有的卡最划算，符合「這隊缺哪一位」的直覺，而不是每次都自己重新洗一支不相干的隊伍。
-let ROI_BASE = null; // {result, song, sourceLabel}
+// 而不是自己在④裡另外重新搜尋一次。②和③問的問題本質不同，所以分開存、分開處理：
+// - practice（②）：隊伍只從「目前持有」的角色組成，還有優化空間 → ROI 問的是「抽哪張未持有的卡能讓這隊變強」。
+// - leaderpick（③）：隊伍本來就是從資料庫全部卡片搜尋出的理論最佳隊伍，未持有的格位已經是那個位置客觀最好的選擇，
+//   換別的未持有卡不會更好 → ROI 改問「如果抽不到這張、只能用現有角色頂替，分數會掉多少」，掉越多代表越該優先抽。
+let TEAM_RESULTS = { practice: null, leaderpick: null }; // {result, song}
 
 /* ================= ENGINE ================= */
 function ownedCardList(){ return CARDS.filter(c=>OWNED[c.id]); }
@@ -3602,6 +3617,7 @@ return best;
 function switchTab(name){
 document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active", b.dataset.tab===name));
 document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.id==="tab-"+name));
+if(name==="roi") updateRoiSourceStatus();
 }
 document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
 
@@ -3843,7 +3859,8 @@ if(!result){ alert("找不到可行隊伍，請確認角色庫是否足夠多樣
 renderResult(result, song, "resultAreaPractice");
 result.order.forEach((id,i)=>{ const sel=document.getElementById("pslot"+i); if(sel) sel.value=id; });
 document.getElementById("leaderSelectPractice").value = result.leaderId;
-ROI_BASE = {result, song, sourceLabel:"② 隊伍養成分析（依現有角色）"};
+TEAM_RESULTS.practice = {result, song};
+updateRoiSourceStatus();
 }
 
 function runAnalyzeManualPractice(){
@@ -3857,7 +3874,8 @@ const leaderId = document.getElementById("leaderSelectPractice").value || ids[0]
 const cards = ids.map(id=>cardById(id));
 const result = scoreTeam(cards, leaderId, song);
 renderResult(result, song, "resultAreaPractice");
-ROI_BASE = {result, song, sourceLabel:"② 隊伍養成分析（依現有角色）"};
+TEAM_RESULTS.practice = {result, song};
+updateRoiSourceStatus();
 }
 
 function clearPractice(){
@@ -3899,7 +3917,8 @@ if(!result){ alert("找不到可行隊伍，請確認資料庫是否足夠多樣
 }
 renderResult(result, song, "resultAreaLeaderPick", true);
 result.order.forEach((id,i)=>{ const sel=document.getElementById("lpslot"+i); if(sel) sel.value=id; });
-ROI_BASE = {result, song, sourceLabel:"③ 指定隊長找最佳隊伍"};
+TEAM_RESULTS.leaderpick = {result, song};
+updateRoiSourceStatus();
 }
 
 function runAnalyzeManualLeaderPick(){
@@ -3913,7 +3932,8 @@ if(!fixedCards.some(c=>c.id===leaderId)){ alert("上方選的隊長必須也出�
 const song = {id:"leaderpick", title:"指定隊長最佳隊伍（不指定歌曲，從全部卡片挑選）", performer:"", duration:200, exLevel:null};
 const result = scoreTeam(fixedCards, leaderId, song);
 renderResult(result, song, "resultAreaLeaderPick", true);
-ROI_BASE = {result, song, sourceLabel:"③ 指定隊長找最佳隊伍"};
+TEAM_RESULTS.leaderpick = {result, song};
+updateRoiSourceStatus();
 }
 
 function clearLeaderPick(){
@@ -3953,10 +3973,78 @@ if(!parts.length) parts.push("小幅整體優化");
 return parts.join("、");
 }
 
-function runROI(){
-if(!ROI_BASE){ alert("請先到「②隊伍養成分析」或「③指定隊長找最佳隊伍」按「自動建議最佳隊伍」或「分析目前手動隊伍」找出一支隊伍，ROI 會直接以那支隊伍為基準計算，不會在這裡另外重新搜尋。"); return; }
-const {result: current, song, sourceLabel} = ROI_BASE;
+function updateRoiSourceStatus(){
+const ps = document.getElementById("roiSrcPracticeStatus");
+const ls = document.getElementById("roiSrcLeaderpickStatus");
+if(ps){
+const p = TEAM_RESULTS.practice;
+ps.textContent = p ? `目前：${cardById(p.result.leaderId).holomem} 領隊，總分 ${p.result.overall.toFixed(1)}` : "（尚未在②跑出隊伍）";
+}
+if(ls){
+const l = TEAM_RESULTS.leaderpick;
+ls.textContent = l ? `目前：${cardById(l.result.leaderId).holomem} 領隊，總分 ${l.result.overall.toFixed(1)}` : "（尚未在③跑出隊伍）";
+}
+}
 
+// 針對③「指定隊長找最佳隊伍」這種本來就已經從資料庫全部卡片搜尋出理論最佳隊伍的情境：
+// 隊伍裡還沒持有的每一張卡，如果抽不到、只能用「目前持有」的角色頂替該位置，分數會掉多少？
+// 掉越多，代表這張卡對這隊的重要性／優先度越高，值得優先抽；如果連可頂替的持有角色都湊不出來，
+// 代表這張卡目前是「沒有它就湊不滿整隊」的必抽卡。
+function analyzeAcquirePriority(current, song){
+const baseCards = current.team.map(m=>m.card);
+const owned = ownedCardList();
+const results = [];
+baseCards.forEach((card,i)=>{
+if(OWNED[card.id]) return; // 已持有，不需要排入優先順序
+const othersHolomem = new Set(baseCards.filter((c,idx)=>idx!==i).map(c=>c.holomem));
+const candidates = owned.filter(c=>!othersHolomem.has(c.holomem));
+let bestAlt=null, bestScore=-Infinity;
+candidates.forEach(alt=>{
+const trial = baseCards.slice(); trial[i]=alt;
+const newLeaderId = (card.id===current.leaderId) ? alt.id : current.leaderId;
+const r = scoreTeam(trial, newLeaderId, song);
+if(r.overall>bestScore){ bestScore=r.overall; bestAlt=alt; }
+});
+if(bestAlt){ results.push({card, delta: current.overall-bestScore, bestAlt}); }
+else { results.push({card, delta:null, bestAlt:null}); }
+});
+return results;
+}
+
+function runROI(){
+const srcEl = document.querySelector('input[name="roiSource"]:checked');
+const src = srcEl ? srcEl.value : "practice";
+const stored = TEAM_RESULTS[src];
+if(!stored){
+alert(src==="practice"
+? "請先到「②隊伍養成分析」按「自動建議最佳隊伍」或「分析目前手動隊伍」找出一支隊伍。"
+: "請先到「③指定隊長找最佳隊伍」按「找出這位隊長的最佳隊伍」或「分析目前手動隊伍」找出一支隊伍。");
+return;
+}
+const {result: current, song} = stored;
+const sourceLabel = src==="practice" ? "② 隊伍養成分析（依現有角色）" : "③ 指定隊長找最佳隊伍";
+
+document.getElementById("roiResult").style.display="block";
+
+const leaderCard = current.team.find(m=>m.card.id===current.leaderId).card;
+const condRows = current.conditionReport.map(r=>`
+<tr>
+<td>${r.isLeader?"👑 ":""}${r.card.holomem}<br><span class="small">${r.card.name}</span></td>
+${src==="leaderpick" ? `<td>${OWNED[r.card.id]? '<span class="pill g">✅ 已持有</span>' : '<span class="pill r">🛒 未持有</span>'}</td>` : ""}
+<td>${pillFor(r.leaderOutfitCol)}</td>
+<td>${pillFor(r.passiveCol)}</td>
+<td>${pillFor(r.typeCol)}</td>
+<td>${pillFor(r.genCol)}</td>
+</tr>`).join("");
+document.getElementById("roiBaseline").innerHTML = `
+<p class="small">基準隊伍來源：<b>${sourceLabel}</b>　Leader：<b>${leaderCard.holomem}</b> — ${leaderCard.name}　總分：<b>${current.overall.toFixed(1)} / 100</b>（想換一支隊伍當基準，回②或③重新跑一次再回來按「計算」即可）</p>
+<table><thead><tr><th>隊員</th>${src==="leaderpick"?"<th>持有狀態</th>":""}<th>隊長服裝</th><th>被動</th><th>屬性搭配</th><th>期別搭配</th></tr></thead>
+<tbody>${condRows}</tbody></table>
+`;
+
+if(src==="practice"){
+// ②的隊伍只從持有角色組成，還有優化空間：找出「抽哪張未持有的卡、換掉哪一位，分數提升最多」。
+document.getElementById("roiListTitle").textContent = "ROI 排行榜（換掉最弱一位後的分數提升幅度）";
 const unowned = CARDS.filter(c=>!OWNED[c.id]);
 const rows=[];
 unowned.forEach(cand=>{
@@ -3965,30 +4053,38 @@ if(g) rows.push({card:cand, ...g});
 });
 rows.sort((a,b)=>b.delta-a.delta);
 const top = rows.slice(0,15);
-
-document.getElementById("roiResult").style.display="block";
-
-const leaderCard = current.team.find(m=>m.card.id===current.leaderId).card;
-const condRows = current.conditionReport.map(r=>`
-<tr>
-<td>${r.isLeader?"👑 ":""}${r.card.holomem}<br><span class="small">${r.card.name}</span></td>
-<td>${pillFor(r.leaderOutfitCol)}</td>
-<td>${pillFor(r.passiveCol)}</td>
-<td>${pillFor(r.typeCol)}</td>
-<td>${pillFor(r.genCol)}</td>
-</tr>`).join("");
-document.getElementById("roiBaseline").innerHTML = `
-<p class="small">基準隊伍來源：<b>${sourceLabel}</b>　Leader：<b>${leaderCard.holomem}</b> — ${leaderCard.name}　總分：<b>${current.overall.toFixed(1)} / 100</b>（下方 ROI 排行以這隊為基準，找出換掉哪一位、換上哪張未持有的卡，能讓分數提升最多；想換一支隊伍當基準，回②或③重新跑一次再回來按「計算 ROI 排行」即可）</p>
-<table><thead><tr><th>隊員</th><th>隊長服裝</th><th>被動</th><th>屬性搭配</th><th>期別搭配</th></tr></thead>
-<tbody>${condRows}</tbody></table>
-`;
-
 document.getElementById("roiList").innerHTML = top.length ? top.map((r,i)=>`
 <div class="roi-row">
 <div class="roi-rank">#${i+1}</div>
 <div class="roi-name">${r.card.holomem} — ${r.card.name}<span class="sub">建議替換：${r.replacedCard.holomem}（${r.replacedCard.name}）${r.newLeaderId===r.card.id?" · 同時成為新隊長":""} · ${gapReasonText(current,r)} · ${GEN_LABELS[r.card.genCode]}${r.card.type!=="unknown"?" / "+r.card.type:""} · <a href="${r.card.source}" target="_blank" class="badge-src">資料來源</a></span></div>
 <div class="roi-delta">${r.delta>=0?"+":""}${r.delta.toFixed(2)}</div>
 </div>`).join("") : `<p class="small">目前找不到任何一張未持有的卡能合法換進這支隊伍（可能是 Holomem 重複衝突太多），請先到「⑤資料庫編輯」確認資料庫涵蓋範圍。</p>`;
+} else {
+// ③的隊伍本來就是從資料庫全部卡片搜尋出的理論最佳隊伍，未持有的格位已經是那個位置客觀最好的選擇，
+// 換別的未持有卡不會更好；改成算「抽卡優先順序」——沒抽到、只能用持有角色頂替時，分數會掉多少。
+document.getElementById("roiListTitle").textContent = "抽卡優先順序（這隊裡尚未持有的卡，依「沒有它會少多少分」排序）";
+const priorities = analyzeAcquirePriority(current, song);
+if(!priorities.length){
+document.getElementById("roiList").innerHTML = `<p class="small">🎉 這支理論最佳隊伍你已經全部持有，不需要再抽任何卡。</p>`;
+} else {
+priorities.sort((a,b)=>{
+if(a.delta===null && b.delta!==null) return -1;
+if(b.delta===null && a.delta!==null) return 1;
+return (b.delta??0)-(a.delta??0);
+});
+document.getElementById("roiList").innerHTML = priorities.map((r,i)=>{
+const subText = r.delta===null
+? `你目前持有的角色湊不出能頂替這個位置的隊伍組合（缺這張就湊不滿整隊，屬於必抽）`
+: `若沒抽到，最多只能用「${r.bestAlt.holomem}（${r.bestAlt.name}）」頂替，分數會少 ${r.delta.toFixed(2)} 分`;
+return `
+<div class="roi-row">
+<div class="roi-rank">#${i+1}</div>
+<div class="roi-name">${r.card.holomem} — ${r.card.name}<span class="sub">${subText} · ${GEN_LABELS[r.card.genCode]}${r.card.type!=="unknown"?" / "+r.card.type:""} · <a href="${r.card.source}" target="_blank" class="badge-src">資料來源</a></span></div>
+<div class="roi-delta" style="color:${r.delta===null?'var(--bad)':'var(--warn)'};">${r.delta===null ? "必抽" : ("−"+r.delta.toFixed(2))}</div>
+</div>`;
+}).join("");
+}
+}
 }
 
 function clearROI(){
