@@ -233,7 +233,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <div class="tab" id="tab-about">
 <div class="card">
 <h2>分析方法論</h2>
-<p>本工具依照以下十步驟流程分析「整隊」（而非單卡）表現，資料來源以 <a href="https://appmedia.jp/hololive-dreams" target="_blank">AppMedia</a>、<a href="https://gamerch.com/hololive-dreams" target="_blank">Gamerch</a>、<a href="https://game8.jp/hololive-dreams" target="_blank">Game8</a> 公開 wiki 為主。</p>
+<p>本工具依照以下九步驟流程分析「整隊」（而非單卡）表現，資料來源以 <a href="https://appmedia.jp/hololive-dreams" target="_blank">AppMedia</a>、<a href="https://gamerch.com/hololive-dreams" target="_blank">Gamerch</a>、<a href="https://game8.jp/hololive-dreams" target="_blank">Game8</a> 公開 wiki 為主。</p>
 <ol>
 <li><b>Leader Outfit（權重 30%）</b>：Leader 的衣裝技能（例如「1期生2人以上」）若未啟動，整隊視為不完整，此項得分為 0，並顯示紅色警告。</li>
 <li><b>Member Passive（25%）</b>：逐一檢查每位隊員的被動技能觸發條件是否成立（PASS/FAIL）。</li>
@@ -241,7 +241,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <li><b>Active Skill Timeline（併入 Timeline 20%）</b>：以「首次觸發＝Interval秒，之後每隔 Interval 秒觸發一次，每次持續 Duration 秒」的確定性模型建立時間軸（例：Interval23秒/Duration8秒 → 23–31、46–54、69–77…）。＊本遊戲 Active 技能實際帶有機率（低/中/高機率），非 100% 必發；本模型以「高機率視為近似必發」簡化計算，實際遊戲表現會有隨機浮動，請將本工具的時間軸視為「理論上限」而非保證值。</li>
 <li><b>Skill Coverage（10%）</b>：同類型的 Active「Score Up」效果不可疊加，因此 Overlap（重疊/浪費）只計算<b>主動技彼此</b>同時生效的時間佔比；SP技能（Special）與主動技是不同機制、會疊加，兩者重疊不算浪費。Coverage（至少1個技能生效的時間佔比）、Idle（完全沒有技能生效的時間佔比）則涵蓋所有技能種類。Timeline 分數＝Coverage%；Coverage 分數＝Coverage% − Overlap%（此處 Overlap 僅指主動技彼此重疊）。</li>
 <li><b>Song Length</b>：所有時間軸與覆蓋率皆依你選擇的歌曲實際秒數重新計算（資料庫含 168 首歌曲秒數，來源 Game8）。</li>
-<li><b>Special Skill Order（不列入本工具加權，僅供參考）</b>：Special 技能每首歌只發動一次，依隊伍站位由左到右依序輪流發動（站位1最早、站位5最晚），彼此之間<b>不能重疊</b>（同時間只有1個SP技能生效），但可以自由跟 Active 疊加。部分 Special 帶有額外加成條件（解析自技能說明文字，例如「40コンボ以上でスコアが120%UP」「ライフ1000以上でスキル発動率が55%UP」）：需要<b>連段(コンボ)</b>門檻的應放越右邊（越晚發動，連段數才夠）；需要<b>生命值(ライフ)</b>門檻的應放越左邊（越早發動，生命值還沒被扣掉太多）；沒有特殊條件的則依「スコアサポート效果%」數值由小到大排，數值越高越晚發動，可疊加在音樂遊戲後段通常較高的連段分數倍率上。這個排序邏輯對<b>實際遊戲分數</b>有實質影響，但因為本工具沒有逐拍模擬連段成長，所以<b>不會反映在 Overall Score</b>裡，僅作為站位建議呈現。</li>
+<li><b>Special Skill Order（SP技能站位順序，不列入本工具加權，僅供參考）</b>：SP技能每首歌只發動一次，依隊伍站位由左到右依序輪流發動（站位1最早、站位5最晚），彼此之間<b>不能重疊</b>（同時間只有1個SP技能生效），但可以自由跟主動技疊加。部分SP技能帶有額外加成條件（解析自技能說明文字，例如「40コンボ以上でスコアが120%UP」「ライフ1000以上でスキル発動率が55%UP」）：需要<b>連段(コンボ)</b>門檻的應放越右邊（越晚發動，連段數才夠）；需要<b>生命值(ライフ)</b>門檻的應放越左邊（越早發動，生命值還沒被扣掉太多）；沒有特殊條件的則依「スコアサポート效果%」數值由小到大排，數值越高越晚發動，可疊加在音樂遊戲後段通常較高的連段分數倍率上（此數值僅用於內部排序，不會顯示在站位建議的卡片標籤上）。這個排序邏輯對<b>實際遊戲分數</b>有實質影響，但因為本工具沒有逐拍模擬連段成長，所以<b>不會反映在 Overall Score</b>裡，僅作為站位建議呈現。</li>
 <li><b>Connect / Board（不列入加權，僅供參考）</b>：本遊戲的 Connect 實際機制是「此卡放置於某 Holomem 技能板的 Connect 格時，提升該技能板效果 X%」，並非同隊成員間的加成；Board 加成因人而異，依玩家板面投資進度不同。這兩項對整隊評分的實際影響難以量化，故不列入 Overall Score 加權計算，只在分析結果中列出原始數值供參考。</li>
 <li><b>Overall Score</b>：以上各項依 Leader Outfit 30 / Passive 25 / Timeline 20 / Coverage 10 加權（原始權重總和85%，已等比例正規化為100%）。Special Skill Order／Connect／Board 皆不計入。</li>
 </ol>
@@ -3789,7 +3789,7 @@ ${highlightOwned? `<td>${OWNED[r.card.id]? '<span class="pill g">✅ 已持有</
 const timelineRows = result.team.map((m,idx)=>{
 const c=m.card;
 const myEvents = result.events.filter(e=>e.who===c.name);
-const segs = myEvents.map(e=>`<div class="seg ${e.kind}" style="left:${e.start/song.duration*100}%;width:${(e.end-e.start)/song.duration*100}%;" title="${e.kind} ${e.start}s-${e.end}s"></div>`).join("");
+const segs = myEvents.map(e=>`<div class="seg ${e.kind}" style="left:${e.start/song.duration*100}%;width:${(e.end-e.start)/song.duration*100}%;" title="${e.kind==='active'?'主動技':'SP技能'} ${e.start}s-${e.end}s"></div>`).join("");
 return `<div class="timeline-row"><div class="who">${c.holomem}<br><span class="small">${c.name.slice(0,10)}</span></div><div class="timeline-track">${segs}</div></div>`;
 }).join("");
 
@@ -3799,8 +3799,8 @@ const cond = parseSpecialCondition(c.special);
 let reason = "";
 // SP技能一定會發動（不像主動技有機率），所以沒有連段/生命值門檻的卡片不需要特別標記數值——
 // 只在真的有「連段X+」或「生命Y+」這種會影響排序的條件時才顯示標籤，其餘卡片就只顯示名字。
-if(cond.type==="combo") reason = `連段${cond.threshold}+`;
-else if(cond.type==="life") reason = `生命${cond.threshold}+`;
+if(cond.type==="combo") reason = `SP需連段${cond.threshold}+`;
+else if(cond.type==="life") reason = `SP需生命${cond.threshold}+`;
 return `<div class="order-chip ${id===result.leaderId?'leader':''}">${c.holomem}${id===result.leaderId?' 👑':''}${reason?`<br><span class="small">${reason}</span>`:""}</div>`;
 }).join("");
 
