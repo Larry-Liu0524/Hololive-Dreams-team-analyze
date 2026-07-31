@@ -215,6 +215,19 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <h2 style="margin-top:18px;" id="roiListTitle">ROI 排行榜</h2>
 <div id="roiList"></div>
 </div>
+<div class="card">
+<h2>抽卡機率／期望花費試算</h2>
+<p class="small">獨立小工具，跟上面的ROI清單沒有互相連動。依你提供的機率／保底資訊試算：5★出率5%；常駐池平攤到每位角色0.0925%；活動池（本期5位泳裝角色）可指定1位角色加成到1%、其餘4位泳裝角色各0.25%、常駐角色會被稀釋到0.0555%；每200抽必定可兌換指定一位角色（保底不會超抽）；每抽250鑽石，8200鑽石＝9800日幣。若之後池子／角色異動，下方選項需要你自己更新。</p>
+<label class="small">抽卡目標情境
+<select id="gachaScenario" onchange="runGachaCalc()">
+<option value="0.000925">常駐池／任一角色（0.0925%）</option>
+<option value="0.01">活動池／已選定加成角色（1%）</option>
+<option value="0.0025">活動池／同期其他泳裝角色（未加成，0.25%）</option>
+<option value="0.000555">活動池／常駐角色（被稀釋，0.0555%）</option>
+</select>
+</label>
+<div id="gachaCalcResult" style="margin-top:10px;"></div>
+</div>
 </div>
 
 <!-- ============ TAB 3b: DATA BROWSER (Cards & Songs, read-only lookup) ============ -->
@@ -223,16 +236,26 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <h2>卡片資料查詢</h2>
 <p class="small">瀏覽資料庫目前收錄的全部卡片，可依 Holomem／卡名／期別／屬性搜尋，方便查對某張卡的技能數值。這裡僅供查詢，若要新增／修改卡片請到「⑥ 資料庫編輯」。</p>
 <input type="search" class="searchbar" placeholder="搜尋 Holomem / 卡名 / 期別 / 屬性..." id="cardBrowserSearch" oninput="renderCardBrowser()">
+<label class="small" style="display:inline-flex;align-items:center;gap:6px;margin:6px 0;">
+<input type="checkbox" id="cardBrowserUnownedOnly" onchange="renderCardBrowser()"> 只顯示未持有
+</label>
 <div style="max-height:520px;overflow:auto;">
 <table id="cardBrowserTable"><thead><tr><th>Holomem</th><th>卡片</th><th>期別</th><th>Type</th><th>持有</th><th>Performance</th><th>Technique</th><th>Sense</th><th>隊長服裝</th><th>被動</th><th>主動技</th><th>SP技能</th><th>連結</th><th>來源</th></tr></thead><tbody></tbody></table>
 </div>
 </div>
 <div class="card">
 <h2>歌曲資料查詢</h2>
-<p class="small">資料庫目前收錄 <b id="songCountLabel"></b> 首歌曲秒數（來源 Game8），可依歌名／演唱者搜尋，點欄位標題可切換排序。＊這份歌曲清單目前僅供查詢參考，②③頁的隊伍分析仍使用內部固定的評估區間，尚未提供「依這首歌實際秒數分析隊伍」的功能。</p>
+<p class="small">資料庫目前收錄 <b id="songCountLabel"></b> 首歌曲秒數（來源 Game8），可依歌名／演唱者搜尋，點欄位標題可切換排序。目前最長歌曲約166秒，②③頁分析區間已涵蓋所有歌曲長度，故不需依單曲秒數另外調整。</p>
 <input type="search" class="searchbar" placeholder="搜尋歌名 / 演唱者..." id="songBrowserSearch" oninput="renderSongBrowser()">
 <div style="max-height:520px;overflow:auto;">
 <table id="songBrowserTable"><thead><tr><th onclick="setSongSort('title')" style="cursor:pointer;">歌曲名稱 ⇅</th><th onclick="setSongSort('performer')" style="cursor:pointer;">演唱者 ⇅</th><th onclick="setSongSort('duration')" style="cursor:pointer;">秒數 ⇅</th><th onclick="setSongSort('exLevel')" style="cursor:pointer;">EX等級 ⇅</th></tr></thead><tbody></tbody></table>
+</div>
+</div>
+<div class="card">
+<h2>已儲存的隊伍快照</h2>
+<p class="small">在②或③跑出分析結果後，按結果卡片右上角「💾 另存為快照」即可存一份到這裡永久保留（存在瀏覽器 localStorage，換瀏覽器/清快取會遺失，重要隊伍建議另外自行截圖備份）。「載入查看」會把這筆快照還原成②/③目前的分析結果並帶你切過去。</p>
+<div style="max-height:400px;overflow:auto;">
+<table id="savedTeamsTable"><thead><tr><th>名稱</th><th>來源</th><th>隊長</th><th>總分</th><th>存檔時間</th><th>操作</th></tr></thead><tbody></tbody></table>
 </div>
 </div>
 </div>
@@ -3264,6 +3287,11 @@ function loadOwned(){ try{ return JSON.parse(localStorage.getItem("hd_owned")||"
 function saveOwned(o){ localStorage.setItem("hd_owned", JSON.stringify(o)); }
 function loadBoard(){ try{ return JSON.parse(localStorage.getItem("hd_board")||"{}"); }catch(e){ return {}; } }
 function saveBoard(b){ localStorage.setItem("hd_board", JSON.stringify(b)); }
+// ②③最後一次分析結果：自動存最新一次，重新整理頁面不會遺失；使用者也可以另外「另存為」具名快照長期保留、比較。
+function loadTeamResults(){ try{ return JSON.parse(localStorage.getItem("hd_team_results")||"null") || { practice: null, leaderpick: null }; }catch(e){ return { practice: null, leaderpick: null }; } }
+function saveTeamResultsToStorage(){ localStorage.setItem("hd_team_results", JSON.stringify(TEAM_RESULTS)); }
+function loadSavedTeams(){ try{ return JSON.parse(localStorage.getItem("hd_saved_teams")||"[]"); }catch(e){ return []; } }
+function saveSavedTeamsToStorage(){ localStorage.setItem("hd_saved_teams", JSON.stringify(SAVED_TEAMS)); }
 
 let CARDS = loadCards();
 let OWNED = loadOwned(); // {cardId:true}
@@ -3274,7 +3302,8 @@ let BOARD = loadBoard(); // {cardId: percent}
 // - practice（②）：隊伍只從「目前持有」的角色組成，還有優化空間 → ROI 問的是「抽哪張未持有的卡能讓這隊變強」。
 // - leaderpick（③）：隊伍本來就是從資料庫全部卡片搜尋出的理論最佳隊伍，未持有的格位已經是那個位置客觀最好的選擇，
 //   換別的未持有卡不會更好 → ROI 改問「如果抽不到這張、只能用現有角色頂替，分數會掉多少」，掉越多代表越該優先抽。
-let TEAM_RESULTS = { practice: null, leaderpick: null }; // {result, song}
+let TEAM_RESULTS = loadTeamResults(); // {result, song}，開頁時自動還原上次分析結果
+let SAVED_TEAMS = loadSavedTeams(); // 使用者手動「另存為」的具名隊伍快照清單
 
 // 修BUG：②③頁「隊伍組成」的5個欄位，在按下自動搜尋後會被系統填入找到的隊伍卡片，方便你接著微調。
 // 但如果填好之後又去上方換一位不同的隊長再按一次搜尋，這些欄位就會被當成「使用者手動鎖定」的卡片，
@@ -3682,7 +3711,7 @@ function switchTab(name){
 document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active", b.dataset.tab===name));
 document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.id==="tab-"+name));
 if(name==="roi") updateRoiSourceStatus();
-if(name==="databrowser"){ renderCardBrowser(); renderSongBrowser(); }
+if(name==="databrowser"){ renderCardBrowser(); renderSongBrowser(); renderSavedTeams(); }
 }
 document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
 
@@ -3880,6 +3909,7 @@ el.innerHTML = `
 <h2>分析結果 — ${song.title}（${song.duration}秒）</h2>
 <div class="overall-score">${result.overall.toFixed(1)} <span style="font-size:14px;color:var(--sub);">/ 100</span></div>
 </div>
+<div style="text-align:right;margin:-8px 0 8px;"><button class="btn small" onclick="saveCurrentAsSnapshot('${song.id}')">💾 另存為快照</button></div>
 ${banner}
 <h3>總分組成（各項權重已正規化，原始總和${WEIGHT_SUM}% → 100%；SP技能出場順序／連結／面板不列入本工具加權，僅供參考）</h3>
 ${scoreBar("隊長服裝",WEIGHTS.leader,result.leaderScore)}
@@ -3925,6 +3955,60 @@ const duration = Math.max(3, Math.min(9, overflow/22));
 text.style.animationDuration = duration.toFixed(1)+"s";
 }
 });
+}
+// 把目前②或③最新一次的分析結果另存成一筆具名快照，永久保留在 localStorage，供之後查看／比較／刪除。
+// source 是 "practice" 或 "leaderpick"（剛好等於 song.id），對應 TEAM_RESULTS 裡的哪一份結果。
+function saveCurrentAsSnapshot(source){
+const stored = TEAM_RESULTS[source];
+if(!stored){ alert("目前沒有可儲存的分析結果，請先跑一次分析。"); return; }
+const leaderCard = stored.result.team.find(m=>m.card.id===stored.result.leaderId).card;
+const defaultName = leaderCard.holomem+"隊（"+stored.result.overall.toFixed(1)+"分）";
+const name = prompt("為這支隊伍命名：", defaultName);
+if(!name) return;
+SAVED_TEAMS.push({ id:"snap_"+Date.now(), name, savedAt:new Date().toISOString(), source, result:stored.result, song:stored.song });
+saveSavedTeamsToStorage();
+renderSavedTeams();
+alert("已儲存「"+name+"」。可到「⑤卡片／歌曲查詢」頁下方查看所有已存快照。");
+}
+function deleteSnapshot(id){
+if(!confirm("確定要刪除這筆已儲存的隊伍快照嗎？")) return;
+SAVED_TEAMS = SAVED_TEAMS.filter(s=>s.id!==id);
+saveSavedTeamsToStorage();
+renderSavedTeams();
+}
+// 把某筆快照載回②或③的分析結果區（依它原本存的是哪一頁），並自動切換過去讓使用者看到。
+function loadSnapshot(id){
+const snap = SAVED_TEAMS.find(s=>s.id===id);
+if(!snap) return;
+TEAM_RESULTS[snap.source] = { result:snap.result, song:snap.song };
+saveTeamResultsToStorage();
+updateRoiSourceStatus();
+if(snap.source==="practice"){
+switchTab("practice");
+renderResult(snap.result, snap.song, "resultAreaPractice");
+} else {
+switchTab("leaderpick");
+renderResult(snap.result, snap.song, "resultAreaLeaderPick", true);
+}
+}
+function renderSavedTeams(){
+const el = document.querySelector("#savedTeamsTable tbody");
+if(!el) return;
+const sorted = SAVED_TEAMS.slice().sort((a,b)=> b.savedAt.localeCompare(a.savedAt));
+el.innerHTML = sorted.length ? sorted.map(s=>{
+const leaderCard = s.result.team.find(m=>m.card.id===s.result.leaderId).card;
+const sourceLabel = s.source==="practice" ? "②養成分析" : "③指定隊長";
+const dt = new Date(s.savedAt);
+const dtLabel = dt.getFullYear()+"/"+(dt.getMonth()+1)+"/"+dt.getDate()+" "+String(dt.getHours()).padStart(2,"0")+":"+String(dt.getMinutes()).padStart(2,"0");
+return `<tr>
+<td>${s.name}</td>
+<td class="small">${sourceLabel}</td>
+<td>${leaderCard.holomem} 👑</td>
+<td>${s.result.overall.toFixed(1)}</td>
+<td class="small">${dtLabel}</td>
+<td><button class="btn secondary small" onclick="loadSnapshot('${s.id}')">載入查看</button> <button class="btn secondary small" onclick="deleteSnapshot('${s.id}')">刪除</button></td>
+</tr>`;
+}).join("") : `<tr><td colspan="6" class="small">目前還沒有儲存任何快照。到②或③分析出隊伍後，按結果卡片右上角的「💾 另存為快照」即可存到這裡。</td></tr>`;
 }
 function pillFor(v){
 if(v==="PASS"||v==="PASS(無條件)") return `<span class="pill g">PASS</span>`;
@@ -3972,6 +4056,7 @@ result.order.forEach((id,i)=>{ const sel=document.getElementById("pslot"+i); if(
 document.getElementById("leaderSelectPractice").value = result.leaderId;
 practiceSlotsAutoFilled = true; // 這5個欄位剛被系統自動填入，換隊長時應該自動清空重新搜尋
 TEAM_RESULTS.practice = {result, song};
+saveTeamResultsToStorage();
 updateRoiSourceStatus();
 }
 
@@ -3987,6 +4072,7 @@ const cards = ids.map(id=>cardById(id));
 const result = scoreTeam(cards, leaderId, song);
 renderResult(result, song, "resultAreaPractice");
 TEAM_RESULTS.practice = {result, song};
+saveTeamResultsToStorage();
 updateRoiSourceStatus();
 }
 
@@ -4032,6 +4118,7 @@ renderResult(result, song, "resultAreaLeaderPick", true);
 result.order.forEach((id,i)=>{ const sel=document.getElementById("lpslot"+i); if(sel) sel.value=id; });
 leaderPickSlotsAutoFilled = true; // 這5個欄位剛被系統自動填入，換隊長時應該自動清空重新搜尋
 TEAM_RESULTS.leaderpick = {result, song};
+saveTeamResultsToStorage();
 updateRoiSourceStatus();
 }
 
@@ -4047,6 +4134,7 @@ const song = {id:"leaderpick", title:"指定隊長最佳隊伍（不指定歌曲
 const result = scoreTeam(fixedCards, leaderId, song);
 renderResult(result, song, "resultAreaLeaderPick", true);
 TEAM_RESULTS.leaderpick = {result, song};
+saveTeamResultsToStorage();
 updateRoiSourceStatus();
 }
 
@@ -4208,10 +4296,43 @@ document.getElementById("roiBaseline").innerHTML = "";
 document.getElementById("roiList").innerHTML = "";
 }
 
+/* ================= 抽卡機率／期望花費試算（獨立小工具，不連動ROI清單） ================= */
+const GACHA_PULL_COST_DIAMONDS = 250; // 每抽鑽石數
+const GACHA_DIAMOND_PACK = {diamonds:8200, jpy:9800}; // 儲值檔位換算基準
+const GACHA_JPY_PER_DIAMOND = GACHA_DIAMOND_PACK.jpy / GACHA_DIAMOND_PACK.diamonds;
+const GACHA_PITY_PULLS = 200; // 每200抽必定可兌換指定一位角色
+
+function runGachaCalc(){
+const sel = document.getElementById("gachaScenario");
+const el = document.getElementById("gachaCalcResult");
+if(!sel || !el) return;
+const p = parseFloat(sel.value);
+if(!p || p<=0){ el.innerHTML=""; return; }
+// 有保底時，實際抽數等同於「幾何分佈(每抽獨立、機率p)」但在第200抽被強制封頂：
+// E[min(X,200)] = Σ(k=0→199) P(X>k) = Σ(k=0→199) (1-p)^k = (1-(1-p)^200) / p
+const expectedPullsWithPity = (1 - Math.pow(1-p, GACHA_PITY_PULLS)) / p;
+const expectedPullsNoPity = 1/p; // 純機率理論期望值(不封頂)，僅供對照，實際不會抽這麼多
+const median = Math.min(GACHA_PITY_PULLS, Math.ceil(Math.log(0.5)/Math.log(1-p)));
+const expectedDiamonds = expectedPullsWithPity * GACHA_PULL_COST_DIAMONDS;
+const expectedJPY = expectedDiamonds * GACHA_JPY_PER_DIAMOND;
+el.innerHTML = `
+<div class="metric-row">
+<div class="metric-box"><div class="num">${expectedPullsWithPity.toFixed(1)}</div><div class="lbl">期望抽數（含保底封頂）</div></div>
+<div class="metric-box"><div class="num">${median}</div><div class="lbl">約50%機率所需抽數</div></div>
+<div class="metric-box"><div class="num">${Math.round(expectedDiamonds).toLocaleString()}</div><div class="lbl">期望消耗鑽石</div></div>
+<div class="metric-box"><div class="num">¥${Math.round(expectedJPY).toLocaleString()}</div><div class="lbl">期望花費日幣</div></div>
+</div>
+<p class="small">＊「期望抽數」已考慮每200抽必定可兌換指定角色的保底機制，因此不會超過200抽。若完全不觸發保底、純靠機率計算的理論期望值為 ${expectedPullsNoPity.toFixed(1)} 抽，僅供對照——實際上你最多200抽就會用保底兌換到，機率越低，保底幫你省下的抽數越多。</p>
+<p class="small">＊日幣換算基準：${GACHA_DIAMOND_PACK.diamonds}鑽石＝¥${GACHA_DIAMOND_PACK.jpy}（每鑽約¥${GACHA_JPY_PER_DIAMOND.toFixed(3)}），每抽${GACHA_PULL_COST_DIAMONDS}鑽石。不同儲值檔位單價可能略有差異，此處以你提供的檔位為準。</p>
+`;
+}
+
 /* ================= DATA BROWSER (卡片／歌曲查詢，唯讀查詢頁) ================= */
 function renderCardBrowser(){
 const q = (document.getElementById("cardBrowserSearch").value||"").trim().toLowerCase();
+const unownedOnly = document.getElementById("cardBrowserUnownedOnly").checked;
 const filtered = CARDS.filter(c=>{
+if(unownedOnly && OWNED[c.id]) return false;
 if(!q) return true;
 return c.holomem.toLowerCase().includes(q) ||
 c.name.toLowerCase().includes(q) ||
@@ -4352,6 +4473,23 @@ updateDbStat();
 renderRoster();
 populateSelectors();
 renderCardTable();
+// 開頁時把上次自動保存的②③分析結果還原顯示出來，不用重新整理頁面就再跑一次分析；連同下方「隊伍組成」欄位也一併還原，維持一致。
+if(TEAM_RESULTS.practice){
+const r = TEAM_RESULTS.practice;
+renderResult(r.result, r.song, "resultAreaPractice");
+r.result.order.forEach((id,i)=>{ const sel=document.getElementById("pslot"+i); if(sel) sel.value=id; });
+const ls=document.getElementById("leaderSelectPractice"); if(ls) ls.value = r.result.leaderId;
+practiceSlotsAutoFilled = true;
+}
+if(TEAM_RESULTS.leaderpick){
+const r = TEAM_RESULTS.leaderpick;
+renderResult(r.result, r.song, "resultAreaLeaderPick", true);
+r.result.order.forEach((id,i)=>{ const sel=document.getElementById("lpslot"+i); if(sel) sel.value=id; });
+const ls=document.getElementById("leaderSelectPick"); if(ls) ls.value = r.result.leaderId;
+leaderPickSlotsAutoFilled = true;
+}
+updateRoiSourceStatus();
+runGachaCalc();
 }
 init();
 </script>
