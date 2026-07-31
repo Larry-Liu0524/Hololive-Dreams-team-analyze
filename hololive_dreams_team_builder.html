@@ -58,7 +58,18 @@ th{color:var(--sub);font-weight:600;position:sticky;top:0;background:var(--panel
 .timeline-wrap{margin-top:8px;}
 .timeline-ruler{display:flex;justify-content:space-between;font-size:10px;color:var(--sub);margin-bottom:2px;}
 .timeline-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
-.timeline-row .who{width:170px;font-size:11.5px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.timeline-row .who{width:170px;font-size:11.5px;flex-shrink:0;}
+.who .marquee-wrap{overflow:hidden;white-space:nowrap;position:relative;}
+.who .marquee-wrap.small{font-size:11px;color:var(--sub);margin-top:1px;}
+.who .marquee-wrap .marquee-text{display:inline-block;white-space:nowrap;}
+.who .marquee-wrap.overflowing .marquee-text{animation-name:marquee-bounce;animation-timing-function:ease-in-out;animation-iteration-count:infinite;}
+@keyframes marquee-bounce{
+0%{transform:translateX(0);}
+20%{transform:translateX(0);}
+50%{transform:translateX(var(--marquee-shift,0px));}
+70%{transform:translateX(var(--marquee-shift,0px));}
+100%{transform:translateX(0);}
+}
 .timeline-track{position:relative;flex:1;height:20px;background:var(--panel2);border-radius:4px;overflow:hidden;}
 .timeline-track.ruler{overflow:visible;background:none;border-bottom:1px solid var(--border);height:14px;}
 .timeline-track.ruler span{font-size:10px;color:var(--sub);font-variant-numeric:tabular-nums;}
@@ -3790,7 +3801,7 @@ const timelineRows = result.team.map((m,idx)=>{
 const c=m.card;
 const myEvents = result.events.filter(e=>e.who===c.name);
 const segs = myEvents.map(e=>`<div class="seg ${e.kind}" style="left:${e.start/song.duration*100}%;width:${(e.end-e.start)/song.duration*100}%;" title="${e.kind==='active'?'主動技':'SP技能'} ${e.start}s-${e.end}s"></div>`).join("");
-return `<div class="timeline-row"><div class="who">${c.holomem}<br><span class="small">${c.name.slice(0,10)}</span></div><div class="timeline-track">${segs}</div></div>`;
+return `<div class="timeline-row"><div class="who"><div class="marquee-wrap"><span class="marquee-text">${c.holomem}</span></div><div class="marquee-wrap small"><span class="marquee-text">${c.name}</span></div></div><div class="timeline-track">${segs}</div></div>`;
 }).join("");
 
 const orderChips = result.order.map(id=>{
@@ -3838,6 +3849,23 @@ ${scoreBar("覆蓋效率（扣除重疊）",WEIGHTS.coverage,result.coverageScor
 <p class="small">＊沒有時間軸資料的卡片（主動技資料為 unknown）不會顯示色塊，代表該卡目前無法納入時間軸計算，僅其服裝/被動/隊長效果仍計入評分。</p>
 </div>
 `;
+initMarquee(el);
+}
+
+// 時間軸左側的角色名／卡名欄位寬度固定，長名字會被裝不下；與其直接截斷看不到後半段，
+// 改成量測實際內容寬度，超出容器的才加上跑馬燈動畫來回滑動展示完整名稱，沒超出的維持原樣不動。
+function initMarquee(root){
+root.querySelectorAll(".marquee-wrap").forEach(wrap=>{
+const text = wrap.querySelector(".marquee-text");
+if(!text) return;
+const overflow = text.scrollWidth - wrap.clientWidth;
+if(overflow > 2){
+wrap.classList.add("overflowing");
+wrap.style.setProperty("--marquee-shift", (-overflow-6)+"px");
+const duration = Math.max(3, Math.min(9, overflow/22));
+text.style.animationDuration = duration.toFixed(1)+"s";
+}
+});
 }
 function pillFor(v){
 if(v==="PASS"||v==="PASS(無條件)") return `<span class="pill g">PASS</span>`;
