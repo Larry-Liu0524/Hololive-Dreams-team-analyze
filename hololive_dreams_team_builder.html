@@ -120,8 +120,9 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <button data-tab="practice">② 隊伍養成分析（依現有角色）</button>
 <button data-tab="leaderpick">③ 指定隊長找最佳隊伍</button>
 <button data-tab="roi">④ 抽卡 ROI 推薦</button>
-<button data-tab="editor">⑤ 資料庫編輯</button>
-<button data-tab="about">⑥ 方法論 / 資料來源</button>
+<button data-tab="databrowser">⑤ 卡片／歌曲查詢</button>
+<button data-tab="editor">⑥ 資料庫編輯</button>
+<button data-tab="about">⑦ 方法論 / 資料來源</button>
 </nav>
 
 <main>
@@ -150,7 +151,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <div class="grid cols2">
 <div>
 <label class="small">Leader（必須為持有角色）</label>
-<select id="leaderSelectPractice"></select>
+<select id="leaderSelectPractice" onchange="onPracticeLeaderChanged()"></select>
 </div>
 <div style="display:flex;align-items:flex-end;gap:8px;">
 <button class="btn" onclick="runAutoBuildPractice()">🪄 自動建議最佳隊伍</button>
@@ -173,7 +174,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <div class="grid cols2">
 <div>
 <label class="small">隊長（必選，僅列出持有角色）</label>
-<select id="leaderSelectPick"></select>
+<select id="leaderSelectPick" onchange="onLeaderPickChanged()"></select>
 </div>
 <div style="display:flex;align-items:flex-end;gap:8px;">
 <button class="btn" onclick="runFindBestForLeader()">🪄 找出這位隊長的最佳隊伍</button>
@@ -213,6 +214,26 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <div id="roiBaseline"></div>
 <h2 style="margin-top:18px;" id="roiListTitle">ROI 排行榜</h2>
 <div id="roiList"></div>
+</div>
+</div>
+
+<!-- ============ TAB 3b: DATA BROWSER (Cards & Songs, read-only lookup) ============ -->
+<div class="tab" id="tab-databrowser">
+<div class="card">
+<h2>卡片資料查詢</h2>
+<p class="small">瀏覽資料庫目前收錄的全部卡片，可依 Holomem／卡名／期別／屬性搜尋，方便查對某張卡的技能數值。這裡僅供查詢，若要新增／修改卡片請到「⑥ 資料庫編輯」。</p>
+<input type="search" class="searchbar" placeholder="搜尋 Holomem / 卡名 / 期別 / 屬性..." id="cardBrowserSearch" oninput="renderCardBrowser()">
+<div style="max-height:520px;overflow:auto;">
+<table id="cardBrowserTable"><thead><tr><th>Holomem</th><th>卡片</th><th>期別</th><th>Type</th><th>持有</th><th>Performance</th><th>Technique</th><th>Sense</th><th>隊長服裝</th><th>被動</th><th>主動技</th><th>SP技能</th><th>連結</th><th>來源</th></tr></thead><tbody></tbody></table>
+</div>
+</div>
+<div class="card">
+<h2>歌曲資料查詢</h2>
+<p class="small">資料庫目前收錄 <b id="songCountLabel"></b> 首歌曲秒數（來源 Game8），可依歌名／演唱者搜尋，點欄位標題可切換排序。＊這份歌曲清單目前僅供查詢參考，②③頁的隊伍分析仍使用內部固定的評估區間，尚未提供「依這首歌實際秒數分析隊伍」的功能。</p>
+<input type="search" class="searchbar" placeholder="搜尋歌名 / 演唱者..." id="songBrowserSearch" oninput="renderSongBrowser()">
+<div style="max-height:520px;overflow:auto;">
+<table id="songBrowserTable"><thead><tr><th onclick="setSongSort('title')" style="cursor:pointer;">歌曲名稱 ⇅</th><th onclick="setSongSort('performer')" style="cursor:pointer;">演唱者 ⇅</th><th onclick="setSongSort('duration')" style="cursor:pointer;">秒數 ⇅</th><th onclick="setSongSort('exLevel')" style="cursor:pointer;">EX等級 ⇅</th></tr></thead><tbody></tbody></table>
+</div>
 </div>
 </div>
 
@@ -257,7 +278,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <li><b>Overall Score</b>：以上各項依 Leader Outfit 30 / Passive 25 / Timeline 20 / Coverage 10 加權（原始權重總和85%，已等比例正規化為100%）。Special Skill Order／Connect／Board 皆不計入。</li>
 </ol>
 <h3>已知資料限制</h3>
-<p class="small">目前遊戲（2026/7/23 上線）wiki 資料仍在補齊中：(1) 內建資料庫已收錄 <b>59 張卡</b>——54 位 Holomem 各自的主力 5★卡（來自 AppMedia／Game8 星5一覧），加上 5 張最新追加的水著限定 5★卡（白銀ノエル／大空スバル／不知火フレア／角巻わため／音乃瀬奏），<b>全部 59 張都已取得完整的 Active/Passive/Special/Outfit/Connect/Stats/Type/Generation 數值</b>（AppMedia 有 19 張把技能表渲染成圖片抓不到文字，已改用 Game8 的純文字版頁面補齊，未用假數字填補）；(2) 完整遊戲每位角色通常還有第2、第3張卡（We are hololive!基礎款等），尚未全部收錄，可在「⑤ 資料庫編輯」分頁持續新增；(3) Active 技能的精確發動機率（%）目前沒有任何公開 wiki 揭露確切數字，僅有「低/中/高機率」的質化描述；(4) 歌曲 BPM 目前無公開資料；(5) Holomem Board 逐格效果未逐一列出，改由你在①分頁手動輸入目前的加成%。所有假設與資料缺口都會在介面上明確標示，不會用虛構數字掩蓋。</p>
+<p class="small">目前遊戲（2026/7/23 上線）wiki 資料仍在補齊中：(1) 內建資料庫已收錄 <b>59 張卡</b>——54 位 Holomem 各自的主力 5★卡（來自 AppMedia／Game8 星5一覧），加上 5 張最新追加的水著限定 5★卡（白銀ノエル／大空スバル／不知火フレア／角巻わため／音乃瀬奏），<b>全部 59 張都已取得完整的 Active/Passive/Special/Outfit/Connect/Stats/Type/Generation 數值</b>（AppMedia 有 19 張把技能表渲染成圖片抓不到文字，已改用 Game8 的純文字版頁面補齊，未用假數字填補）；(2) 完整遊戲每位角色通常還有第2、第3張卡（We are hololive!基礎款等），尚未全部收錄，可在「⑥ 資料庫編輯」分頁持續新增；(3) Active 技能的精確發動機率（%）目前沒有任何公開 wiki 揭露確切數字，僅有「低/中/高機率」的質化描述；(4) 歌曲 BPM 目前無公開資料；(5) Holomem Board 逐格效果未逐一列出，改由你在①分頁手動輸入目前的加成%。所有假設與資料缺口都會在介面上明確標示，不會用虛構數字掩蓋。</p>
 </div>
 </div>
 
@@ -3255,6 +3276,26 @@ let BOARD = loadBoard(); // {cardId: percent}
 //   換別的未持有卡不會更好 → ROI 改問「如果抽不到這張、只能用現有角色頂替，分數會掉多少」，掉越多代表越該優先抽。
 let TEAM_RESULTS = { practice: null, leaderpick: null }; // {result, song}
 
+// 修BUG：②③頁「隊伍組成」的5個欄位，在按下自動搜尋後會被系統填入找到的隊伍卡片，方便你接著微調。
+// 但如果填好之後又去上方換一位不同的隊長再按一次搜尋，這些欄位就會被當成「使用者手動鎖定」的卡片，
+// 導致新的搜尋其實被舊隊伍卡死、甚至可能因為隊長被截斷而整個沒反應（見 findBestTeamWithFixed 修BUG 註解）。
+// 用這兩個旗標追蹤「目前欄位內容是不是系統剛自動填的、使用者還沒手動動過」：是的話，換隊長時就自動清空，
+// 讓新的隊長從頭全新搜尋；如果使用者已經手動改過任一欄位（代表是刻意要鎖定的），換隊長就不會動到這些欄位。
+let practiceSlotsAutoFilled = false;
+let leaderPickSlotsAutoFilled = false;
+function onPracticeLeaderChanged(){
+if(practiceSlotsAutoFilled){
+for(let i=0;i<TEAM_SIZE;i++){ const s=document.getElementById("pslot"+i); if(s) s.value=""; }
+practiceSlotsAutoFilled = false;
+}
+}
+function onLeaderPickChanged(){
+if(leaderPickSlotsAutoFilled){
+for(let i=0;i<TEAM_SIZE;i++){ const s=document.getElementById("lpslot"+i); if(s) s.value=""; }
+leaderPickSlotsAutoFilled = false;
+}
+}
+
 /* ================= ENGINE ================= */
 function ownedCardList(){ return CARDS.filter(c=>OWNED[c.id]); }
 function cardById(id){ return CARDS.find(c=>c.id===id); }
@@ -3393,7 +3434,13 @@ function scoreTeam(ownedTeamCards, leaderId, song){
 // ownedTeamCards: array of card objects length TEAM_SIZE
 let team = ownedTeamCards.map(c=>({card:c}));
 const counts = computeCounts(team);
-const leader = team.find(m=>m.card.id===leaderId).card;
+const leaderMember = team.find(m=>m.card.id===leaderId);
+if(!leaderMember){
+// 保險護欄：理論上呼叫端應該保證隊長一定在隊伍陣列裡，但若因為呼叫端邏輯疏漏漏放了隊長，
+// 直接噴清楚的錯誤訊息，好過原本 undefined.card 那種難以追查、畫面直接沒反應的例外。
+throw new Error("scoreTeam: 隊長卡片("+leaderId+")不在傳入的隊伍陣列裡，請檢查呼叫端邏輯。");
+}
+const leader = leaderMember.card;
 
 // 1. Leader outfit
 let leaderPass=true, leaderScore=0, leaderNote="";
@@ -3555,11 +3602,15 @@ return best;
 // forcedLeaderId：可選，若指定且該卡不在 fixedCards 中，會自動補進固定名單裡（Leader一定要上場）。
 function findBestTeamWithFixed(fixedCards, forcedLeaderId, owned, song){
 let forced = fixedCards.slice();
+// 修BUG：隊長一定要放在陣列最前面再做「超過5張就截斷」的動作。
+// 之前是先把隊長 concat 到陣列「最後面」，如果 fixedCards 剛好已經有5張（例如上一次自動搜尋填滿的欄位，
+// 換了隊長後沒清空），加上隊長會變成6張，slice(0,TEAM_SIZE) 只留前5個，隊長反而被切掉，
+// 後面 scoreTeam 找不到隊長卡就會直接噴例外、畫面卡住沒反應（點按鈕像沒事發生一樣）。
 if(forcedLeaderId && !forced.some(c=>c.id===forcedLeaderId)){
 const leaderCard = cardById(forcedLeaderId);
-if(leaderCard) forced = forced.concat([leaderCard]);
+if(leaderCard) forced = [leaderCard, ...forced];
 }
-// 保險：避免同一位 Holomem 被鎖定兩次
+// 保險：避免同一位 Holomem 被鎖定兩次（隊長已排最前面，同一位 Holomem 重複時會保留隊長那張）
 const seen = new Set();
 forced = forced.filter(c=>{ if(seen.has(c.holomem)) return false; seen.add(c.holomem); return true; });
 if(forced.length > TEAM_SIZE) forced = forced.slice(0, TEAM_SIZE);
@@ -3631,6 +3682,7 @@ function switchTab(name){
 document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active", b.dataset.tab===name));
 document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.id==="tab-"+name));
 if(name==="roi") updateRoiSourceStatus();
+if(name==="databrowser"){ renderCardBrowser(); renderSongBrowser(); }
 }
 document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
 
@@ -3720,11 +3772,16 @@ leaderSelPractice.innerHTML = `<option value="">（自動選擇最佳Leader）</
 }
 const slotsPractice=document.getElementById("manualSlotsPractice");
 if(slotsPractice){
+const prevPracticeVals = [];
+for(let i=0;i<TEAM_SIZE;i++){ const s=document.getElementById("pslot"+i); prevPracticeVals.push(s?s.value:""); }
 slotsPractice.innerHTML="";
 for(let i=0;i<TEAM_SIZE;i++){
 const sel=document.createElement("select");
 sel.id="pslot"+i;
 sel.innerHTML = `<option value="">（空）</option>` + cardOptionsGroupedByGen(owned, c=>`${c.holomem} - ${c.name}`);
+if(prevPracticeVals[i]) sel.value = prevPracticeVals[i];
+// 使用者自己手動改了某個欄位，就不再是「系統剛自動填的」狀態，之後換隊長不應該清掉這個手動選擇。
+sel.onchange = ()=>{ practiceSlotsAutoFilled = false; };
 const wrap=document.createElement("div");
 wrap.innerHTML=`<label class="small">位置 ${i+1}${i===0?"（預設Leader，可於上方Leader選單覆蓋）":""}</label>`;
 wrap.appendChild(sel);
@@ -3750,6 +3807,8 @@ const sel=document.createElement("select");
 sel.id="lpslot"+i;
 sel.innerHTML = `<option value="">（空）</option>` + cardOptionsGroupedByGen(CARDS, c=>`${c.holomem} - ${c.name}${OWNED[c.id]?"":"（未持有）"}`);
 if(prevVals[i]) sel.value = prevVals[i];
+// 使用者自己手動改了某個欄位，就不再是「系統剛自動填的」狀態，之後換隊長不應該清掉這個手動選擇。
+sel.onchange = ()=>{ leaderPickSlotsAutoFilled = false; };
 const wrap=document.createElement("div");
 wrap.innerHTML=`<label class="small">位置 ${i+1}</label>`;
 wrap.appendChild(sel);
@@ -3911,6 +3970,7 @@ if(!result){ alert("找不到可行隊伍，請確認角色庫是否足夠多樣
 renderResult(result, song, "resultAreaPractice");
 result.order.forEach((id,i)=>{ const sel=document.getElementById("pslot"+i); if(sel) sel.value=id; });
 document.getElementById("leaderSelectPractice").value = result.leaderId;
+practiceSlotsAutoFilled = true; // 這5個欄位剛被系統自動填入，換隊長時應該自動清空重新搜尋
 TEAM_RESULTS.practice = {result, song};
 updateRoiSourceStatus();
 }
@@ -3933,6 +3993,7 @@ updateRoiSourceStatus();
 function clearPractice(){
 document.getElementById("leaderSelectPractice").value = "";
 for(let i=0;i<TEAM_SIZE;i++){ const sel=document.getElementById("pslot"+i); if(sel) sel.value=""; }
+practiceSlotsAutoFilled = false;
 const el=document.getElementById("resultAreaPractice"); if(el) el.innerHTML="";
 }
 
@@ -3963,12 +4024,13 @@ result = findBestTeamWithFixed(fixedCards, leaderId, CARDS, song);
 if(!result){ alert("找不到可行隊伍，請確認資料庫是否足夠多樣（还需其他不同 Holomem 補滿剩餘位置）。"); return; }
 } else {
 const uniqueHolomem = [...new Set(CARDS.filter(c=>c.holomem!==leaderCard.holomem).map(c=>c.holomem))];
-if(uniqueHolomem.length < TEAM_SIZE-1){ alert("資料庫中可搭配的不同 Holomem 數量不足，請先到「⑤資料庫編輯」補充卡片。"); return; }
+if(uniqueHolomem.length < TEAM_SIZE-1){ alert("資料庫中可搭配的不同 Holomem 數量不足，請先到「⑥資料庫編輯」補充卡片。"); return; }
 result = findBestTeamOverall(CARDS, song, leaderId);
 if(!result){ alert("找不到可行隊伍，請確認資料庫是否足夠多樣。"); return; }
 }
 renderResult(result, song, "resultAreaLeaderPick", true);
 result.order.forEach((id,i)=>{ const sel=document.getElementById("lpslot"+i); if(sel) sel.value=id; });
+leaderPickSlotsAutoFilled = true; // 這5個欄位剛被系統自動填入，換隊長時應該自動清空重新搜尋
 TEAM_RESULTS.leaderpick = {result, song};
 updateRoiSourceStatus();
 }
@@ -3991,6 +4053,7 @@ updateRoiSourceStatus();
 function clearLeaderPick(){
 document.getElementById("leaderSelectPick").value = "";
 for(let i=0;i<TEAM_SIZE;i++){ const sel=document.getElementById("lpslot"+i); if(sel) sel.value=""; }
+leaderPickSlotsAutoFilled = false;
 const el=document.getElementById("resultAreaLeaderPick"); if(el) el.innerHTML="";
 }
 
@@ -4110,7 +4173,7 @@ document.getElementById("roiList").innerHTML = top.length ? top.map((r,i)=>`
 <div class="roi-rank">#${i+1}</div>
 <div class="roi-name">${r.card.holomem} — ${r.card.name}<span class="sub">建議替換：${r.replacedCard.holomem}（${r.replacedCard.name}）${r.newLeaderId===r.card.id?" · 同時成為新隊長":""} · ${gapReasonText(current,r)} · ${GEN_LABELS[r.card.genCode]}${r.card.type!=="unknown"?" / "+r.card.type:""} · <a href="${r.card.source}" target="_blank" class="badge-src">資料來源</a></span></div>
 <div class="roi-delta">${r.delta>=0?"+":""}${r.delta.toFixed(2)}</div>
-</div>`).join("") : `<p class="small">目前找不到任何一張未持有的卡能合法換進這支隊伍（可能是 Holomem 重複衝突太多），請先到「⑤資料庫編輯」確認資料庫涵蓋範圍。</p>`;
+</div>`).join("") : `<p class="small">目前找不到任何一張未持有的卡能合法換進這支隊伍（可能是 Holomem 重複衝突太多），請先到「⑥資料庫編輯」確認資料庫涵蓋範圍。</p>`;
 } else {
 // ③的隊伍本來就是從資料庫全部卡片搜尋出的理論最佳隊伍，未持有的格位已經是那個位置客觀最好的選擇，
 // 換別的未持有卡不會更好；改成算「抽卡優先順序」——沒抽到、只能用持有角色頂替時，分數會掉多少。
@@ -4143,6 +4206,74 @@ function clearROI(){
 document.getElementById("roiResult").style.display = "none";
 document.getElementById("roiBaseline").innerHTML = "";
 document.getElementById("roiList").innerHTML = "";
+}
+
+/* ================= DATA BROWSER (卡片／歌曲查詢，唯讀查詢頁) ================= */
+function renderCardBrowser(){
+const q = (document.getElementById("cardBrowserSearch").value||"").trim().toLowerCase();
+const filtered = CARDS.filter(c=>{
+if(!q) return true;
+return c.holomem.toLowerCase().includes(q) ||
+c.name.toLowerCase().includes(q) ||
+(GEN_LABELS[c.genCode]||"").toLowerCase().includes(q) ||
+(c.type||"").toLowerCase().includes(q);
+});
+const sorted = filtered.slice().sort((a,b)=> a.holomem.localeCompare(b.holomem,"ja") || a.name.localeCompare(b.name,"ja"));
+document.querySelector("#cardBrowserTable tbody").innerHTML = sorted.map(c=>{
+const outfitTxt = c.outfit
+? (c.outfit.condType ? (c.outfit.condType==="gen"?GEN_LABELS[c.outfit.condVal]:c.outfit.condVal)+"≥"+c.outfit.condCount+"（"+c.outfit.value+"%）" : "無條件（"+c.outfit.value+"%）")
+: "unknown";
+const passiveTxt = c.passive
+? (c.passive.condType==="gen"?GEN_LABELS[c.passive.condVal]:c.passive.condVal)+"≥"+c.passive.condCount+"（"+c.passive.value+"%）"
+: "unknown";
+const activeTxt = c.active
+? "每"+c.active.interval+"s／持續"+c.active.duration+"s／+"+c.active.value+"%（"+c.active.probTier+"機率）"
+: "unknown";
+const specialTxt = c.special
+? c.special.value+"%／持續"+c.special.duration+"s"
+: "unknown";
+return `<tr>
+<td>${c.holomem}</td>
+<td>${c.name}</td>
+<td>${GEN_LABELS[c.genCode]||c.genCode}</td>
+<td>${c.type!=="unknown"?c.type:'<span class="small">unknown</span>'}</td>
+<td>${OWNED[c.id]?'<span class="pill g">✅</span>':'<span class="pill r">🛒</span>'}</td>
+<td>${c.stats?c.stats.performance:"?"}</td>
+<td>${c.stats?c.stats.technique:"?"}</td>
+<td>${c.stats?c.stats.sense:"?"}</td>
+<td class="small">${outfitTxt}</td>
+<td class="small">${passiveTxt}</td>
+<td class="small">${activeTxt}</td>
+<td class="small">${specialTxt}</td>
+<td>${c.connect?"+"+c.connect.value+"%":"unknown"}</td>
+<td><a href="${c.source}" target="_blank">來源</a></td>
+</tr>`;
+}).join("");
+}
+
+let songSortKey = "duration", songSortAsc = true;
+function setSongSort(key){
+if(songSortKey===key) songSortAsc = !songSortAsc; else { songSortKey = key; songSortAsc = true; }
+renderSongBrowser();
+}
+function renderSongBrowser(){
+document.getElementById("songCountLabel").textContent = SONGS.length;
+const q = (document.getElementById("songBrowserSearch").value||"").trim().toLowerCase();
+const filtered = SONGS.filter(s=>{
+if(!q) return true;
+return s.title.toLowerCase().includes(q) || (s.performer||"").toLowerCase().includes(q);
+});
+const sorted = filtered.slice().sort((a,b)=>{
+let av=a[songSortKey], bv=b[songSortKey];
+if(typeof av==="string"){ av=(av||"").toLowerCase(); bv=(bv||"").toLowerCase(); }
+if(av==null) av = -Infinity; if(bv==null) bv = -Infinity;
+if(av<bv) return songSortAsc?-1:1;
+if(av>bv) return songSortAsc?1:-1;
+return 0;
+});
+document.querySelector("#songBrowserTable tbody").innerHTML = sorted.map(s=>`
+<tr><td>${s.title}</td><td>${s.performer||""}</td><td>${s.duration}s</td><td>${s.exLevel!=null?"EX"+s.exLevel:'<span class="small">unknown</span>'}</td></tr>
+`).join("");
 }
 
 /* ================= EDITOR ================= */
