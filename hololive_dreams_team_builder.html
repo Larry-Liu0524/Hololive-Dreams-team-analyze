@@ -85,6 +85,11 @@ th{color:var(--sub);font-weight:600;position:sticky;top:0;background:var(--panel
 .metric-box .lbl{font-size:11px;color:var(--sub);}
 .warn-banner{background:rgba(255,95,126,.12);border:1px solid var(--bad);color:#ffb0c0;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;}
 .ok-banner{background:rgba(95,217,122,.1);border:1px solid var(--good);color:#bdf5c8;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;}
+.quicknav{background:var(--panel2);border:1px solid var(--border);border-radius:8px;margin:0 20px 14px;padding:2px 16px;}
+.quicknav summary{cursor:pointer;padding:10px 0;font-size:13px;color:var(--accent2);font-weight:600;}
+.quicknav table{width:100%;border-collapse:collapse;margin-bottom:12px;}
+.quicknav td{padding:6px 8px;font-size:13px;border-top:1px solid var(--border);vertical-align:top;}
+.quicknav td:first-child{color:var(--sub);width:46%;}
 .small{font-size:11.5px;color:var(--sub);}
 .searchbar{margin-bottom:10px;}
 textarea{width:100%;min-height:260px;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px;font-family:monospace;font-size:12px;}
@@ -125,6 +130,20 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <button data-tab="about">⑦ 方法論 / 資料來源</button>
 </nav>
 
+<details class="quicknav">
+<summary>🧭 不知道要先看哪一頁？點這裡看常見情境對照</summary>
+<table>
+<tbody>
+<tr><td>只是想看看目前持有的角色怎麼搭配最好</td><td>先到<b>①我的角色庫</b>勾好持有角色，再到<b>②隊伍養成分析</b>按「自動建議最佳隊伍」</td></tr>
+<tr><td>已經抽到某張五星角色，想知道適合搭配哪個隊長、還缺哪些隊友</td><td>到<b>③指定隊長找最佳隊伍</b>，把那張卡選為隊長，按「找出這位隊長的最佳隊伍」——這頁會從全部卡片找出理論最強搭配，並標示每一位你有沒有持有</td></tr>
+<tr><td>想知道現在最推薦抽哪張卡</td><td>先在②或③跑出一支隊伍，再到<b>④抽卡ROI推薦</b>按「計算」</td></tr>
+<tr><td>想估算抽到特定角色大概要花多少鑽石/日幣</td><td>到<b>④抽卡ROI推薦</b>下方的「抽卡機率／期望花費試算」</td></tr>
+<tr><td>想查某張卡或某首歌的詳細數值</td><td>到<b>⑤卡片／歌曲查詢</b>搜尋</td></tr>
+<tr><td>想新增卡片、修正資料庫裡的數值</td><td>到<b>⑥資料庫編輯</b></td></tr>
+</tbody>
+</table>
+</details>
+
 <main>
 
 <!-- ============ TAB 1: ROSTER ============ -->
@@ -148,6 +167,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <div class="card">
 <h2>Step 0 · 選擇隊長（依現有角色，不指定歌曲）</h2>
 <p class="small">這一頁<b>不綁定任何特定歌曲</b>，系統會直接依你在①勾選的持有角色，找出技能節奏彼此重疊最少、空檔最少的隊伍。原因：短歌曲常常會把主動技能「攔腰截斷」——例如 Interval 29 秒的技能，在一首 24 秒的短歌裡根本來不及發動，導致覆蓋率分數看起來很差，但那其實是歌曲太短，不代表這隊搭配不好。這頁改用系統內部一個較長的評估區間，讓每張卡的主動技／SP技能都能跑完好幾輪週期，這樣才看得出這隊技能彼此的「間隔／重疊／空檔」本質上合不合，適合先在這裡練出一隊技能節奏鬆一點、重疊低的隊伍。</p>
+<p class="small">＊隊長本質上是「隊伍buff」角色，不強制要求也要佔用下面5個上場席位之一——只是多數人前期資源有限、又想讓主推角色一起上場，才會順便把隊長也放進隊伍組成裡。這裡兩種情況都支援：如果你上面選的隊長沒有出現在下面5個欄位裡，分析時會當成「隊長沒上場、只掛隊長服裝buff」處理，隊長自己的主動技/被動/SP技能就不會計入這次分析。</p>
 <div class="grid cols2">
 <div>
 <label class="small">Leader（必須為持有角色）</label>
@@ -171,6 +191,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <div class="card">
 <h2>Step 0 · 指定隊長</h2>
 <p class="small">這一頁<b>一定要先選好一位隊長</b>（不提供「自動選擇最佳Leader」，隊長仍只列出你持有的角色），也不需要選歌曲。系統會從<b>資料庫全部卡片</b>（不限於你持有的）窮舉／爬山演算法找出搭配這位隊長客觀上最強的隊友，並在下方結果的「逐位隊員條件檢查」表格標示每一位是<b>✅ 已持有</b>還是<b>🛒 未持有</b>——這樣你就能一次看出理論最佳隊伍長怎樣、以及還缺哪些卡值得抽。</p>
+<p class="small">＊隊長本質上是「隊伍buff」角色，不強制要求也要佔用下面5個上場席位之一——「🪄找出這位隊長的最佳隊伍」預設仍會把隊長排進上場5人裡（多數人實際玩法如此，也比較省資源）；但如果你用「分析目前手動隊伍」，下面5格選的是你想上場的成員，隊長不用一定也選進這5格裡——沒放進去就會當成「隊長沒上場、只掛隊長服裝buff」處理。</p>
 <div class="grid cols2">
 <div>
 <label class="small">隊長（必選，僅列出持有角色）</label>
@@ -3353,11 +3374,12 @@ const map = condType==="gen"?counts.gen:counts.type;
 return (map[condVal]||0) >= condCount;
 }
 
-function conditionReport(team,leaderId,counts){
+// leaderCard 直接傳入卡片物件，不再從 team 陣列裡反查——因為隊長不一定實際上場、
+// 不一定會出現在 team 裡（見 scoreTeam 裡 leaderDeployed 的說明），用 team.find(...) 反查在隊長沒上場時會是 undefined 而炸掉。
+function conditionReport(team,leaderCard,counts){
 return team.map(m=>{
 const c=m.card;
-const isLeader = c.id===leaderId;
-const leaderCard = team.find(x=>x.card.id===leaderId).card;
+const isLeader = c.id===leaderCard.id;
 let leaderOutfitCol="N/A";
 if(leaderCard.outfit && leaderCard.outfit.condType){
 if(leaderCard.outfit.condType==="gen") leaderOutfitCol = cardGenCodes(c).includes(leaderCard.outfit.condVal)?"PASS":"FAIL";
@@ -3460,25 +3482,31 @@ return {order, specialEfficiency: 100};
 }
 
 function scoreTeam(ownedTeamCards, leaderId, song){
-// ownedTeamCards: array of card objects length TEAM_SIZE
+// ownedTeamCards: array of card objects,實際「上場5席位」的成員（不一定含隊長，見下方說明）
 let team = ownedTeamCards.map(c=>({card:c}));
 const counts = computeCounts(team);
 const leaderMember = team.find(m=>m.card.id===leaderId);
-if(!leaderMember){
-// 保險護欄：理論上呼叫端應該保證隊長一定在隊伍陣列裡，但若因為呼叫端邏輯疏漏漏放了隊長，
+// 修正：隊長在遊戲裡其實是「隊伍buff」角色，不強制佔用上場5個席位之一——
+// 多數玩家因為前期資源/主推/衝榜考量，會順便把隊長卡也放進上場5人裡（這時 leaderMember 找得到，leaderDeployed=true，
+// 隊長自己的主動技/被動/SP技能照常觸發、跟以前行為完全一樣）；但隊長也可以是完全沒上場、只提供「隊長服裝」buff的獨立角色
+// （leaderMember 找不到，leaderDeployed=false，這時隊長自己的技能不會觸發，也不計入下面的 team/counts/時間軸，
+// 只有隊長服裝這項buff仍然生效——因為隊長服裝本來就是「隊長專屬、對全隊生效」的被動，不需要隊長本人上場）。
+const leaderDeployed = !!leaderMember;
+const leaderCard = leaderDeployed ? leaderMember.card : cardById(leaderId);
+if(!leaderCard){
+// 保險護欄：理論上呼叫端應該保證 leaderId 對應到一張真實存在的卡片，若因為呼叫端邏輯疏漏傳了不存在的 id，
 // 直接噴清楚的錯誤訊息，好過原本 undefined.card 那種難以追查、畫面直接沒反應的例外。
-throw new Error("scoreTeam: 隊長卡片("+leaderId+")不在傳入的隊伍陣列裡，請檢查呼叫端邏輯。");
+throw new Error("scoreTeam: 找不到隊長卡片("+leaderId+")，請檢查呼叫端邏輯。");
 }
-const leader = leaderMember.card;
 
-// 1. Leader outfit
+// 1. Leader outfit（隊長服裝buff，不論隊長本人有沒有上場都會生效）
 let leaderPass=true, leaderScore=0, leaderNote="";
-if(!leader.outfit){ leaderPass=false; leaderNote="Leader此卡尚無Outfit資料"; }
-else if(!leader.outfit.condType){ leaderPass=true; leaderScore=100; leaderNote="無條件啟動"; }
+if(!leaderCard.outfit){ leaderPass=false; leaderNote="Leader此卡尚無Outfit資料"; }
+else if(!leaderCard.outfit.condType){ leaderPass=true; leaderScore=100; leaderNote="無條件啟動"; }
 else {
-leaderPass = condMet(leader.outfit.condType, leader.outfit.condVal, leader.outfit.condCount, counts);
+leaderPass = condMet(leaderCard.outfit.condType, leaderCard.outfit.condVal, leaderCard.outfit.condCount, counts);
 leaderScore = leaderPass?100:0;
-leaderNote = (leader.outfit.condType==="gen"?GEN_LABELS[leader.outfit.condVal]:leader.outfit.condVal)+" ≥ "+leader.outfit.condCount+"（目前："+((leader.outfit.condType==="gen"?counts.gen[leader.outfit.condVal]:counts.type[leader.outfit.condVal])||0)+"）";
+leaderNote = (leaderCard.outfit.condType==="gen"?GEN_LABELS[leaderCard.outfit.condVal]:leaderCard.outfit.condVal)+" ≥ "+leaderCard.outfit.condCount+"（目前："+((leaderCard.outfit.condType==="gen"?counts.gen[leaderCard.outfit.condVal]:counts.type[leaderCard.outfit.condVal])||0)+"）";
 }
 
 // 2. Passive
@@ -3523,12 +3551,12 @@ coverageScore*WEIGHTS.coverage;
 const overall = overallRaw/(WEIGHT_SUM*100)*100;
 
 return {
-team, leaderId, counts, leaderPass, leaderScore, leaderNote,
+team, leaderId, leaderCard, leaderDeployed, counts, leaderPass, leaderScore, leaderNote,
 passiveScore, passiveDetails,
 timelineScore, coverageScore, coverage, overlap, idle,
 specialScore, order, events,
 connectScore, boardScore, overall,
-conditionReport: conditionReport(team, leaderId, counts)
+conditionReport: conditionReport(team, leaderCard, counts)
 };
 }
 
@@ -3869,11 +3897,16 @@ return `<div class="timeline-row"><div class="who small">時間刻度</div><div 
 
 function renderResult(result, song, targetId, highlightOwned){
 const el = document.getElementById(targetId||"resultArea");
-const leaderCard = result.team.find(m=>m.card.id===result.leaderId).card;
+const leaderCard = getLeaderCardOf(result);
+// result.leaderDeployed 是這次更新才加的欄位；舊資料(更新前存的)沒有這個欄位，undefined 時一律當「有上場」處理
+// （因為舊版本的 scoreTeam 本來就強制隊長一定要在隊伍陣列裡，不會有「沒上場」的舊資料）。
+const deployNote = (result.leaderDeployed===false)
+? `<div class="small" style="margin-top:4px;">＊隊長「${leaderCard.holomem} - ${leaderCard.name}」這次沒有實際上場（不佔用下面5個席位），只提供隊長服裝這項buff；隊長自己的主動技／被動／SP技能不會觸發、也不會出現在下方時間軸或站位順序裡。</div>`
+: "";
 
 let banner = result.leaderPass
-? `<div class="ok-banner">✅ 隊長服裝已啟動：${leaderCard.name}（${leaderCard.outfit?leaderCard.outfit.desc:""}）</div>`
-: `<div class="warn-banner">⚠️ 隊長服裝條件未滿足（${result.leaderNote}）——依規格，整隊視為「不完整」，總分已大幅扣分，建議調整隊員屬性/期別組成。</div>`;
+? `<div class="ok-banner">✅ 隊長服裝已啟動：${leaderCard.name}（${leaderCard.outfit?leaderCard.outfit.desc:""}）${deployNote}</div>`
+: `<div class="warn-banner">⚠️ 隊長服裝條件未滿足（${result.leaderNote}）——依規格，整隊視為「不完整」，總分已大幅扣分，建議調整隊員屬性/期別組成。${deployNote}</div>`;
 
 const condRows = result.conditionReport.map(r=>`
 <tr>
@@ -3961,7 +3994,7 @@ text.style.animationDuration = duration.toFixed(1)+"s";
 function saveCurrentAsSnapshot(source){
 const stored = TEAM_RESULTS[source];
 if(!stored){ alert("目前沒有可儲存的分析結果，請先跑一次分析。"); return; }
-const leaderCard = stored.result.team.find(m=>m.card.id===stored.result.leaderId).card;
+const leaderCard = getLeaderCardOf(stored.result);
 const defaultName = leaderCard.holomem+"隊（"+stored.result.overall.toFixed(1)+"分）";
 const name = prompt("為這支隊伍命名：", defaultName);
 if(!name) return;
@@ -3996,7 +4029,7 @@ const el = document.querySelector("#savedTeamsTable tbody");
 if(!el) return;
 const sorted = SAVED_TEAMS.slice().sort((a,b)=> b.savedAt.localeCompare(a.savedAt));
 el.innerHTML = sorted.length ? sorted.map(s=>{
-const leaderCard = s.result.team.find(m=>m.card.id===s.result.leaderId).card;
+const leaderCard = getLeaderCardOf(s.result);
 const sourceLabel = s.source==="practice" ? "②養成分析" : "③指定隊長";
 const dt = new Date(s.savedAt);
 const dtLabel = dt.getFullYear()+"/"+(dt.getMonth()+1)+"/"+dt.getDate()+" "+String(dt.getHours()).padStart(2,"0")+":"+String(dt.getMinutes()).padStart(2,"0");
@@ -4009,6 +4042,13 @@ return `<tr>
 <td><button class="btn secondary small" onclick="loadSnapshot('${s.id}')">載入查看</button> <button class="btn secondary small" onclick="deleteSnapshot('${s.id}')">刪除</button></td>
 </tr>`;
 }).join("") : `<tr><td colspan="6" class="small">目前還沒有儲存任何快照。到②或③分析出隊伍後，按結果卡片右上角的「💾 另存為快照」即可存到這裡。</td></tr>`;
+}
+// 相容舊資料用：新版 scoreTeam() 回傳的 result 會直接帶 leaderCard 欄位（因為隊長不一定在 team 陣列裡，見 scoreTeam 註解）；
+// 但 localStorage 裡可能還留著這次更新之前存的舊 result（沒有 leaderCard 欄位，當時隊長一定在 team 裡），這裡做個相容讀取。
+function getLeaderCardOf(result){
+if(result.leaderCard) return result.leaderCard;
+const m = result.team.find(x=>x.card.id===result.leaderId);
+return m ? m.card : cardById(result.leaderId);
 }
 function pillFor(v){
 if(v==="PASS"||v==="PASS(無條件)") return `<span class="pill g">PASS</span>`;
@@ -4068,6 +4108,13 @@ if(ids.length!==TEAM_SIZE){ alert("請於「隊伍組成」5個欄位都選好�
 const holomemSet = new Set(ids.map(id=>cardById(id).holomem));
 if(holomemSet.size!==TEAM_SIZE){ alert("隊伍中有重複的 Holomem，同一位角色不能同時上場多張卡。"); return; }
 const leaderId = document.getElementById("leaderSelectPractice").value || ids[0];
+// 修正：隊長是「隊伍buff」角色，不強制要求也是上場5人之一——如果你上面選的隊長跟這5格選的卡不是同一張，
+// 會直接當成「隊長沒上場，只掛buff」來分析（例如自動建議完後，你把隊長原本站的那格手動換成別的角色，
+// 以前這裡會沒反應，現在會正常分析）。唯一會擋的是隊長跟上場成員撞到同一位 Holomem 的情況。
+if(!ids.includes(leaderId)){
+const leaderCardCheck = cardById(leaderId);
+if(leaderCardCheck && holomemSet.has(leaderCardCheck.holomem)){ alert("隊長沒有出現在上場5席位裡，但跟上場成員有同一位 Holomem（用了不同卡）——同一位角色能否「隊長掛buff、又用不同卡上場」本工具無法確認是否合法，請換一張隊長卡或調整隊伍組成。"); return; }
+}
 const cards = ids.map(id=>cardById(id));
 const result = scoreTeam(cards, leaderId, song);
 renderResult(result, song, "resultAreaPractice");
@@ -4126,10 +4173,15 @@ function runAnalyzeManualLeaderPick(){
 const leaderId = document.getElementById("leaderSelectPick").value;
 if(!leaderId){ alert("請先選擇一位隊長。"); return; }
 const fixedCards = getLeaderPickFixedCards();
-if(fixedCards.length!==TEAM_SIZE){ alert("請於「隊伍組成」5個欄位都選好卡片，或改用「自動建議最佳隊伍」。"); return; }
+if(fixedCards.length!==TEAM_SIZE){ alert("請於「隊伍組成」5個欄位都選好卡片（這5格是實際上場成員；隊長只提供隊長buff，不一定要放進這5格），或改用「自動建議最佳隊伍」。"); return; }
 const holomemSet = new Set(fixedCards.map(c=>c.holomem));
 if(holomemSet.size!==TEAM_SIZE){ alert("隊伍中有重複的 Holomem，同一位角色不能同時上場多張卡。"); return; }
-if(!fixedCards.some(c=>c.id===leaderId)){ alert("上方選的隊長必須也出現在下方「隊伍組成」的其中一個欄位裡。"); return; }
+// 修正：隊長是「隊伍buff」角色，不強制要求也出現在下方5個上場席位裡（多數玩家因為資源/主推考量還是會放進去，
+// 這裡兩種情況都支援）。唯一要擋的是「隊長沒上場，但跟上場成員用了同一位Holomem的不同卡」這種本工具無法判斷是否合法的情況。
+if(!fixedCards.some(c=>c.id===leaderId)){
+const leaderCardCheck = cardById(leaderId);
+if(leaderCardCheck && holomemSet.has(leaderCardCheck.holomem)){ alert("隊長沒有出現在上場5席位裡，但跟上場成員有同一位 Holomem（用了不同卡）——同一位角色能否「隊長掛buff、又用不同卡上場」本工具無法確認是否合法，請換一張隊長卡或調整隊伍組成。"); return; }
+}
 const song = {id:"leaderpick", title:"指定隊長最佳隊伍（不指定歌曲，從全部卡片挑選）", performer:"", duration:200, exLevel:null};
 const result = scoreTeam(fixedCards, leaderId, song);
 renderResult(result, song, "resultAreaLeaderPick", true);
@@ -4229,7 +4281,7 @@ const sourceLabel = src==="practice" ? "② 隊伍養成分析（依現有角色
 
 document.getElementById("roiResult").style.display="block";
 
-const leaderCard = current.team.find(m=>m.card.id===current.leaderId).card;
+const leaderCard = getLeaderCardOf(current);
 const condRows = current.conditionReport.map(r=>`
 <tr>
 <td>${r.isLeader?"👑 ":""}${r.card.holomem}<br><span class="small">${r.card.name}</span></td>
