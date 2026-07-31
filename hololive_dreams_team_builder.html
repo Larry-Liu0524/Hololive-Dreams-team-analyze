@@ -60,6 +60,8 @@ th{color:var(--sub);font-weight:600;position:sticky;top:0;background:var(--panel
 .timeline-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
 .timeline-row .who{width:170px;font-size:11.5px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .timeline-track{position:relative;flex:1;height:20px;background:var(--panel2);border-radius:4px;overflow:hidden;}
+.timeline-track.ruler{overflow:visible;background:none;border-bottom:1px solid var(--border);height:14px;}
+.timeline-track.ruler span{font-size:10px;color:var(--sub);font-variant-numeric:tabular-nums;}
 .seg{position:absolute;top:0;height:100%;opacity:.85;border-radius:3px;}
 .seg.active{background:var(--accent2);}
 .seg.special{background:var(--accent);}
@@ -133,7 +135,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <div class="tab" id="tab-practice">
 <div class="card">
 <h2>Step 0 · 選擇隊長（依現有角色，不指定歌曲）</h2>
-<p class="small">這一頁<b>不綁定任何特定歌曲</b>，系統會直接依你在①勾選的持有角色，找出技能節奏彼此重疊最少、空檔最少的隊伍。原因：短歌曲常常會把主動技能「攔腰截斷」——例如 Interval 29 秒的技能，在一首 24 秒的短歌裡根本來不及發動，導致覆蓋率分數看起來很差，但那其實是歌曲太短，不代表這隊搭配不好。這頁改用系統內部一個較長的評估區間，讓每張卡的主動技／必殺技都能跑完好幾輪週期，這樣才看得出這隊技能彼此的「間隔／重疊／空檔」本質上合不合，適合先在這裡練出一隊技能節奏鬆一點、重疊低的隊伍。</p>
+<p class="small">這一頁<b>不綁定任何特定歌曲</b>，系統會直接依你在①勾選的持有角色，找出技能節奏彼此重疊最少、空檔最少的隊伍。原因：短歌曲常常會把主動技能「攔腰截斷」——例如 Interval 29 秒的技能，在一首 24 秒的短歌裡根本來不及發動，導致覆蓋率分數看起來很差，但那其實是歌曲太短，不代表這隊搭配不好。這頁改用系統內部一個較長的評估區間，讓每張卡的主動技／SP技能都能跑完好幾輪週期，這樣才看得出這隊技能彼此的「間隔／重疊／空檔」本質上合不合，適合先在這裡練出一隊技能節奏鬆一點、重疊低的隊伍。</p>
 <div class="grid cols2">
 <div>
 <label class="small">Leader（必須為持有角色）</label>
@@ -237,9 +239,9 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <li><b>Member Passive（25%）</b>：逐一檢查每位隊員的被動技能觸發條件是否成立（PASS/FAIL）。</li>
 <li><b>Type / Generation 檢查</b>：於「條件報告」表格中列出每位隊員的 Type、Generation 是否與隊上其他成員形成有效搭配（同屬性/期別≥2）。</li>
 <li><b>Active Skill Timeline（併入 Timeline 20%）</b>：以「首次觸發＝Interval秒，之後每隔 Interval 秒觸發一次，每次持續 Duration 秒」的確定性模型建立時間軸（例：Interval23秒/Duration8秒 → 23–31、46–54、69–77…）。＊本遊戲 Active 技能實際帶有機率（低/中/高機率），非 100% 必發；本模型以「高機率視為近似必發」簡化計算，實際遊戲表現會有隨機浮動，請將本工具的時間軸視為「理論上限」而非保證值。</li>
-<li><b>Skill Coverage（10%）</b>：同類型的 Active「Score Up」效果不可疊加，因此 Overlap（重疊/浪費）只計算<b>主動技彼此</b>同時生效的時間佔比；必殺技（Special）與主動技是不同機制、會疊加，兩者重疊不算浪費。Coverage（至少1個技能生效的時間佔比）、Idle（完全沒有技能生效的時間佔比）則涵蓋所有技能種類。Timeline 分數＝Coverage%；Coverage 分數＝Coverage% − Overlap%（此處 Overlap 僅指主動技彼此重疊）。</li>
+<li><b>Skill Coverage（10%）</b>：同類型的 Active「Score Up」效果不可疊加，因此 Overlap（重疊/浪費）只計算<b>主動技彼此</b>同時生效的時間佔比；SP技能（Special）與主動技是不同機制、會疊加，兩者重疊不算浪費。Coverage（至少1個技能生效的時間佔比）、Idle（完全沒有技能生效的時間佔比）則涵蓋所有技能種類。Timeline 分數＝Coverage%；Coverage 分數＝Coverage% − Overlap%（此處 Overlap 僅指主動技彼此重疊）。</li>
 <li><b>Song Length</b>：所有時間軸與覆蓋率皆依你選擇的歌曲實際秒數重新計算（資料庫含 168 首歌曲秒數，來源 Game8）。</li>
-<li><b>Special Skill Order（不列入本工具加權，僅供參考）</b>：Special 技能每首歌只發動一次，依隊伍站位由左到右依序輪流發動（站位1最早、站位5最晚），彼此之間<b>不能重疊</b>（同時間只有1個必殺技生效），但可以自由跟 Active 疊加。部分 Special 帶有額外加成條件（解析自技能說明文字，例如「40コンボ以上でスコアが120%UP」「ライフ1000以上でスキル発動率が55%UP」）：需要<b>連段(コンボ)</b>門檻的應放越右邊（越晚發動，連段數才夠）；需要<b>生命值(ライフ)</b>門檻的應放越左邊（越早發動，生命值還沒被扣掉太多）；沒有特殊條件的則依「スコアサポート效果%」數值由小到大排，數值越高越晚發動，可疊加在音樂遊戲後段通常較高的連段分數倍率上。這個排序邏輯對<b>實際遊戲分數</b>有實質影響，但因為本工具沒有逐拍模擬連段成長，所以<b>不會反映在 Overall Score</b>裡，僅作為站位建議呈現。</li>
+<li><b>Special Skill Order（不列入本工具加權，僅供參考）</b>：Special 技能每首歌只發動一次，依隊伍站位由左到右依序輪流發動（站位1最早、站位5最晚），彼此之間<b>不能重疊</b>（同時間只有1個SP技能生效），但可以自由跟 Active 疊加。部分 Special 帶有額外加成條件（解析自技能說明文字，例如「40コンボ以上でスコアが120%UP」「ライフ1000以上でスキル発動率が55%UP」）：需要<b>連段(コンボ)</b>門檻的應放越右邊（越晚發動，連段數才夠）；需要<b>生命值(ライフ)</b>門檻的應放越左邊（越早發動，生命值還沒被扣掉太多）；沒有特殊條件的則依「スコアサポート效果%」數值由小到大排，數值越高越晚發動，可疊加在音樂遊戲後段通常較高的連段分數倍率上。這個排序邏輯對<b>實際遊戲分數</b>有實質影響，但因為本工具沒有逐拍模擬連段成長，所以<b>不會反映在 Overall Score</b>裡，僅作為站位建議呈現。</li>
 <li><b>Connect / Board（不列入加權，僅供參考）</b>：本遊戲的 Connect 實際機制是「此卡放置於某 Holomem 技能板的 Connect 格時，提升該技能板效果 X%」，並非同隊成員間的加成；Board 加成因人而異，依玩家板面投資進度不同。這兩項對整隊評分的實際影響難以量化，故不列入 Overall Score 加權計算，只在分析結果中列出原始數值供參考。</li>
 <li><b>Overall Score</b>：以上各項依 Leader Outfit 30 / Passive 25 / Timeline 20 / Coverage 10 加權（原始權重總和85%，已等比例正規化為100%）。Special Skill Order／Connect／Board 皆不計入。</li>
 </ol>
@@ -3216,7 +3218,7 @@ const GEN_LABELS = {"0":"0期生","1":"1期生","2":"2期生","3":"3期生","4":
 const GEN_ORDER = ["0","1","2","3","4","5","gamers","holox","myth","promise","regloss","advent","id1","id2","id3"];
 const TYPES = ["Happy","Cute","Pure"];
 const TEAM_SIZE = 5; // 依 Game8/Gamerch：1隊 = 5張卡，其中1張為Leader（AppMedia最強編成頁確認）
-const WEIGHTS = {leader:30,passive:25,timeline:20,coverage:10}; // 必殺技出場順序不列入加權(順序不影響真實分數,只影響誰先誰後上場)；Connect/Board 也不列入加權評分，僅在①分頁與資料庫中作為參考資訊
+const WEIGHTS = {leader:30,passive:25,timeline:20,coverage:10}; // SP技能出場順序不列入加權(順序不影響真實分數,只影響誰先誰後上場)；Connect/Board 也不列入加權評分，僅在①分頁與資料庫中作為參考資訊
 const WEIGHT_SUM = Object.values(WEIGHTS).reduce((a,b)=>a+b,0); // 90 -> normalize
 
 /* ================= STORAGE ================= */
@@ -3333,7 +3335,7 @@ if(e.kind==="active") activeCnt++;
 });
 if(cnt>=1) covered+=STEP;
 // 重疊(浪費)只計算「主動技彼此」同時生效的情況：同類型 Score Up 效果不可疊加，才算浪費。
-// 必殺技(Special)與主動技(Active)是不同機制，會疊加，故必殺技與主動技重疊不算浪費。
+// SP技能(Special)與主動技(Active)是不同機制，會疊加，故SP技能與主動技重疊不算浪費。
 if(activeCnt>=2) overlapT+=STEP;
 }
 const coverage = Math.min(100, covered/songLen*100);
@@ -3342,7 +3344,7 @@ const idle = Math.max(0, 100-coverage);
 return {coverage,overlap,idle};
 }
 
-// 從必殺技說明文字中解析出「額外加成觸發條件」：連段(コンボ)門檻 或 生命值(ライフ)門檻。
+// 從SP技能說明文字中解析出「額外加成觸發條件」：連段(コンボ)門檻 或 生命值(ライフ)門檻。
 // 目前資料庫沒有另外的結構化欄位存這個條件，但文字說明裡已經有(例如「40コンボ以上でスコアが120%UP」「ライフ1000以上でスキル発動率が55%UP」)，直接解析即可，不需要逐卡手動再標一次。
 function parseSpecialCondition(special){
 if(!special || !special.desc) return {type:null, threshold:0};
@@ -3355,12 +3357,12 @@ return {type:null, threshold:0};
 }
 
 function bestSpecialOrder(team,songLen){
-// 必殺技是依隊伍站位「由左到右」依序輪流發動，不是隨機、站位也不能任意互換視為等價：
+// SP技能是依隊伍站位「由左到右」依序輪流發動，不是隨機、站位也不能任意互換視為等價：
 // 站位1永遠最早發動(這時候連段數還很低、生命值通常還很高)，站位5永遠最晚發動(這時候連段數通常已經累積得比較高)。
 // 因此排序規則：
-// 1) 需要「生命值(ライフ)達到門檻」才吃到額外加成的必殺技 → 放越左邊越好(越早發動，生命值還沒被扣掉太多)。
-// 2) 需要「連段(コンボ)達到門檻」才吃到額外加成的必殺技 → 放越右邊越好(越晚發動，連段數才夠，門檻越高的越要排在更右邊)。
-// 3) 沒有這類特殊條件的必殺技：音樂遊戲普遍是連段越高、每個note的分數倍率越高，所以「スコアサポート效果%」數值越高的必殺技也應該盡量放越右邊，讓它疊加在後段已經比較高的連段倍率上，換到的實際加分效果更大。
+// 1) 需要「生命值(ライフ)達到門檻」才吃到額外加成的SP技能 → 放越左邊越好(越早發動，生命值還沒被扣掉太多)。
+// 2) 需要「連段(コンボ)達到門檻」才吃到額外加成的SP技能 → 放越右邊越好(越晚發動，連段數才夠，門檻越高的越要排在更右邊)。
+// 3) 沒有這類特殊條件的SP技能：音樂遊戲普遍是連段越高、每個note的分數倍率越高，所以「スコアサポート效果%」數值越高的SP技能也應該盡量放越右邊，讓它疊加在後段已經比較高的連段倍率上，換到的實際加分效果更大。
 function priority(card){
 const cond = parseSpecialCondition(card.special);
 const value = (card.special && typeof card.special.value==="number") ? card.special.value : 0;
@@ -3408,7 +3410,7 @@ passiveDetails.push({name:c.name,ok:null,desc:"資料缺"});
 });
 const passiveScore = passiveKnownCount>0 ? (passiveOkCount/passiveKnownCount*100) : 0;
 
-// 3/5/6. timeline / coverage；必殺技站位順序（由左到右依序發動）依連段/生命值門檻與數值高低排出，
+// 3/5/6. timeline / coverage；SP技能站位順序（由左到右依序發動）依連段/生命值門檻與數值高低排出，
 // 對實際遊戲分數有影響，但本工具沒有逐拍模擬連段成長，所以這裡算出的 Coverage/Overlap/Idle 不會因此改變，
 // 站位順序本身不計入 Overall Score，只作為參考建議。
 const {order, specialEfficiency} = bestSpecialOrder(team, song.duration);
@@ -3745,6 +3747,27 @@ slotsLeaderPick.appendChild(wrap);
 }
 }
 
+// 時間軸下方的秒數刻度：歌曲越長，刻度間隔跟著放寬，避免太密看不清楚，但都維持 15 的倍數方便對照。
+function pickTimelineStep(songDuration){
+if(songDuration<=60) return 15;
+if(songDuration<=150) return 30;
+return 60;
+}
+function buildTimelineRulerHtml(songDuration){
+const step = pickTimelineStep(songDuration);
+const marks=[];
+for(let t=0; t<songDuration; t+=step){ marks.push(Math.round(t)); }
+marks.push(Math.round(songDuration));
+const ticks = marks.map(t=>{
+const pct = songDuration>0 ? (t/songDuration*100) : 0;
+let transform = "translateX(-50%)";
+if(pct<=0.5) transform = "translateX(0%)";
+else if(pct>=99.5) transform = "translateX(-100%)";
+return `<span style="position:absolute;left:${pct}%;transform:${transform};top:0;">${t}s</span>`;
+}).join("");
+return `<div class="timeline-row"><div class="who small">時間刻度</div><div class="timeline-track ruler">${ticks}</div></div>`;
+}
+
 function renderResult(result, song, targetId, highlightOwned){
 const el = document.getElementById(targetId||"resultArea");
 const leaderCard = result.team.find(m=>m.card.id===result.leaderId).card;
@@ -3774,9 +3797,10 @@ const orderChips = result.order.map(id=>{
 const c=cardById(id);
 const cond = parseSpecialCondition(c.special);
 let reason = "";
+// SP技能一定會發動（不像主動技有機率），所以沒有連段/生命值門檻的卡片不需要特別標記數值——
+// 只在真的有「連段X+」或「生命Y+」這種會影響排序的條件時才顯示標籤，其餘卡片就只顯示名字。
 if(cond.type==="combo") reason = `連段${cond.threshold}+`;
 else if(cond.type==="life") reason = `生命${cond.threshold}+`;
-else if(c.special && typeof c.special.value==="number") reason = `數值${c.special.value}%`;
 return `<div class="order-chip ${id===result.leaderId?'leader':''}">${c.holomem}${id===result.leaderId?' 👑':''}${reason?`<br><span class="small">${reason}</span>`:""}</div>`;
 }).join("");
 
@@ -3787,7 +3811,7 @@ el.innerHTML = `
 <div class="overall-score">${result.overall.toFixed(1)} <span style="font-size:14px;color:var(--sub);">/ 100</span></div>
 </div>
 ${banner}
-<h3>總分組成（各項權重已正規化，原始總和${WEIGHT_SUM}% → 100%；必殺技出場順序／連結／面板不列入本工具加權，僅供參考）</h3>
+<h3>總分組成（各項權重已正規化，原始總和${WEIGHT_SUM}% → 100%；SP技能出場順序／連結／面板不列入本工具加權，僅供參考）</h3>
 ${scoreBar("隊長服裝",WEIGHTS.leader,result.leaderScore)}
 ${scoreBar("隊員被動",WEIGHTS.passive,result.passiveScore)}
 ${scoreBar("時間軸覆蓋率",WEIGHTS.timeline,result.timelineScore)}
@@ -3798,19 +3822,19 @@ ${scoreBar("覆蓋效率（扣除重疊）",WEIGHTS.coverage,result.coverageScor
 <table><thead><tr><th>隊員</th>${highlightOwned? "<th>持有狀態</th>":""}<th>隊長服裝</th><th>被動</th><th>屬性搭配</th><th>期別搭配</th></tr></thead>
 <tbody>${condRows}</tbody></table>
 
-<h3>建議站位順序（必殺技依隊伍站位由左到右依序輪流發動，站位1最早發動、站位5最晚）</h3>
+<h3>建議站位順序（SP技能依隊伍站位由左到右依序輪流發動，站位1最早發動、站位5最晚）</h3>
 <div class="order-list">${orderChips}</div>
-<p class="small">＊排序規則：需要<b>生命值(ライフ)達到門檻</b>才吃到額外加成的必殺技放最左邊（越早發動，生命值還沒被扣掉太多）；需要<b>連段(コンボ)達到門檻</b>才吃到額外加成的放最右邊（越晚發動，連段數才夠，門檻越高排越右）；沒有這類條件的則依「スコアサポート效果%」數值由小到大排，數值越高越晚發動，可以疊加在音樂遊戲後段通常已經比較高的連段分數倍率上。這個排序<b>不會反映在本工具的 Overall Score</b>裡（因為沒有逐拍模擬連段成長），但對實際遊戲分數有實質影響，請照這個順序安排站位。</p>
+<p class="small">＊排序規則：需要<b>生命值(ライフ)達到門檻</b>才吃到額外加成的SP技能放最左邊（越早發動，生命值還沒被扣掉太多）；需要<b>連段(コンボ)達到門檻</b>才吃到額外加成的放最右邊（越晚發動，連段數才夠，門檻越高排越右）；沒有這類條件的則依「スコアサポート效果%」數值由小到大排，數值越高越晚發動，可以疊加在音樂遊戲後段通常已經比較高的連段分數倍率上。這個排序<b>不會反映在本工具的 Overall Score</b>裡（因為沒有逐拍模擬連段成長），但對實際遊戲分數有實質影響，請照這個順序安排站位。</p>
 
-<h3>主動技／必殺技時間軸</h3>
+<h3>主動技／SP技能時間軸</h3>
 <div class="metric-row">
 <div class="metric-box"><div class="num">${result.coverage.toFixed(1)}%</div><div class="lbl">覆蓋率</div></div>
 <div class="metric-box"><div class="num">${result.overlap.toFixed(1)}%</div><div class="lbl">重疊（浪費）</div></div>
 <div class="metric-box"><div class="num">${result.idle.toFixed(1)}%</div><div class="lbl">空檔</div></div>
 </div>
-<div class="legend"><span><i style="background:var(--accent2)"></i>主動技</span><span><i style="background:var(--accent)"></i>必殺技</span></div>
-<div class="timeline-wrap">${timelineRows}</div>
-<p class="small">＊「重疊（浪費）」只計算<b>主動技彼此</b>同時生效的時間（同類型 Score Up 效果不可疊加）；必殺技與主動技是不同機制，會疊加，兩者重疊不算浪費、也不影響必殺技的站位順序。</p>
+<div class="legend"><span><i style="background:var(--accent2)"></i>主動技</span><span><i style="background:var(--accent)"></i>SP技能</span></div>
+<div class="timeline-wrap">${buildTimelineRulerHtml(song.duration)}${timelineRows}</div>
+<p class="small">＊「重疊（浪費）」只計算<b>主動技彼此</b>同時生效的時間（同類型 Score Up 效果不可疊加）；SP技能與主動技是不同機制，會疊加，兩者重疊不算浪費、也不影響SP技能的站位順序。</p>
 <p class="small">＊沒有時間軸資料的卡片（主動技資料為 unknown）不會顯示色塊，代表該卡目前無法納入時間軸計算，僅其服裝/被動/隊長效果仍計入評分。</p>
 </div>
 `;
@@ -3827,7 +3851,7 @@ return `<div class="score-bar-row"><div class="label">${label}（${weight}%）</
 
 /* ================= PRACTICE (no song length) ================= */
 function getPracticeSong(){
-// 不需使用者輸入：內部固定用一個較長的評估區間，讓每張卡的主動技/必殺技都能跑完好幾輪週期，
+// 不需使用者輸入：內部固定用一個較長的評估區間，讓每張卡的主動技/SP技能都能跑完好幾輪週期，
 // 這樣才能純粹看出隊伍技能節奏彼此合不合，不受任何特定歌曲秒數影響。
 const PRACTICE_DURATION = 200;
 return {id:"practice", title:"隊伍養成分析（依現有角色，不指定歌曲）", performer:"", duration: PRACTICE_DURATION, exLevel:null};
