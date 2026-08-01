@@ -156,7 +156,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <button class="btn secondary small" onclick="rosterSelectAll(false)">清空</button>
 </div>
 </div>
-<p class="small">勾選你目前持有的卡片。同一位 Holomem 若持有多張卡（例如常駐款＋泳裝款），可以全部勾選——分析時系統會自動確保同一 Holomem 不會同時上場。「Board加成%」為你自己在該卡 Holomem Board 已投資解鎖的效果加成（依你帳號實際進度手動輸入，遊戲未公開統一數值，故無法自動抓取）。</p>
+<p class="small">勾選你目前持有的卡片。同一位 Holomem 若持有多張卡（例如常駐款＋泳裝款），可以全部勾選——分析時系統會自動確保同一 Holomem 不會同時上場。</p>
 <input type="search" class="searchbar" placeholder="搜尋角色 / Holomem / 期別..." id="rosterSearch" oninput="renderRoster()">
 <div class="roster-list" id="rosterList"></div>
 </div>
@@ -318,11 +318,11 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <li><b>Skill Coverage（10%）</b>：同類型的 Active「Score Up」效果不可疊加，因此 Overlap（重疊/浪費）只計算<b>主動技彼此</b>同時生效的時間佔比；SP技能（Special）與主動技是不同機制、會疊加，兩者重疊不算浪費。Coverage（至少1個技能生效的時間佔比）、Idle（完全沒有技能生效的時間佔比）則涵蓋所有技能種類。Timeline 分數＝Coverage%；Coverage 分數＝Coverage% − Overlap%（此處 Overlap 僅指主動技彼此重疊）。</li>
 <li><b>Song Length</b>：所有時間軸與覆蓋率皆依你選擇的歌曲實際秒數重新計算（資料庫含 168 首歌曲秒數，來源 Game8）。</li>
 <li><b>Special Skill Order（SP技能站位順序，不列入本工具加權，僅供參考）</b>：SP技能每首歌只發動一次，依隊伍站位由左到右依序輪流發動（站位1最早、站位5最晚），彼此之間<b>不能重疊</b>（同時間只有1個SP技能生效），但可以自由跟主動技疊加。部分SP技能帶有額外加成條件（解析自技能說明文字，例如「40コンボ以上でスコアが120%UP」「ライフ1000以上でスキル発動率が55%UP」）：需要<b>連段(コンボ)</b>門檻的應放越右邊（越晚發動，連段數才夠）；需要<b>生命值(ライフ)</b>門檻的應放越左邊（越早發動，生命值還沒被扣掉太多）；沒有特殊條件的則依「スコアサポート效果%」數值由小到大排，數值越高越晚發動，可疊加在音樂遊戲後段通常較高的連段分數倍率上（此數值僅用於內部排序，不會顯示在站位建議的卡片標籤上）。這個排序邏輯對<b>實際遊戲分數</b>有實質影響，但因為本工具沒有逐拍模擬連段成長，所以<b>不會反映在 Overall Score</b>裡，僅作為站位建議呈現。</li>
-<li><b>Connect / Board（不列入加權，僅供參考）</b>：本遊戲的 Connect 實際機制是「此卡放置於某 Holomem 技能板的 Connect 格時，提升該技能板效果 X%」，並非同隊成員間的加成；Board 加成因人而異，依玩家板面投資進度不同。這兩項對整隊評分的實際影響難以量化，故不列入 Overall Score 加權計算，只在分析結果中列出原始數值供參考。</li>
-<li><b>Overall Score</b>：以上各項依 Leader Outfit 30 / Passive 25 / Timeline 20 / Coverage 10 加權（原始權重總和85%，已等比例正規化為100%）。Special Skill Order／Connect／Board 皆不計入。</li>
+<li><b>Connect（不列入加權，僅供參考）</b>：本遊戲的 Connect 實際機制是「此卡放置於某 Holomem 技能板的 Connect 格時，提升該技能板效果 X%」，並非同隊成員間的加成。這項對整隊評分的實際影響難以量化，故不列入 Overall Score 加權計算，只在分析結果中列出原始數值供參考。（原本還有「Board 加成%」項目，因為需要玩家手動輸入每張卡的板面投資進度、太麻煩且無法自動抓取，已整個移除。）</li>
+<li><b>Overall Score</b>：以上各項依 Leader Outfit 30 / Passive 25 / Timeline 20 / Coverage 10 加權（原始權重總和85%，已等比例正規化為100%）。Special Skill Order／Connect 皆不計入。</li>
 </ol>
 <h3>已知資料限制</h3>
-<p class="small">目前遊戲（2026/7/23 上線）wiki 資料仍在補齊中：(1) 內建資料庫已收錄 <b>59 張卡</b>——54 位 Holomem 各自的主力 5★卡（來自 AppMedia／Game8 星5一覧），加上 5 張最新追加的水著限定 5★卡（白銀ノエル／大空スバル／不知火フレア／角巻わため／音乃瀬奏），<b>全部 59 張都已取得完整的 Active/Passive/Special/Outfit/Connect/Stats/Type/Generation 數值</b>（AppMedia 有 19 張把技能表渲染成圖片抓不到文字，已改用 Game8 的純文字版頁面補齊，未用假數字填補）；(2) 完整遊戲每位角色通常還有第2、第3張卡（We are hololive!基礎款等），尚未全部收錄，可在「⑥ 資料庫編輯」分頁持續新增；(3) Active 技能的精確發動機率（%）目前沒有任何公開 wiki 揭露確切數字，僅有「低/中/高機率」的質化描述；(4) 歌曲 BPM 目前無公開資料；(5) Holomem Board 逐格效果未逐一列出，改由你在①分頁手動輸入目前的加成%。所有假設與資料缺口都會在介面上明確標示，不會用虛構數字掩蓋。</p>
+<p class="small">目前遊戲（2026/7/23 上線）wiki 資料仍在補齊中：(1) 內建資料庫已收錄 <b>59 張卡</b>——54 位 Holomem 各自的主力 5★卡（來自 AppMedia／Game8 星5一覧），加上 5 張最新追加的水著限定 5★卡（白銀ノエル／大空スバル／不知火フレア／角巻わため／音乃瀬奏），<b>全部 59 張都已取得完整的 Active/Passive/Special/Outfit/Connect/Stats/Type/Generation 數值</b>（AppMedia 有 19 張把技能表渲染成圖片抓不到文字，已改用 Game8 的純文字版頁面補齊，未用假數字填補）；(2) 完整遊戲每位角色通常還有第2、第3張卡（We are hololive!基礎款等），尚未全部收錄，可在「⑥ 資料庫編輯」分頁持續新增；(3) Active 技能的精確發動機率（%）目前沒有任何公開 wiki 揭露確切數字，僅有「低/中/高機率」的質化描述；(4) 歌曲 BPM 與逐秒 note 密度（例如副歌段落是否比其他段落更密集）目前沒有任何公開資料來源——這代表「覆蓋率」只衡量技能生效的<b>時間長度</b>，同樣長度的生效時間蓋在 note 密集的段落還是稀疏的段落，實際換算到的分數可能差很多，本工具目前無法納入這個差異，覆蓋率請理解成「技能彼此設計上合不合、有沒有互相卡到」的參考指標，而不是實際分數的保證值。所有假設與資料缺口都會在介面上明確標示，不會用虛構數字掩蓋。</p>
 </div>
 </div>
 
@@ -3313,7 +3313,7 @@ function holomemEn(name){ return HOLOMEM_EN[name] || ""; }
 const GEN_ORDER = ["0","1","2","3","4","5","gamers","holox","myth","promise","regloss","advent","id1","id2","id3"];
 const TYPES = ["Happy","Cute","Pure"];
 const TEAM_SIZE = 5; // 依 Game8/Gamerch：1隊 = 5張卡，其中1張為Leader（AppMedia最強編成頁確認）
-const WEIGHTS = {leader:30,passive:25,timeline:20,coverage:10}; // SP技能出場順序不列入加權(順序不影響真實分數,只影響誰先誰後上場)；Connect/Board 也不列入加權評分，僅在①分頁與資料庫中作為參考資訊
+const WEIGHTS = {leader:30,passive:25,timeline:20,coverage:10}; // SP技能出場順序不列入加權(順序不影響真實分數,只影響誰先誰後上場)；Connect 也不列入加權評分，僅供參考資訊
 const WEIGHT_SUM = Object.values(WEIGHTS).reduce((a,b)=>a+b,0); // 90 -> normalize
 
 /* ================= STORAGE ================= */
@@ -3325,8 +3325,6 @@ return JSON.parse(JSON.stringify(DEFAULT_CARDS));
 function saveCards(cards){ localStorage.setItem("hd_cards", JSON.stringify(cards)); }
 function loadOwned(){ try{ return JSON.parse(localStorage.getItem("hd_owned")||"{}"); }catch(e){ return {}; } }
 function saveOwned(o){ localStorage.setItem("hd_owned", JSON.stringify(o)); }
-function loadBoard(){ try{ return JSON.parse(localStorage.getItem("hd_board")||"{}"); }catch(e){ return {}; } }
-function saveBoard(b){ localStorage.setItem("hd_board", JSON.stringify(b)); }
 // ②③最後一次分析結果：自動存最新一次，重新整理頁面不會遺失；使用者也可以另外「另存為」具名快照長期保留、比較。
 function loadTeamResults(){ try{ return JSON.parse(localStorage.getItem("hd_team_results")||"null") || { practice: null, leaderpick: null }; }catch(e){ return { practice: null, leaderpick: null }; } }
 function saveTeamResultsToStorage(){ localStorage.setItem("hd_team_results", JSON.stringify(TEAM_RESULTS)); }
@@ -3335,7 +3333,6 @@ function saveSavedTeamsToStorage(){ localStorage.setItem("hd_saved_teams", JSON.
 
 let CARDS = loadCards();
 let OWNED = loadOwned(); // {cardId:true}
-let BOARD = loadBoard(); // {cardId: percent}
 
 // ROI（④）的計算基準：直接沿用②「隊伍養成分析」或③「指定隊長找最佳隊伍」最後一次算出的隊伍結果，
 // 而不是自己在④裡另外重新搜尋一次。②和③問的問題本質不同，所以分開存、分開處理：
@@ -3582,12 +3579,9 @@ const timelineScore = coverage;
 const coverageScore = Math.max(0, coverage-overlap);
 const specialScore = specialEfficiency; // 參考資訊，不計入總分
 
-// Connect / Board：保留原始數值做為參考資訊，但不列入 Overall Score 加權
+// Connect：保留原始數值做為參考資訊，但不列入 Overall Score 加權
 const connectVals = team.map(m=>m.card.connect?m.card.connect.value:0).filter(v=>v>0);
 const connectScore = connectVals.length? Math.min(100, (connectVals.reduce((a,b)=>a+b,0)/connectVals.length)/2) : 0;
-
-const boardVals = team.map(m=> BOARD[m.card.id]||0);
-const boardScore = Math.min(100, (boardVals.reduce((a,b)=>a+b,0)/team.length));
 
 const overallRaw = leaderScore*WEIGHTS.leader + passiveScore*WEIGHTS.passive + timelineScore*WEIGHTS.timeline +
 coverageScore*WEIGHTS.coverage;
@@ -3598,7 +3592,7 @@ team, leaderId, leaderCard, leaderDeployed, counts, leaderPass, leaderScore, lea
 passiveScore, passiveDetails,
 timelineScore, coverageScore, coverage, overlap, idle,
 specialScore, order, events,
-connectScore, boardScore, overall,
+connectScore, overall,
 conditionReport: conditionReport(team, leaderCard, counts)
 };
 }
@@ -3824,8 +3818,6 @@ row.onclick = (e)=>rowClicked(e, c.id);
 row.innerHTML = `
 <input type="checkbox" id="chk_${c.id}" ${OWNED[c.id]?"checked":""} onchange="toggleOwned('${c.id}',this.checked)">
 <span class="name"><b>${c.holomem}</b><span class="tag"> ${holomemEn(c.holomem)}</span> — ${c.name} <span class="tag">${c.type!=="unknown"?"["+c.type+"]":""}${c.extraGenCodes&&c.extraGenCodes.length?' <span class="pill y" title="'+(c.extraGenNote||'')+'">兼'+c.extraGenCodes.map(code=>GEN_LABELS[code]||code).join("/")+'</span>':""}</span></span>
-<span class="small">Board加成%</span>
-<input type="number" value="${BOARD[c.id]||0}" min="0" max="300" onchange="setBoard('${c.id}',this.value)" onclick="event.stopPropagation()">
 `;
 group.appendChild(row);
 });
@@ -3840,7 +3832,6 @@ cb.checked = !cb.checked;
 toggleOwned(cardId, cb.checked);
 }
 function toggleOwned(id,val){ OWNED[id]=val; saveOwned(OWNED); updateDbStat(); populateSelectors(); }
-function setBoard(id,val){ BOARD[id]=parseFloat(val)||0; saveBoard(BOARD); }
 function rosterSelectAll(val){ CARDS.forEach(c=>OWNED[c.id]=val); saveOwned(OWNED); renderRoster(); updateDbStat(); populateSelectors(); }
 
 // 把一批卡片依期生(Generation)分組，輸出成 <optgroup> 包住的 <option>，
@@ -3987,12 +3978,12 @@ el.innerHTML = `
 </div>
 <div style="text-align:right;margin:-8px 0 8px;"><button class="btn small" onclick="saveCurrentAsSnapshot('${song.id}')">💾 另存為快照</button></div>
 ${banner}
-<h3>總分組成（各項權重已正規化，原始總和${WEIGHT_SUM}% → 100%；SP技能出場順序／連結／面板不列入本工具加權，僅供參考）</h3>
+<h3>總分組成（各項權重已正規化，原始總和${WEIGHT_SUM}% → 100%；SP技能出場順序／連結不列入本工具加權，僅供參考）</h3>
 ${scoreBar("隊長服裝",WEIGHTS.leader,result.leaderScore)}
 ${scoreBar("隊員被動",WEIGHTS.passive,result.passiveScore)}
 ${scoreBar("時間軸覆蓋率",WEIGHTS.timeline,result.timelineScore)}
 ${scoreBar("覆蓋效率（扣除重疊）",WEIGHTS.coverage,result.coverageScore)}
-<p class="small">參考資訊（不計入總分，本工具未模擬逐拍連段成長）：連結 ${result.connectScore.toFixed(1)} / 100 · 面板 ${result.boardScore.toFixed(1)} / 100</p>
+<p class="small">參考資訊（不計入總分，本工具未模擬逐拍連段成長）：連結 ${result.connectScore.toFixed(1)} / 100</p>
 
 <h3>逐位隊員條件檢查（PASS/FAIL）</h3>
 <table><thead><tr><th>隊員</th>${highlightOwned? "<th>持有狀態</th>":""}<th>隊長服裝</th><th>被動</th><th>屬性搭配</th><th>期別搭配</th></tr></thead>
@@ -4532,12 +4523,12 @@ alert("已儲存卡片："+obj.id);
 function deleteCard(id){
 if(!confirm("確定刪除這張卡片？")) return;
 CARDS = CARDS.filter(c=>c.id!==id);
-delete OWNED[id]; delete BOARD[id];
-saveCards(CARDS); saveOwned(OWNED); saveBoard(BOARD);
+delete OWNED[id];
+saveCards(CARDS); saveOwned(OWNED);
 renderCardTable(); updateDbStat(); renderRoster(); populateSelectors();
 }
 function exportData(){
-const blob = new Blob([JSON.stringify({cards:CARDS, owned:OWNED, board:BOARD},null,2)], {type:"application/json"});
+const blob = new Blob([JSON.stringify({cards:CARDS, owned:OWNED},null,2)], {type:"application/json"});
 const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="hololive_dreams_data.json"; a.click();
 }
 function importData(ev){
@@ -4548,8 +4539,7 @@ try{
 const obj=JSON.parse(reader.result);
 if(obj.cards) CARDS=obj.cards;
 if(obj.owned) OWNED=obj.owned;
-if(obj.board) BOARD=obj.board;
-saveCards(CARDS); saveOwned(OWNED); saveBoard(BOARD);
+saveCards(CARDS); saveOwned(OWNED);
 renderCardTable(); renderRoster(); updateDbStat(); populateSelectors();
 alert("匯入完成");
 }catch(e){ alert("匯入失敗："+e.message); }
