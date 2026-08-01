@@ -3312,7 +3312,7 @@ const HOLOMEM_EN = {
 function holomemEn(name){ return HOLOMEM_EN[name] || ""; }
 const GEN_ORDER = ["0","1","2","3","4","5","gamers","holox","myth","promise","regloss","advent","id1","id2","id3"];
 const TYPES = ["Happy","Cute","Pure"];
-const TEAM_SIZE = 5; // 依 Game8/Gamerch：1隊 = 5張卡，其中1張為Leader（AppMedia最強編成頁確認）
+const TEAM_SIZE = 5; // 依 Game8/Gamerch/horodori.com 確認：上場5個席位是「隊員」，隊長是獨立於這5席之外的第6個角色，只提供隊長服裝buff，可以上場(佔用5席其中1位、自己的主動/被動/SP技能照常觸發)、也可以完全不上場(單純掛buff)
 const WEIGHTS = {leader:30,passive:25,timeline:20,coverage:10}; // SP技能出場順序不列入加權(順序不影響真實分數,只影響誰先誰後上場)；Connect 也不列入加權評分，僅供參考資訊
 const WEIGHT_SUM = Object.values(WEIGHTS).reduce((a,b)=>a+b,0); // 90 -> normalize
 
@@ -3615,24 +3615,21 @@ return res;
 
 function findBestTeamForLeader(leader, pool, song){
 // pool: owned cards excluding leader's holomem, unique holomem only (pick best card per holomem to reduce search)
+// 隊長是獨立於5個上場席位之外的角色，所以要同時試兩種情境並取分數較高者：
+//   (a) 隊長也上場：5席＝隊長＋pool選4位
+//   (b) 隊長不上場、只掛隊長服裝buff：5席全部從pool選（隊長自己的主動/被動/SP不會觸發）
 const byHolomem={};
 pool.forEach(c=>{ if(!byHolomem[c.holomem]) byHolomem[c.holomem]=[]; byHolomem[c.holomem].push(c); });
 const holomemList = Object.keys(byHolomem);
-let candidateSets;
-if(holomemList.length<=9){
-// brute force over holomem choice, and within each holomem try all its cards (usually 1-3)
-candidateSets = combinations(holomemList, Math.min(TEAM_SIZE-1, holomemList.length));
-} else {
-candidateSets = null; // will use greedy
-}
 let best=null, bestScore=-1;
 
-function evalMemberSet(memberHolomems){
-// for each holomem pick the card variant that yields best score (try all, small numbers)
+function evalMemberSet(memberHolomems, leaderDeployed){
 function pickBest(idx, chosen){
 if(idx===memberHolomems.length){
-if(chosen.length < TEAM_SIZE-1) return;
-const r = scoreTeam([leader,...chosen], leader.id, song);
+const neededSize = leaderDeployed ? TEAM_SIZE-1 : TEAM_SIZE;
+if(chosen.length < neededSize) return;
+const teamCards = leaderDeployed ? [leader,...chosen] : chosen;
+const r = scoreTeam(teamCards, leader.id, song);
 if(r.overall>bestScore){ bestScore=r.overall; best=r; }
 return;
 }
@@ -3642,19 +3639,15 @@ variants.forEach(v=>{ chosen.push(v); pickBest(idx+1,chosen); chosen.pop(); });
 pickBest(0,[]);
 }
 
-if(candidateSets){
-candidateSets.forEach(set=>evalMemberSet(set));
-} else {
-// greedy construction then local swap improvement
+function greedyBuild(slotsCount, leaderDeployed){
 let chosenHolomem=[];
 let remaining = holomemList.slice();
-for(let slot=0; slot<TEAM_SIZE-1; slot++){
+for(let slot=0; slot<slotsCount; slot++){
 let bestH=null,bestS=-1,bestCard=null;
 remaining.forEach(h=>{
 byHolomem[h].forEach(v=>{
-const trial=[leader,...chosenHolomem.map(x=>x.card),v];
-if(trial.length<2) return;
-const r=scoreTeam(trial, leader.id, song);
+const trialCards = leaderDeployed ? [leader,...chosenHolomem.map(x=>x.card),v] : [...chosenHolomem.map(x=>x.card),v];
+const r=scoreTeam(trialCards, leader.id, song);
 if(r.overall>bestS){ bestS=r.overall; bestH=h; bestCard=v; }
 });
 });
@@ -3662,24 +3655,40 @@ if(!bestH) break;
 chosenHolomem.push({holomem:bestH,card:bestCard});
 remaining = remaining.filter(h=>h!==bestH);
 }
-// local swap improvement (2 passes)
 for(let pass=0; pass<2; pass++){
 for(let i=0;i<chosenHolomem.length;i++){
-let curScore = scoreTeam([leader,...chosenHolomem.map(x=>x.card)], leader.id, song).overall;
-let improved=false;
+remaining = holomemList.filter(h=>!chosenHolomem.some(x=>x.holomem===h));
+const curCards = leaderDeployed ? [leader,...chosenHolomem.map(x=>x.card)] : chosenHolomem.map(x=>x.card);
+let curScore = scoreTeam(curCards, leader.id, song).overall;
 remaining.forEach(h=>{
 byHolomem[h].forEach(v=>{
 const trial = chosenHolomem.map(x=>x.card); trial[i]=v;
-const r = scoreTeam([leader,...trial], leader.id, song);
-if(r.overall>curScore){ curScore=r.overall; chosenHolomem[i]={holomem:h,card:v}; improved=true; }
+const trialCards = leaderDeployed ? [leader,...trial] : trial;
+const r = scoreTeam(trialCards, leader.id, song);
+if(r.overall>curScore){ curScore=r.overall; chosenHolomem[i]={holomem:h,card:v}; }
 });
 });
-remaining = holomemList.filter(h=>!chosenHolomem.some(x=>x.holomem===h));
 }
 }
-const finalTeam=[leader,...chosenHolomem.map(x=>x.card)];
-best = scoreTeam(finalTeam, leader.id, song);
-bestScore = best.overall;
+const finalCards = leaderDeployed ? [leader,...chosenHolomem.map(x=>x.card)] : chosenHolomem.map(x=>x.card);
+return scoreTeam(finalCards, leader.id, song);
+}
+
+if(holomemList.length<=9){
+// (a) 隊長上場：pool 選 TEAM_SIZE-1 位
+combinations(holomemList, Math.min(TEAM_SIZE-1, holomemList.length)).forEach(set=>evalMemberSet(set, true));
+// (b) 隊長不上場：pool 選 TEAM_SIZE 位（需要pool至少有5個不同holomem才夠選）
+if(holomemList.length>=TEAM_SIZE){
+combinations(holomemList, TEAM_SIZE).forEach(set=>evalMemberSet(set, false));
+}
+} else {
+// 太多候選 Holomem 時改用貪婪法＋局部交換改善，兩種情境都跑一次再比較
+const resA = greedyBuild(TEAM_SIZE-1, true);
+if(resA.overall>bestScore){ bestScore=resA.overall; best=resA; }
+if(holomemList.length>=TEAM_SIZE){
+const resB = greedyBuild(TEAM_SIZE, false);
+if(resB.overall>bestScore){ bestScore=resB.overall; best=resB; }
+}
 }
 return best;
 }
@@ -3698,28 +3707,27 @@ return best;
 
 // 鎖定「已手動指定的卡片」，只針對剩下的空位從 owned 中窮舉／爬山演算法找最佳搭配。
 // fixedCards：已手動選好、要固定上場的卡片（可以是 0～5 張）。
-// forcedLeaderId：可選，若指定且該卡不在 fixedCards 中，會自動補進固定名單裡（Leader一定要上場）。
+// forcedLeaderId：可選；若指定且該卡不在 fixedCards 中，函式內部會同時嘗試「隊長也上場」與「隊長不上場只掛buff」兩種情境，取分數較高者。
 function findBestTeamWithFixed(fixedCards, forcedLeaderId, owned, song){
-let forced = fixedCards.slice();
-// 修BUG：隊長一定要放在陣列最前面再做「超過5張就截斷」的動作。
-// 之前是先把隊長 concat 到陣列「最後面」，如果 fixedCards 剛好已經有5張（例如上一次自動搜尋填滿的欄位，
-// 換了隊長後沒清空），加上隊長會變成6張，slice(0,TEAM_SIZE) 只留前5個，隊長反而被切掉，
-// 後面 scoreTeam 找不到隊長卡就會直接噴例外、畫面卡住沒反應（點按鈕像沒事發生一樣）。
-if(forcedLeaderId && !forced.some(c=>c.id===forcedLeaderId)){
-const leaderCard = cardById(forcedLeaderId);
-if(leaderCard) forced = [leaderCard, ...forced];
+// 隊長是獨立於5個上場席位之外的角色，所以要同時試「隊長上場」與「隊長不上場只掛buff」兩種情境並取分數較高者——
+// 除非使用者已經把隊長那張卡明確放進鎖定欄位裡，這種情況視為使用者明確要隊長上場，只跑上場那個情境。
+const leaderCard = forcedLeaderId ? cardById(forcedLeaderId) : null;
+const leaderAlreadyInFixed = leaderCard && fixedCards.some(c=>c.id===leaderCard.id);
+
+function dedupe(arr){
+const seen=new Set();
+return arr.filter(c=>{ if(seen.has(c.holomem)) return false; seen.add(c.holomem); return true; });
 }
-// 保險：避免同一位 Holomem 被鎖定兩次（隊長已排最前面，同一位 Holomem 重複時會保留隊長那張）
-const seen = new Set();
-forced = forced.filter(c=>{ if(seen.has(c.holomem)) return false; seen.add(c.holomem); return true; });
+
+function searchFillRemaining(forcedRaw, effLeaderId){
+let forced = dedupe(forcedRaw);
 if(forced.length > TEAM_SIZE) forced = forced.slice(0, TEAM_SIZE);
-if(forced.length===0) return null; // 沒有鎖定卡片也沒有指定隊長時，應改用 findBestTeamOverall
-
-const leaderId = forcedLeaderId || forced[0].id;
+if(forced.length===0) return null;
 const remainingSlots = TEAM_SIZE - forced.length;
-if(remainingSlots<=0) return scoreTeam(forced, leaderId, song);
+if(remainingSlots<=0) return scoreTeam(forced, effLeaderId, song);
 
-const pool = owned.filter(c=> !forced.some(f=>f.holomem===c.holomem));
+// 不管隊長這次上不上場，隊長本人的 Holomem 都不能再被其他候選卡佔用（同一位角色不能同時用兩張卡）。
+const pool = owned.filter(c=> !forced.some(f=>f.holomem===c.holomem) && (!leaderCard || c.holomem!==leaderCard.holomem));
 const byHolomem={};
 pool.forEach(c=>{ if(!byHolomem[c.holomem]) byHolomem[c.holomem]=[]; byHolomem[c.holomem].push(c); });
 const holomemList = Object.keys(byHolomem);
@@ -3730,7 +3738,7 @@ function evalMemberSet(memberHolomems){
 function pickBest(idx, chosen){
 if(idx===memberHolomems.length){
 const trial = forced.concat(chosen);
-const r = scoreTeam(trial, leaderId, song);
+const r = scoreTeam(trial, effLeaderId, song);
 if(r.overall>bestScore){ bestScore=r.overall; best=r; }
 return;
 }
@@ -3742,7 +3750,7 @@ pickBest(0,[]);
 if(holomemList.length<=9){
 combinations(holomemList, remainingSlots).forEach(set=>evalMemberSet(set));
 } else {
-// 太多候選 Holomem 時改用貪婪法＋局部交換改善（跟 findBestTeamForLeader 同一套邏輯）
+// 太多候選 Holomem 時改用貪婪法＋局部交換改善
 let chosenHolomem=[];
 let remaining = holomemList.slice();
 for(let slot=0; slot<remainingSlots; slot++){
@@ -3750,7 +3758,7 @@ let bestH=null,bestS=-1,bestCard=null;
 remaining.forEach(h=>{
 byHolomem[h].forEach(v=>{
 const trial = forced.concat(chosenHolomem.map(x=>x.card), [v]);
-const r = scoreTeam(trial, leaderId, song);
+const r = scoreTeam(trial, effLeaderId, song);
 if(r.overall>bestS){ bestS=r.overall; bestH=h; bestCard=v; }
 });
 });
@@ -3760,20 +3768,40 @@ remaining = remaining.filter(h=>h!==bestH);
 }
 for(let pass=0; pass<2; pass++){
 for(let i=0;i<chosenHolomem.length;i++){
-let curScore = scoreTeam(forced.concat(chosenHolomem.map(x=>x.card)), leaderId, song).overall;
+let curScore = scoreTeam(forced.concat(chosenHolomem.map(x=>x.card)), effLeaderId, song).overall;
 remaining = holomemList.filter(h=>!chosenHolomem.some(x=>x.holomem===h));
 remaining.forEach(h=>{
 byHolomem[h].forEach(v=>{
 const trial = chosenHolomem.map(x=>x.card); trial[i]=v;
-const r = scoreTeam(forced.concat(trial), leaderId, song);
+const r = scoreTeam(forced.concat(trial), effLeaderId, song);
 if(r.overall>curScore){ curScore=r.overall; chosenHolomem[i]={holomem:h,card:v}; }
 });
 });
 }
 }
-best = scoreTeam(forced.concat(chosenHolomem.map(x=>x.card)), leaderId, song);
+best = scoreTeam(forced.concat(chosenHolomem.map(x=>x.card)), effLeaderId, song);
 }
 return best;
+}
+
+// 情境 A：隊長上場（使用者已把隊長卡鎖進欄位時，一定屬於這個情境）
+let resA = null;
+if(leaderCard){
+const forcedA = leaderAlreadyInFixed ? fixedCards.slice() : [leaderCard, ...fixedCards];
+resA = searchFillRemaining(forcedA, forcedLeaderId);
+} else if(fixedCards.length>0){
+// 沒有指定隊長：沿用鎖定欄位第一張卡當隊長（維持舊行為）
+resA = searchFillRemaining(fixedCards, fixedCards[0].id);
+}
+
+// 情境 B：隊長不上場、只掛服裝buff（只有「有指定隊長」且「使用者沒把隊長卡鎖進欄位」時才需要試）
+let resB = null;
+if(leaderCard && !leaderAlreadyInFixed){
+resB = searchFillRemaining(fixedCards.slice(), forcedLeaderId);
+}
+
+if(resA && resB) return resA.overall>=resB.overall ? resA : resB;
+return resA || resB;
 }
 
 /* ================= UI ================= */
