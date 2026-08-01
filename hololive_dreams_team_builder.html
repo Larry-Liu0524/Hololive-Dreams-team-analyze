@@ -311,7 +311,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <h2>分析方法論</h2>
 <p>本工具依照以下九步驟流程分析「整隊」（而非單卡）表現，資料來源以 <a href="https://appmedia.jp/hololive-dreams" target="_blank">AppMedia</a>、<a href="https://gamerch.com/hololive-dreams" target="_blank">Gamerch</a>、<a href="https://game8.jp/hololive-dreams" target="_blank">Game8</a> 公開 wiki 為主。</p>
 <ol>
-<li><b>Leader Outfit（權重 30%）</b>：Leader 的衣裝技能（例如「1期生2人以上」）若未啟動，整隊視為不完整，此項得分為 0，並顯示紅色警告。</li>
+<li><b>Leader Outfit（權重 30%）</b>：Leader 的衣裝技能（例如「1期生2人以上」）若未啟動，整隊視為不完整，此項得分為 0，並顯示紅色警告。條件達成時分數<b>不是固定滿分</b>，而是依這件服裝相對於全資料庫最強服裝的「實際強度」按比例給分：交叉比對全部59張5★卡的隊長服裝數值後發現一個很一致的規律——全數值(all)型無條件45%／有條件50%，單一數值(performance/technique/sense)型無條件120%／有條件130%，兩者比例穩定在約2.6倍（120/45≈2.67、130/50=2.6），因此「全數值型」的實際強度＝數值×2.6 再跟其他服裝比較；スコアサポート效果(support)型目前一律以1倍權重計算（暫無足夠交叉數據可精確換算，是簡化假設）。</li>
 <li><b>Member Passive（25%）</b>：逐一檢查每位隊員的被動技能觸發條件是否成立（PASS/FAIL）。</li>
 <li><b>Type / Generation 檢查</b>：於「條件報告」表格中列出每位隊員的 Type、Generation 是否與隊上其他成員形成有效搭配（同屬性/期別≥2）。</li>
 <li><b>Active Skill Timeline（併入 Timeline 20%）</b>：以「首次觸發＝Interval秒，之後每隔 Interval 秒觸發一次，每次持續 Duration 秒」的確定性模型建立時間軸（例：Interval23秒/Duration8秒 → 23–31、46–54、69–77…）。＊本遊戲 Active 技能實際帶有機率（低/中/高機率），非 100% 必發；本模型以「高機率視為近似必發」簡化計算，實際遊戲表現會有隨機浮動，請將本工具的時間軸視為「理論上限」而非保證值。</li>
@@ -327,7 +327,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 </div>
 
 </main>
-<footer>Hololive Dreams Team Builder · 資料來源：AppMedia / Gamerch / Game8（僅供玩家自製攻略工具參考，非官方資料）</footer>
+<footer>Hololive Dreams Team Builder · 資料來源：AppMedia / Gamerch / Game8（僅供玩家自製攻略工具參考，非官方資料）<br>Unofficial fan site; not affiliated with COVER Corp. or QualiArts.</footer>
 
 <script>
 /* ================= DATA: CARDS ================= */
@@ -3291,6 +3291,25 @@ const SONGS = [
 ].map((r,i)=>({id:"song_"+i,title:r[0],performer:r[1],duration:r[2],exLevel:r[3]}));
 
 const GEN_LABELS = {"0":"0期生","1":"1期生","2":"2期生","3":"3期生","4":"4期生","5":"5期生","gamers":"ゲーマーズ","holox":"holoX","promise":"Promise","regloss":"ReGLOSS","advent":"Advent","myth":"Myth","id1":"ID1期生","id2":"ID2期生","id3":"ID3期生"};
+// Holomem 英文（羅馬拼音）名稱對照表，格式參考 Yagoo-dori（另一個玩家自製的 hololive Dreams 攻略網站）。
+// 來源：hololive 官方網站 talents 頁面、Wikipedia、pixiv百科事典 交叉確認。
+const HOLOMEM_EN = {
+  "百鬼あやめ":"Nakiri Ayame","桃鈴ねね":"Momosuzu Nene","獅白ぼたん":"Shishiro Botan","博衣こより":"Hakui Koyori",
+  "パヴォリア・レイネ":"Pavolia Reine","オーロ・クロニー":"Ouro Kronii","AZKi":"AZKi","星街すいせい":"Hoshimachi Suisei",
+  "白上フブキ":"Shirakami Fubuki","夏色まつり":"Natsuiro Matsuri","大空スバル":"Oozora Subaru","大神ミオ":"Ookami Mio",
+  "不知火フレア":"Shiranui Flare","宝鐘マリン":"Houshou Marine","姫森ルーナ":"Himemori Luna","雪花ラミィ":"Yukihana Lamy",
+  "風真いろは":"Kazama Iroha","アイラニ・イオフィフティーン":"Airani Iofifteen","ベスティア・ゼータ":"Vestia Zeta",
+  "森カリオペ":"Mori Calliope","小鳥遊キアラ":"Takanashi Kiara","シオリ・ノヴェラ":"Shiori Novella","モココ・アビスガード":"Mococo Abyssgard",
+  "音乃瀬奏":"Otonose Kanade","一条莉々華":"Ichijou Ririka","儒烏風亭らでん":"Juufuutei Raden","轟はじめ":"Todoroki Hajime",
+  "ときのそら":"Tokino Sora","ロボ子さん":"Roboco","さくらみこ":"Sakura Miko","アキ・ローゼンタール":"Aki Rosenthal",
+  "赤井はあと":"Akai Haato","癒月ちょこ":"Yuzuki Choco","猫又おかゆ":"Nekomata Okayu","戌神ころね":"Inugami Korone",
+  "兎田ぺこら":"Usada Pekora","白銀ノエル":"Shirogane Noel","角巻わため":"Tsunomaki Watame","常闇トワ":"Tokoyami Towa",
+  "尾丸ポルカ":"Omaru Polka","ラプラス・ダークネス":"La+ Darknesss","鷹嶺ルイ":"Takane Lui","アユンダ・リス":"Ayunda Risu",
+  "ムーナ・ホシノヴァ":"Moona Hoshinova","クレイジー・オリー":"Kureiji Ollie","アーニャ・メルフィッサ":"Anya Melfissa",
+  "カエラ・コヴァルスキア":"Kaela Kovalskia","こぼ・かなえる":"Kobo Kanaeru","一伊那尓栖":"Ninomae Ina'nis","IRyS":"IRyS",
+  "ハコス・ベールズ":"Hakos Baelz","古石ビジュー":"Koseki Bijou","ネリッサ・レイヴンクロフト":"Nerissa Ravencroft","フワワ・アビスガード":"Fuwawa Abyssgard"
+};
+function holomemEn(name){ return HOLOMEM_EN[name] || ""; }
 const GEN_ORDER = ["0","1","2","3","4","5","gamers","holox","myth","promise","regloss","advent","id1","id2","id3"];
 const TYPES = ["Happy","Cute","Pure"];
 const TEAM_SIZE = 5; // 依 Game8/Gamerch：1隊 = 5張卡，其中1張為Leader（AppMedia最強編成頁確認）
@@ -3366,6 +3385,23 @@ cardGenCodes(c).forEach(code=>{ gen[code]=(gen[code]||0)+1; });
 if(c.type && c.type!=="unknown") type[c.type]=(type[c.type]||0)+1;
 });
 return {gen,type};
+}
+
+// 隊長服裝的「實際強度」：不是只看有沒有PASS，還要看這件服裝實際buff多強。
+// 交叉比對全 5★ 角色的隊長服裝數值後發現一個很一致的設計規律：
+//   全數值(all)型：無條件45% / 有條件(需2人同期別等)50%
+//   單一數值(performance/technique/sense)型：無條件120% / 有條件130%
+// 兩者比例穩定在 120/45≈2.67、130/50=2.6，平均約2.6倍——不是隨便猜的係數，是從全部59張卡的實際數值反推出來的。
+// "support"(スコアサポート效果)型服裝目前都是統一60%（無論有無條件），機制跟stat型完全不同，暫時仍以1倍權重處理（這塊沒有足夠交叉數據可以精確換算，是本工具的簡化假設）。
+function leaderOutfitEffectiveValue(outfit){
+  if(!outfit || typeof outfit.value!=="number") return 0;
+  const breadth = outfit.statTarget==="all" ? 2.6 : 1;
+  return outfit.value * breadth;
+}
+function maxLeaderOutfitEffectiveValue(){
+  let max = 1;
+  CARDS.forEach(c=>{ if(c.outfit){ const v=leaderOutfitEffectiveValue(c.outfit); if(v>max) max=v; } });
+  return max;
 }
 
 function condMet(condType,condVal,condCount,counts){
@@ -3500,12 +3536,19 @@ throw new Error("scoreTeam: 找不到隊長卡片("+leaderId+")，請檢查呼�
 }
 
 // 1. Leader outfit（隊長服裝buff，不論隊長本人有沒有上場都會生效）
+// 分數不再是「PASS就滿分100」，而是依這件服裝相對於全資料庫最強服裝的「實際強度」按比例給分——
+// 這樣兩件都PASS的服裝，buff更強的那件才會拿到更高分，符合實際遊戲裡分數不一樣的事實。
 let leaderPass=true, leaderScore=0, leaderNote="";
+const maxOutfitVal = maxLeaderOutfitEffectiveValue();
 if(!leaderCard.outfit){ leaderPass=false; leaderNote="Leader此卡尚無Outfit資料"; }
-else if(!leaderCard.outfit.condType){ leaderPass=true; leaderScore=100; leaderNote="無條件啟動"; }
+else if(!leaderCard.outfit.condType){
+  leaderPass=true;
+  leaderScore=Math.min(100, leaderOutfitEffectiveValue(leaderCard.outfit)/maxOutfitVal*100);
+  leaderNote="無條件啟動";
+}
 else {
 leaderPass = condMet(leaderCard.outfit.condType, leaderCard.outfit.condVal, leaderCard.outfit.condCount, counts);
-leaderScore = leaderPass?100:0;
+leaderScore = leaderPass ? Math.min(100, leaderOutfitEffectiveValue(leaderCard.outfit)/maxOutfitVal*100) : 0;
 leaderNote = (leaderCard.outfit.condType==="gen"?GEN_LABELS[leaderCard.outfit.condVal]:leaderCard.outfit.condVal)+" ≥ "+leaderCard.outfit.condCount+"（目前："+((leaderCard.outfit.condType==="gen"?counts.gen[leaderCard.outfit.condVal]:counts.type[leaderCard.outfit.condVal])||0)+"）";
 }
 
@@ -3780,7 +3823,7 @@ row.className="roster-item";
 row.onclick = (e)=>rowClicked(e, c.id);
 row.innerHTML = `
 <input type="checkbox" id="chk_${c.id}" ${OWNED[c.id]?"checked":""} onchange="toggleOwned('${c.id}',this.checked)">
-<span class="name"><b>${c.holomem}</b> — ${c.name} <span class="tag">${c.type!=="unknown"?"["+c.type+"]":""}${c.extraGenCodes&&c.extraGenCodes.length?' <span class="pill y" title="'+(c.extraGenNote||'')+'">兼'+c.extraGenCodes.map(code=>GEN_LABELS[code]||code).join("/")+'</span>':""}</span></span>
+<span class="name"><b>${c.holomem}</b><span class="tag"> ${holomemEn(c.holomem)}</span> — ${c.name} <span class="tag">${c.type!=="unknown"?"["+c.type+"]":""}${c.extraGenCodes&&c.extraGenCodes.length?' <span class="pill y" title="'+(c.extraGenNote||'')+'">兼'+c.extraGenCodes.map(code=>GEN_LABELS[code]||code).join("/")+'</span>':""}</span></span>
 <span class="small">Board加成%</span>
 <input type="number" value="${BOARD[c.id]||0}" min="0" max="300" onchange="setBoard('${c.id}',this.value)" onclick="event.stopPropagation()">
 `;
@@ -3825,7 +3868,7 @@ const owned=ownedCardList();
 // ---- 隊伍養成分析（依現有角色，不看歌曲）用的 Leader 選單 / 手動隊伍插槽，內容與上方同步 ----
 const leaderSelPractice=document.getElementById("leaderSelectPractice");
 if(leaderSelPractice){
-leaderSelPractice.innerHTML = `<option value="">（自動選擇最佳Leader）</option>` + cardOptionsGroupedByGen(owned, c=>`${c.holomem} - ${c.name}`);
+leaderSelPractice.innerHTML = `<option value="">（自動選擇最佳Leader）</option>` + cardOptionsGroupedByGen(owned, c=>`${c.holomem}(${holomemEn(c.holomem)}) - ${c.name}`);
 }
 const slotsPractice=document.getElementById("manualSlotsPractice");
 if(slotsPractice){
@@ -3835,7 +3878,7 @@ slotsPractice.innerHTML="";
 for(let i=0;i<TEAM_SIZE;i++){
 const sel=document.createElement("select");
 sel.id="pslot"+i;
-sel.innerHTML = `<option value="">（空）</option>` + cardOptionsGroupedByGen(owned, c=>`${c.holomem} - ${c.name}`);
+sel.innerHTML = `<option value="">（空）</option>` + cardOptionsGroupedByGen(owned, c=>`${c.holomem}(${holomemEn(c.holomem)}) - ${c.name}`);
 if(prevPracticeVals[i]) sel.value = prevPracticeVals[i];
 // 使用者自己手動改了某個欄位，就不再是「系統剛自動填的」狀態，之後換隊長不應該清掉這個手動選擇。
 sel.onchange = ()=>{ practiceSlotsAutoFilled = false; };
@@ -3850,7 +3893,7 @@ slotsPractice.appendChild(wrap);
 const leaderSelPick=document.getElementById("leaderSelectPick");
 if(leaderSelPick){
 const curPick=leaderSelPick.value;
-leaderSelPick.innerHTML = `<option value="">（請選擇隊長）</option>` + cardOptionsGroupedByGen(owned, c=>`${c.holomem} - ${c.name}`);
+leaderSelPick.innerHTML = `<option value="">（請選擇隊長）</option>` + cardOptionsGroupedByGen(owned, c=>`${c.holomem}(${holomemEn(c.holomem)}) - ${c.name}`);
 if(curPick) leaderSelPick.value=curPick;
 }
 const slotsLeaderPick=document.getElementById("manualSlotsLeaderPick");
@@ -3862,7 +3905,7 @@ slotsLeaderPick.innerHTML="";
 for(let i=0;i<TEAM_SIZE;i++){
 const sel=document.createElement("select");
 sel.id="lpslot"+i;
-sel.innerHTML = `<option value="">（空）</option>` + cardOptionsGroupedByGen(CARDS, c=>`${c.holomem} - ${c.name}${OWNED[c.id]?"":"（未持有）"}`);
+sel.innerHTML = `<option value="">（空）</option>` + cardOptionsGroupedByGen(CARDS, c=>`${c.holomem}(${holomemEn(c.holomem)}) - ${c.name}${OWNED[c.id]?"":"（未持有）"}`);
 if(prevVals[i]) sel.value = prevVals[i];
 // 使用者自己手動改了某個欄位，就不再是「系統剛自動填的」狀態，之後換隊長不應該清掉這個手動選擇。
 sel.onchange = ()=>{ leaderPickSlotsAutoFilled = false; };
@@ -3910,7 +3953,7 @@ let banner = result.leaderPass
 
 const condRows = result.conditionReport.map(r=>`
 <tr>
-<td>${r.isLeader?"👑 ":""}${r.card.holomem}<br><span class="small">${r.card.name}</span></td>
+<td>${r.isLeader?"👑 ":""}${r.card.holomem}<span class="tag">${holomemEn(r.card.holomem)}</span><br><span class="small">${r.card.name}</span></td>
 ${highlightOwned? `<td>${OWNED[r.card.id]? '<span class="pill g">✅ 已持有</span>' : '<span class="pill r">🛒 未持有</span>'}</td>` : ""}
 <td>${pillFor(r.leaderOutfitCol)}</td>
 <td>${pillFor(r.passiveCol)}</td>
@@ -3933,7 +3976,7 @@ let reason = "";
 // 只在真的有「連段X+」或「生命Y+」這種會影響排序的條件時才顯示標籤，其餘卡片就只顯示名字。
 if(cond.type==="combo") reason = `SP需連段${cond.threshold}+`;
 else if(cond.type==="life") reason = `SP需生命${cond.threshold}+`;
-return `<div class="order-chip ${id===result.leaderId?'leader':''}">${c.holomem}${id===result.leaderId?' 👑':''}${reason?`<br><span class="small">${reason}</span>`:""}</div>`;
+return `<div class="order-chip ${id===result.leaderId?'leader':''}">${c.holomem}${id===result.leaderId?' 👑':''}<br><span class="small">${holomemEn(c.holomem)}</span>${reason?`<br><span class="small">${reason}</span>`:""}</div>`;
 }).join("");
 
 el.innerHTML = `
@@ -4284,7 +4327,7 @@ document.getElementById("roiResult").style.display="block";
 const leaderCard = getLeaderCardOf(current);
 const condRows = current.conditionReport.map(r=>`
 <tr>
-<td>${r.isLeader?"👑 ":""}${r.card.holomem}<br><span class="small">${r.card.name}</span></td>
+<td>${r.isLeader?"👑 ":""}${r.card.holomem}<span class="tag">${holomemEn(r.card.holomem)}</span><br><span class="small">${r.card.name}</span></td>
 ${src==="leaderpick" ? `<td>${OWNED[r.card.id]? '<span class="pill g">✅ 已持有</span>' : '<span class="pill r">🛒 未持有</span>'}</td>` : ""}
 <td>${pillFor(r.leaderOutfitCol)}</td>
 <td>${pillFor(r.passiveCol)}</td>
@@ -4311,7 +4354,7 @@ const top = rows.slice(0,15);
 document.getElementById("roiList").innerHTML = top.length ? top.map((r,i)=>`
 <div class="roi-row">
 <div class="roi-rank">#${i+1}</div>
-<div class="roi-name">${r.card.holomem} — ${r.card.name}<span class="sub">建議替換：${r.replacedCard.holomem}（${r.replacedCard.name}）${r.newLeaderId===r.card.id?" · 同時成為新隊長":""} · ${gapReasonText(current,r)} · ${GEN_LABELS[r.card.genCode]}${r.card.type!=="unknown"?" / "+r.card.type:""} · <a href="${r.card.source}" target="_blank" class="badge-src">資料來源</a></span></div>
+<div class="roi-name">${r.card.holomem}（${holomemEn(r.card.holomem)}） — ${r.card.name}<span class="sub">建議替換：${r.replacedCard.holomem}（${r.replacedCard.name}）${r.newLeaderId===r.card.id?" · 同時成為新隊長":""} · ${gapReasonText(current,r)} · ${GEN_LABELS[r.card.genCode]}${r.card.type!=="unknown"?" / "+r.card.type:""} · <a href="${r.card.source}" target="_blank" class="badge-src">資料來源</a></span></div>
 <div class="roi-delta">${r.delta>=0?"+":""}${r.delta.toFixed(2)}</div>
 </div>`).join("") : `<p class="small">目前找不到任何一張未持有的卡能合法換進這支隊伍（可能是 Holomem 重複衝突太多），請先到「⑥資料庫編輯」確認資料庫涵蓋範圍。</p>`;
 } else {
@@ -4334,7 +4377,7 @@ const subText = r.delta===null
 return `
 <div class="roi-row">
 <div class="roi-rank">#${i+1}</div>
-<div class="roi-name">${r.card.holomem} — ${r.card.name}<span class="sub">${subText} · ${GEN_LABELS[r.card.genCode]}${r.card.type!=="unknown"?" / "+r.card.type:""} · <a href="${r.card.source}" target="_blank" class="badge-src">資料來源</a></span></div>
+<div class="roi-name">${r.card.holomem}（${holomemEn(r.card.holomem)}） — ${r.card.name}<span class="sub">${subText} · ${GEN_LABELS[r.card.genCode]}${r.card.type!=="unknown"?" / "+r.card.type:""} · <a href="${r.card.source}" target="_blank" class="badge-src">資料來源</a></span></div>
 <div class="roi-delta" style="color:${r.delta===null?'var(--bad)':'var(--warn)'};">${r.delta===null ? "必抽" : ("−"+r.delta.toFixed(2))}</div>
 </div>`;
 }).join("");
@@ -4406,7 +4449,7 @@ const specialTxt = c.special
 ? c.special.value+"%／持續"+c.special.duration+"s"
 : "unknown";
 return `<tr>
-<td>${c.holomem}</td>
+<td>${c.holomem}<br><span class="small">${holomemEn(c.holomem)}</span></td>
 <td>${c.name}</td>
 <td>${GEN_LABELS[c.genCode]||c.genCode}</td>
 <td>${c.type!=="unknown"?c.type:'<span class="small">unknown</span>'}</td>
@@ -4458,7 +4501,7 @@ function renderCardTable(){
 const tbody=document.querySelector("#cardTable tbody");
 tbody.innerHTML = CARDS.map(c=>`
 <tr>
-<td>${c.holomem}</td>
+<td>${c.holomem}<br><span class="small">${holomemEn(c.holomem)}</span></td>
 <td>${c.name}<br><span class="small">${c.id}</span></td>
 <td>${GEN_LABELS[c.genCode]||c.genCode}${c.extraGenCodes&&c.extraGenCodes.length?"（兼"+c.extraGenCodes.map(code=>GEN_LABELS[code]||code).join("/")+"）":""}</td>
 <td>${c.type}${c.typeConfirmed===false?" (推測)":""}</td>
