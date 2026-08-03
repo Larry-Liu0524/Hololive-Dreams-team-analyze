@@ -156,7 +156,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <button class="btn secondary small" onclick="rosterSelectAll(false)">清空</button>
 </div>
 </div>
-<p class="small">勾選你目前持有的卡片。同一位 Holomem 若持有多張卡（例如常駐款＋泳裝款），可以全部勾選——分析時系統會自動確保同一 Holomem 不會同時上場。</p>
+<p class="small">勾選你目前持有的卡片。同一位 Holomem 若持有多張卡（例如常駐款＋泳裝款），可以全部勾選——分析時系統會自動確保同一 Holomem 不會同時上場。「Board加成%」為你自己在該卡 Holomem Board 已投資解鎖的效果加成（依你帳號實際進度手動輸入，遊戲未公開統一數值，故無法自動抓取）。</p>
 <input type="search" class="searchbar" placeholder="搜尋角色 / Holomem / 期別..." id="rosterSearch" oninput="renderRoster()">
 <div class="roster-list" id="rosterList"></div>
 </div>
@@ -311,23 +311,23 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <h2>分析方法論</h2>
 <p>本工具依照以下九步驟流程分析「整隊」（而非單卡）表現，資料來源以 <a href="https://appmedia.jp/hololive-dreams" target="_blank">AppMedia</a>、<a href="https://gamerch.com/hololive-dreams" target="_blank">Gamerch</a>、<a href="https://game8.jp/hololive-dreams" target="_blank">Game8</a> 公開 wiki 為主。</p>
 <ol>
-<li><b>Leader Outfit（權重 30%）</b>：Leader 的衣裝技能（例如「1期生2人以上」）若未啟動，整隊視為不完整，此項得分為 0，並顯示紅色警告。條件達成時分數<b>不是固定滿分</b>，而是依這件服裝相對於全資料庫最強服裝的「實際強度」按比例給分：交叉比對全部59張5★卡的隊長服裝數值後發現一個很一致的規律——全數值(all)型無條件45%／有條件50%，單一數值(performance/technique/sense)型無條件120%／有條件130%，兩者比例穩定在約2.6倍（120/45≈2.67、130/50=2.6），因此「全數值型」的實際強度＝數值×2.6 再跟其他服裝比較；スコアサポート效果(support)型目前一律以1倍權重計算（暫無足夠交叉數據可精確換算，是簡化假設）。</li>
+<li><b>Leader Outfit（權重 30%）</b>：Leader 的衣裝技能（例如「1期生2人以上」）若未啟動，整隊視為不完整，此項得分為 0，並顯示紅色警告。</li>
 <li><b>Member Passive（25%）</b>：逐一檢查每位隊員的被動技能觸發條件是否成立（PASS/FAIL）。</li>
 <li><b>Type / Generation 檢查</b>：於「條件報告」表格中列出每位隊員的 Type、Generation 是否與隊上其他成員形成有效搭配（同屬性/期別≥2）。</li>
 <li><b>Active Skill Timeline（併入 Timeline 20%）</b>：以「首次觸發＝Interval秒，之後每隔 Interval 秒觸發一次，每次持續 Duration 秒」的確定性模型建立時間軸（例：Interval23秒/Duration8秒 → 23–31、46–54、69–77…）。＊本遊戲 Active 技能實際帶有機率（低/中/高機率），非 100% 必發；本模型以「高機率視為近似必發」簡化計算，實際遊戲表現會有隨機浮動，請將本工具的時間軸視為「理論上限」而非保證值。</li>
-<li><b>Skill Coverage（10%）</b>：同類型的 Active「Score Up」效果不可疊加，因此 Overlap（重疊/浪費）只計算<b>主動技彼此</b>同時生效的時間佔比；SP技能（Special）與主動技是不同機制、會疊加，兩者重疊不算浪費。<b>Timeline／Coverage 這兩項評分只採計「主動技」的覆蓋時間</b>，不把 SP技能算進去——因為 SP技能不論換哪 5 位角色上場，5人加總起來幾乎都固定貢獻 50~70 秒左右的覆蓋時間（每張卡 SP 持續時間落在 10~14 秒的窄區間），對「這隊主動技彼此設計合不合」沒有鑑別度，混進評分反而會沖淡真正該看的訊號。Idle（完全沒有任何技能生效的時間佔比）仍涵蓋主動技＋SP技能，才能反映真正的死時間；含SP在內的「總覆蓋率」也會在分析結果中列出，僅供參考不計分。Timeline 分數＝主動技Coverage%；Coverage 分數＝主動技Coverage% − Overlap%。</li>
+<li><b>Skill Coverage（10%）</b>：同類型的 Active「Score Up」效果不可疊加，因此 Overlap（重疊/浪費）只計算<b>主動技彼此</b>同時生效的時間佔比；SP技能（Special）與主動技是不同機制、會疊加，兩者重疊不算浪費。Coverage（至少1個技能生效的時間佔比）、Idle（完全沒有技能生效的時間佔比）則涵蓋所有技能種類。Timeline 分數＝Coverage%；Coverage 分數＝Coverage% − Overlap%（此處 Overlap 僅指主動技彼此重疊）。</li>
 <li><b>Song Length</b>：所有時間軸與覆蓋率皆依你選擇的歌曲實際秒數重新計算（資料庫含 168 首歌曲秒數，來源 Game8）。</li>
 <li><b>Special Skill Order（SP技能站位順序，不列入本工具加權，僅供參考）</b>：SP技能每首歌只發動一次，依隊伍站位由左到右依序輪流發動（站位1最早、站位5最晚），彼此之間<b>不能重疊</b>（同時間只有1個SP技能生效），但可以自由跟主動技疊加。部分SP技能帶有額外加成條件（解析自技能說明文字，例如「40コンボ以上でスコアが120%UP」「ライフ1000以上でスキル発動率が55%UP」）：需要<b>連段(コンボ)</b>門檻的應放越右邊（越晚發動，連段數才夠）；需要<b>生命值(ライフ)</b>門檻的應放越左邊（越早發動，生命值還沒被扣掉太多）；沒有特殊條件的則依「スコアサポート效果%」數值由小到大排，數值越高越晚發動，可疊加在音樂遊戲後段通常較高的連段分數倍率上（此數值僅用於內部排序，不會顯示在站位建議的卡片標籤上）。這個排序邏輯對<b>實際遊戲分數</b>有實質影響，但因為本工具沒有逐拍模擬連段成長，所以<b>不會反映在 Overall Score</b>裡，僅作為站位建議呈現。</li>
-<li><b>Connect（不列入加權，僅供參考）</b>：本遊戲的 Connect 實際機制是「此卡放置於某 Holomem 技能板的 Connect 格時，提升該技能板效果 X%」，並非同隊成員間的加成。這項對整隊評分的實際影響難以量化，故不列入 Overall Score 加權計算，只在分析結果中列出原始數值供參考。（原本還有「Board 加成%」項目，因為需要玩家手動輸入每張卡的板面投資進度、太麻煩且無法自動抓取，已整個移除。）</li>
-<li><b>Overall Score</b>：以上各項依 Leader Outfit 30 / Passive 25 / Timeline 20 / Coverage 10 加權（原始權重總和85%，已等比例正規化為100%）。Special Skill Order／Connect 皆不計入。</li>
+<li><b>Connect / Board（不列入加權，僅供參考）</b>：本遊戲的 Connect 實際機制是「此卡放置於某 Holomem 技能板的 Connect 格時，提升該技能板效果 X%」，並非同隊成員間的加成；Board 加成因人而異，依玩家板面投資進度不同。這兩項對整隊評分的實際影響難以量化，故不列入 Overall Score 加權計算，只在分析結果中列出原始數值供參考。</li>
+<li><b>Overall Score</b>：以上各項依 Leader Outfit 30 / Passive 25 / Timeline 20 / Coverage 10 加權（原始權重總和85%，已等比例正規化為100%）。Special Skill Order／Connect／Board 皆不計入。</li>
 </ol>
 <h3>已知資料限制</h3>
-<p class="small">目前遊戲（2026/7/23 上線）wiki 資料仍在補齊中：(1) 內建資料庫已收錄 <b>59 張卡</b>——54 位 Holomem 各自的主力 5★卡（來自 AppMedia／Game8 星5一覧），加上 5 張最新追加的水著限定 5★卡（白銀ノエル／大空スバル／不知火フレア／角巻わため／音乃瀬奏），<b>全部 59 張都已取得完整的 Active/Passive/Special/Outfit/Connect/Stats/Type/Generation 數值</b>（AppMedia 有 19 張把技能表渲染成圖片抓不到文字，已改用 Game8 的純文字版頁面補齊，未用假數字填補）；(2) 完整遊戲每位角色通常還有第2、第3張卡（We are hololive!基礎款等），尚未全部收錄，可在「⑥ 資料庫編輯」分頁持續新增；(3) Active 技能的精確發動機率（%）目前沒有任何公開 wiki 揭露確切數字，僅有「低/中/高機率」的質化描述；(4) 歌曲 BPM 與逐秒 note 密度（例如副歌段落是否比其他段落更密集）目前沒有任何公開資料來源——這代表「覆蓋率」只衡量技能生效的<b>時間長度</b>，同樣長度的生效時間蓋在 note 密集的段落還是稀疏的段落，實際換算到的分數可能差很多，本工具目前無法納入這個差異，覆蓋率請理解成「技能彼此設計上合不合、有沒有互相卡到」的參考指標，而不是實際分數的保證值。所有假設與資料缺口都會在介面上明確標示，不會用虛構數字掩蓋。</p>
+<p class="small">目前遊戲（2026/7/23 上線）wiki 資料仍在補齊中：(1) 內建資料庫已收錄 <b>59 張卡</b>——54 位 Holomem 各自的主力 5★卡（來自 AppMedia／Game8 星5一覧），加上 5 張最新追加的水著限定 5★卡（白銀ノエル／大空スバル／不知火フレア／角巻わため／音乃瀬奏），<b>全部 59 張都已取得完整的 Active/Passive/Special/Outfit/Connect/Stats/Type/Generation 數值</b>（AppMedia 有 19 張把技能表渲染成圖片抓不到文字，已改用 Game8 的純文字版頁面補齊，未用假數字填補）；(2) 完整遊戲每位角色通常還有第2、第3張卡（We are hololive!基礎款等），尚未全部收錄，可在「⑥ 資料庫編輯」分頁持續新增；(3) Active 技能的精確發動機率（%）目前沒有任何公開 wiki 揭露確切數字，僅有「低/中/高機率」的質化描述；(4) 歌曲 BPM 目前無公開資料；(5) Holomem Board 逐格效果未逐一列出，改由你在①分頁手動輸入目前的加成%。所有假設與資料缺口都會在介面上明確標示，不會用虛構數字掩蓋。</p>
 </div>
 </div>
 
 </main>
-<footer>Hololive Dreams Team Builder · 資料來源：AppMedia / Gamerch / Game8（僅供玩家自製攻略工具參考，非官方資料）<br>Unofficial fan site; not affiliated with COVER Corp. or QualiArts.</footer>
+<footer>Hololive Dreams Team Builder · 資料來源：AppMedia / Gamerch / Game8（僅供玩家自製攻略工具參考，非官方資料）</footer>
 
 <script>
 /* ================= DATA: CARDS ================= */
@@ -3291,29 +3291,10 @@ const SONGS = [
 ].map((r,i)=>({id:"song_"+i,title:r[0],performer:r[1],duration:r[2],exLevel:r[3]}));
 
 const GEN_LABELS = {"0":"0期生","1":"1期生","2":"2期生","3":"3期生","4":"4期生","5":"5期生","gamers":"ゲーマーズ","holox":"holoX","promise":"Promise","regloss":"ReGLOSS","advent":"Advent","myth":"Myth","id1":"ID1期生","id2":"ID2期生","id3":"ID3期生"};
-// Holomem 英文（羅馬拼音）名稱對照表，格式參考 Yagoo-dori（另一個玩家自製的 hololive Dreams 攻略網站）。
-// 來源：hololive 官方網站 talents 頁面、Wikipedia、pixiv百科事典 交叉確認。
-const HOLOMEM_EN = {
-  "百鬼あやめ":"Nakiri Ayame","桃鈴ねね":"Momosuzu Nene","獅白ぼたん":"Shishiro Botan","博衣こより":"Hakui Koyori",
-  "パヴォリア・レイネ":"Pavolia Reine","オーロ・クロニー":"Ouro Kronii","AZKi":"AZKi","星街すいせい":"Hoshimachi Suisei",
-  "白上フブキ":"Shirakami Fubuki","夏色まつり":"Natsuiro Matsuri","大空スバル":"Oozora Subaru","大神ミオ":"Ookami Mio",
-  "不知火フレア":"Shiranui Flare","宝鐘マリン":"Houshou Marine","姫森ルーナ":"Himemori Luna","雪花ラミィ":"Yukihana Lamy",
-  "風真いろは":"Kazama Iroha","アイラニ・イオフィフティーン":"Airani Iofifteen","ベスティア・ゼータ":"Vestia Zeta",
-  "森カリオペ":"Mori Calliope","小鳥遊キアラ":"Takanashi Kiara","シオリ・ノヴェラ":"Shiori Novella","モココ・アビスガード":"Mococo Abyssgard",
-  "音乃瀬奏":"Otonose Kanade","一条莉々華":"Ichijou Ririka","儒烏風亭らでん":"Juufuutei Raden","轟はじめ":"Todoroki Hajime",
-  "ときのそら":"Tokino Sora","ロボ子さん":"Roboco","さくらみこ":"Sakura Miko","アキ・ローゼンタール":"Aki Rosenthal",
-  "赤井はあと":"Akai Haato","癒月ちょこ":"Yuzuki Choco","猫又おかゆ":"Nekomata Okayu","戌神ころね":"Inugami Korone",
-  "兎田ぺこら":"Usada Pekora","白銀ノエル":"Shirogane Noel","角巻わため":"Tsunomaki Watame","常闇トワ":"Tokoyami Towa",
-  "尾丸ポルカ":"Omaru Polka","ラプラス・ダークネス":"La+ Darknesss","鷹嶺ルイ":"Takane Lui","アユンダ・リス":"Ayunda Risu",
-  "ムーナ・ホシノヴァ":"Moona Hoshinova","クレイジー・オリー":"Kureiji Ollie","アーニャ・メルフィッサ":"Anya Melfissa",
-  "カエラ・コヴァルスキア":"Kaela Kovalskia","こぼ・かなえる":"Kobo Kanaeru","一伊那尓栖":"Ninomae Ina'nis","IRyS":"IRyS",
-  "ハコス・ベールズ":"Hakos Baelz","古石ビジュー":"Koseki Bijou","ネリッサ・レイヴンクロフト":"Nerissa Ravencroft","フワワ・アビスガード":"Fuwawa Abyssgard"
-};
-function holomemEn(name){ return HOLOMEM_EN[name] || ""; }
 const GEN_ORDER = ["0","1","2","3","4","5","gamers","holox","myth","promise","regloss","advent","id1","id2","id3"];
 const TYPES = ["Happy","Cute","Pure"];
-const TEAM_SIZE = 5; // 依 Game8/Gamerch/horodori.com 確認：上場5個席位是「隊員」，隊長是獨立於這5席之外的第6個角色，只提供隊長服裝buff，可以上場(佔用5席其中1位、自己的主動/被動/SP技能照常觸發)、也可以完全不上場(單純掛buff)
-const WEIGHTS = {leader:30,passive:25,timeline:20,coverage:10}; // SP技能出場順序不列入加權(順序不影響真實分數,只影響誰先誰後上場)；Connect 也不列入加權評分，僅供參考資訊
+const TEAM_SIZE = 5; // 依 Game8/Gamerch：1隊 = 5張卡，其中1張為Leader（AppMedia最強編成頁確認）
+const WEIGHTS = {leader:30,passive:25,timeline:20,coverage:10}; // SP技能出場順序不列入加權(順序不影響真實分數,只影響誰先誰後上場)；Connect/Board 也不列入加權評分，僅在①分頁與資料庫中作為參考資訊
 const WEIGHT_SUM = Object.values(WEIGHTS).reduce((a,b)=>a+b,0); // 90 -> normalize
 
 /* ================= STORAGE ================= */
@@ -3325,6 +3306,8 @@ return JSON.parse(JSON.stringify(DEFAULT_CARDS));
 function saveCards(cards){ localStorage.setItem("hd_cards", JSON.stringify(cards)); }
 function loadOwned(){ try{ return JSON.parse(localStorage.getItem("hd_owned")||"{}"); }catch(e){ return {}; } }
 function saveOwned(o){ localStorage.setItem("hd_owned", JSON.stringify(o)); }
+function loadBoard(){ try{ return JSON.parse(localStorage.getItem("hd_board")||"{}"); }catch(e){ return {}; } }
+function saveBoard(b){ localStorage.setItem("hd_board", JSON.stringify(b)); }
 // ②③最後一次分析結果：自動存最新一次，重新整理頁面不會遺失；使用者也可以另外「另存為」具名快照長期保留、比較。
 function loadTeamResults(){ try{ return JSON.parse(localStorage.getItem("hd_team_results")||"null") || { practice: null, leaderpick: null }; }catch(e){ return { practice: null, leaderpick: null }; } }
 function saveTeamResultsToStorage(){ localStorage.setItem("hd_team_results", JSON.stringify(TEAM_RESULTS)); }
@@ -3333,6 +3316,7 @@ function saveSavedTeamsToStorage(){ localStorage.setItem("hd_saved_teams", JSON.
 
 let CARDS = loadCards();
 let OWNED = loadOwned(); // {cardId:true}
+let BOARD = loadBoard(); // {cardId: percent}
 
 // ROI（④）的計算基準：直接沿用②「隊伍養成分析」或③「指定隊長找最佳隊伍」最後一次算出的隊伍結果，
 // 而不是自己在④裡另外重新搜尋一次。②和③問的問題本質不同，所以分開存、分開處理：
@@ -3382,23 +3366,6 @@ cardGenCodes(c).forEach(code=>{ gen[code]=(gen[code]||0)+1; });
 if(c.type && c.type!=="unknown") type[c.type]=(type[c.type]||0)+1;
 });
 return {gen,type};
-}
-
-// 隊長服裝的「實際強度」：不是只看有沒有PASS，還要看這件服裝實際buff多強。
-// 交叉比對全 5★ 角色的隊長服裝數值後發現一個很一致的設計規律：
-//   全數值(all)型：無條件45% / 有條件(需2人同期別等)50%
-//   單一數值(performance/technique/sense)型：無條件120% / 有條件130%
-// 兩者比例穩定在 120/45≈2.67、130/50=2.6，平均約2.6倍——不是隨便猜的係數，是從全部59張卡的實際數值反推出來的。
-// "support"(スコアサポート效果)型服裝目前都是統一60%（無論有無條件），機制跟stat型完全不同，暫時仍以1倍權重處理（這塊沒有足夠交叉數據可以精確換算，是本工具的簡化假設）。
-function leaderOutfitEffectiveValue(outfit){
-  if(!outfit || typeof outfit.value!=="number") return 0;
-  const breadth = outfit.statTarget==="all" ? 2.6 : 1;
-  return outfit.value * breadth;
-}
-function maxLeaderOutfitEffectiveValue(){
-  let max = 1;
-  CARDS.forEach(c=>{ if(c.outfit){ const v=leaderOutfitEffectiveValue(c.outfit); if(v>max) max=v; } });
-  return max;
 }
 
 function condMet(condType,condVal,condCount,counts){
@@ -3459,7 +3426,7 @@ return events;
 
 function coverageMetrics(events,songLen){
 const STEP=0.5;
-let covered=0, activeCovered=0, overlapT=0, n=Math.round(songLen/STEP);
+let covered=0, overlapT=0, n=Math.round(songLen/STEP);
 for(let i=0;i<n;i++){
 const t=i*STEP;
 let cnt=0, activeCnt=0;
@@ -3469,17 +3436,15 @@ cnt++;
 if(e.kind==="active") activeCnt++;
 }
 });
-if(cnt>=1) covered+=STEP; // 任何技能(主動+SP)生效的時間，用來算 Idle(完全沒有任何加成的死時間)
-if(activeCnt>=1) activeCovered+=STEP; // 只算主動技生效的時間，用於評分(SP技能無論哪個隊伍幾乎都固定貢獻50~70秒，拿來評分沒有鑑別度)
+if(cnt>=1) covered+=STEP;
 // 重疊(浪費)只計算「主動技彼此」同時生效的情況：同類型 Score Up 效果不可疊加，才算浪費。
 // SP技能(Special)與主動技(Active)是不同機制，會疊加，故SP技能與主動技重疊不算浪費。
 if(activeCnt>=2) overlapT+=STEP;
 }
-const coverage = Math.min(100, covered/songLen*100); // 含SP，僅供參考，不用於評分
-const activeCoverage = Math.min(100, activeCovered/songLen*100); // 只算主動技，用於Timeline/Coverage評分
+const coverage = Math.min(100, covered/songLen*100);
 const overlap = Math.min(100, overlapT/songLen*100);
 const idle = Math.max(0, 100-coverage);
-return {coverage, activeCoverage, overlap, idle};
+return {coverage,overlap,idle};
 }
 
 // 從SP技能說明文字中解析出「額外加成觸發條件」：連段(コンボ)門檻 或 生命值(ライフ)門檻。
@@ -3535,19 +3500,12 @@ throw new Error("scoreTeam: 找不到隊長卡片("+leaderId+")，請檢查呼�
 }
 
 // 1. Leader outfit（隊長服裝buff，不論隊長本人有沒有上場都會生效）
-// 分數不再是「PASS就滿分100」，而是依這件服裝相對於全資料庫最強服裝的「實際強度」按比例給分——
-// 這樣兩件都PASS的服裝，buff更強的那件才會拿到更高分，符合實際遊戲裡分數不一樣的事實。
 let leaderPass=true, leaderScore=0, leaderNote="";
-const maxOutfitVal = maxLeaderOutfitEffectiveValue();
 if(!leaderCard.outfit){ leaderPass=false; leaderNote="Leader此卡尚無Outfit資料"; }
-else if(!leaderCard.outfit.condType){
-  leaderPass=true;
-  leaderScore=Math.min(100, leaderOutfitEffectiveValue(leaderCard.outfit)/maxOutfitVal*100);
-  leaderNote="無條件啟動";
-}
+else if(!leaderCard.outfit.condType){ leaderPass=true; leaderScore=100; leaderNote="無條件啟動"; }
 else {
 leaderPass = condMet(leaderCard.outfit.condType, leaderCard.outfit.condVal, leaderCard.outfit.condCount, counts);
-leaderScore = leaderPass ? Math.min(100, leaderOutfitEffectiveValue(leaderCard.outfit)/maxOutfitVal*100) : 0;
+leaderScore = leaderPass?100:0;
 leaderNote = (leaderCard.outfit.condType==="gen"?GEN_LABELS[leaderCard.outfit.condVal]:leaderCard.outfit.condVal)+" ≥ "+leaderCard.outfit.condCount+"（目前："+((leaderCard.outfit.condType==="gen"?counts.gen[leaderCard.outfit.condVal]:counts.type[leaderCard.outfit.condVal])||0)+"）";
 }
 
@@ -3576,17 +3534,17 @@ const {order, specialEfficiency} = bestSpecialOrder(team, song.duration);
 // 原始順序不同（例如鎖定欄位 vs 從頭搜尋）而跳動。events/coverage 計算本身跟 team 陣列順序無關，不受影響。
 team = order.map(id=> team.find(m=>m.card.id===id)).filter(Boolean);
 const events = buildTimeline(team, leaderId, song.duration, order);
-const {coverage, activeCoverage, overlap, idle} = coverageMetrics(events, song.duration);
-// Timeline/Coverage 分數改用「只算主動技」的 activeCoverage：SP技能不論隊伍怎麼選，
-// 5人加起來幾乎都固定貢獻50~70秒覆蓋時間，混進評分會沖淡「主動技設計好不好」這個真正有鑑別度的訊號。
-// coverage(含SP)則保留成參考資訊，Idle(完全沒有任何加成的死時間)仍用含SP的版本計算才準確。
-const timelineScore = activeCoverage;
-const coverageScore = Math.max(0, activeCoverage-overlap);
+const {coverage, overlap, idle} = coverageMetrics(events, song.duration);
+const timelineScore = coverage;
+const coverageScore = Math.max(0, coverage-overlap);
 const specialScore = specialEfficiency; // 參考資訊，不計入總分
 
-// Connect：保留原始數值做為參考資訊，但不列入 Overall Score 加權
+// Connect / Board：保留原始數值做為參考資訊，但不列入 Overall Score 加權
 const connectVals = team.map(m=>m.card.connect?m.card.connect.value:0).filter(v=>v>0);
 const connectScore = connectVals.length? Math.min(100, (connectVals.reduce((a,b)=>a+b,0)/connectVals.length)/2) : 0;
+
+const boardVals = team.map(m=> BOARD[m.card.id]||0);
+const boardScore = Math.min(100, (boardVals.reduce((a,b)=>a+b,0)/team.length));
 
 const overallRaw = leaderScore*WEIGHTS.leader + passiveScore*WEIGHTS.passive + timelineScore*WEIGHTS.timeline +
 coverageScore*WEIGHTS.coverage;
@@ -3595,9 +3553,9 @@ const overall = overallRaw/(WEIGHT_SUM*100)*100;
 return {
 team, leaderId, leaderCard, leaderDeployed, counts, leaderPass, leaderScore, leaderNote,
 passiveScore, passiveDetails,
-timelineScore, coverageScore, coverage, activeCoverage, overlap, idle,
+timelineScore, coverageScore, coverage, overlap, idle,
 specialScore, order, events,
-connectScore, overall,
+connectScore, boardScore, overall,
 conditionReport: conditionReport(team, leaderCard, counts)
 };
 }
@@ -3615,21 +3573,24 @@ return res;
 
 function findBestTeamForLeader(leader, pool, song){
 // pool: owned cards excluding leader's holomem, unique holomem only (pick best card per holomem to reduce search)
-// 隊長是獨立於5個上場席位之外的角色，所以要同時試兩種情境並取分數較高者：
-//   (a) 隊長也上場：5席＝隊長＋pool選4位
-//   (b) 隊長不上場、只掛隊長服裝buff：5席全部從pool選（隊長自己的主動/被動/SP不會觸發）
 const byHolomem={};
 pool.forEach(c=>{ if(!byHolomem[c.holomem]) byHolomem[c.holomem]=[]; byHolomem[c.holomem].push(c); });
 const holomemList = Object.keys(byHolomem);
+let candidateSets;
+if(holomemList.length<=9){
+// brute force over holomem choice, and within each holomem try all its cards (usually 1-3)
+candidateSets = combinations(holomemList, Math.min(TEAM_SIZE-1, holomemList.length));
+} else {
+candidateSets = null; // will use greedy
+}
 let best=null, bestScore=-1;
 
-function evalMemberSet(memberHolomems, leaderDeployed){
+function evalMemberSet(memberHolomems){
+// for each holomem pick the card variant that yields best score (try all, small numbers)
 function pickBest(idx, chosen){
 if(idx===memberHolomems.length){
-const neededSize = leaderDeployed ? TEAM_SIZE-1 : TEAM_SIZE;
-if(chosen.length < neededSize) return;
-const teamCards = leaderDeployed ? [leader,...chosen] : chosen;
-const r = scoreTeam(teamCards, leader.id, song);
+if(chosen.length < TEAM_SIZE-1) return;
+const r = scoreTeam([leader,...chosen], leader.id, song);
 if(r.overall>bestScore){ bestScore=r.overall; best=r; }
 return;
 }
@@ -3639,15 +3600,19 @@ variants.forEach(v=>{ chosen.push(v); pickBest(idx+1,chosen); chosen.pop(); });
 pickBest(0,[]);
 }
 
-function greedyBuild(slotsCount, leaderDeployed){
+if(candidateSets){
+candidateSets.forEach(set=>evalMemberSet(set));
+} else {
+// greedy construction then local swap improvement
 let chosenHolomem=[];
 let remaining = holomemList.slice();
-for(let slot=0; slot<slotsCount; slot++){
+for(let slot=0; slot<TEAM_SIZE-1; slot++){
 let bestH=null,bestS=-1,bestCard=null;
 remaining.forEach(h=>{
 byHolomem[h].forEach(v=>{
-const trialCards = leaderDeployed ? [leader,...chosenHolomem.map(x=>x.card),v] : [...chosenHolomem.map(x=>x.card),v];
-const r=scoreTeam(trialCards, leader.id, song);
+const trial=[leader,...chosenHolomem.map(x=>x.card),v];
+if(trial.length<2) return;
+const r=scoreTeam(trial, leader.id, song);
 if(r.overall>bestS){ bestS=r.overall; bestH=h; bestCard=v; }
 });
 });
@@ -3655,40 +3620,24 @@ if(!bestH) break;
 chosenHolomem.push({holomem:bestH,card:bestCard});
 remaining = remaining.filter(h=>h!==bestH);
 }
+// local swap improvement (2 passes)
 for(let pass=0; pass<2; pass++){
 for(let i=0;i<chosenHolomem.length;i++){
-remaining = holomemList.filter(h=>!chosenHolomem.some(x=>x.holomem===h));
-const curCards = leaderDeployed ? [leader,...chosenHolomem.map(x=>x.card)] : chosenHolomem.map(x=>x.card);
-let curScore = scoreTeam(curCards, leader.id, song).overall;
+let curScore = scoreTeam([leader,...chosenHolomem.map(x=>x.card)], leader.id, song).overall;
+let improved=false;
 remaining.forEach(h=>{
 byHolomem[h].forEach(v=>{
 const trial = chosenHolomem.map(x=>x.card); trial[i]=v;
-const trialCards = leaderDeployed ? [leader,...trial] : trial;
-const r = scoreTeam(trialCards, leader.id, song);
-if(r.overall>curScore){ curScore=r.overall; chosenHolomem[i]={holomem:h,card:v}; }
+const r = scoreTeam([leader,...trial], leader.id, song);
+if(r.overall>curScore){ curScore=r.overall; chosenHolomem[i]={holomem:h,card:v}; improved=true; }
 });
 });
+remaining = holomemList.filter(h=>!chosenHolomem.some(x=>x.holomem===h));
 }
 }
-const finalCards = leaderDeployed ? [leader,...chosenHolomem.map(x=>x.card)] : chosenHolomem.map(x=>x.card);
-return scoreTeam(finalCards, leader.id, song);
-}
-
-if(holomemList.length<=9){
-// (a) 隊長上場：pool 選 TEAM_SIZE-1 位
-combinations(holomemList, Math.min(TEAM_SIZE-1, holomemList.length)).forEach(set=>evalMemberSet(set, true));
-// (b) 隊長不上場：pool 選 TEAM_SIZE 位（需要pool至少有5個不同holomem才夠選）
-if(holomemList.length>=TEAM_SIZE){
-combinations(holomemList, TEAM_SIZE).forEach(set=>evalMemberSet(set, false));
-}
-} else {
-// 太多候選 Holomem 時改用貪婪法＋局部交換改善，兩種情境都跑一次再比較
-const resA = greedyBuild(TEAM_SIZE-1, true);
-if(resA.overall>bestScore){ bestScore=resA.overall; best=resA; }
-if(holomemList.length>=TEAM_SIZE){
-const resB = greedyBuild(TEAM_SIZE, false);
-if(resB.overall>bestScore){ bestScore=resB.overall; best=resB; }
-}
+const finalTeam=[leader,...chosenHolomem.map(x=>x.card)];
+best = scoreTeam(finalTeam, leader.id, song);
+bestScore = best.overall;
 }
 return best;
 }
@@ -3707,27 +3656,28 @@ return best;
 
 // 鎖定「已手動指定的卡片」，只針對剩下的空位從 owned 中窮舉／爬山演算法找最佳搭配。
 // fixedCards：已手動選好、要固定上場的卡片（可以是 0～5 張）。
-// forcedLeaderId：可選；若指定且該卡不在 fixedCards 中，函式內部會同時嘗試「隊長也上場」與「隊長不上場只掛buff」兩種情境，取分數較高者。
+// forcedLeaderId：可選，若指定且該卡不在 fixedCards 中，會自動補進固定名單裡（Leader一定要上場）。
 function findBestTeamWithFixed(fixedCards, forcedLeaderId, owned, song){
-// 隊長是獨立於5個上場席位之外的角色，所以要同時試「隊長上場」與「隊長不上場只掛buff」兩種情境並取分數較高者——
-// 除非使用者已經把隊長那張卡明確放進鎖定欄位裡，這種情況視為使用者明確要隊長上場，只跑上場那個情境。
-const leaderCard = forcedLeaderId ? cardById(forcedLeaderId) : null;
-const leaderAlreadyInFixed = leaderCard && fixedCards.some(c=>c.id===leaderCard.id);
-
-function dedupe(arr){
-const seen=new Set();
-return arr.filter(c=>{ if(seen.has(c.holomem)) return false; seen.add(c.holomem); return true; });
+let forced = fixedCards.slice();
+// 修BUG：隊長一定要放在陣列最前面再做「超過5張就截斷」的動作。
+// 之前是先把隊長 concat 到陣列「最後面」，如果 fixedCards 剛好已經有5張（例如上一次自動搜尋填滿的欄位，
+// 換了隊長後沒清空），加上隊長會變成6張，slice(0,TEAM_SIZE) 只留前5個，隊長反而被切掉，
+// 後面 scoreTeam 找不到隊長卡就會直接噴例外、畫面卡住沒反應（點按鈕像沒事發生一樣）。
+if(forcedLeaderId && !forced.some(c=>c.id===forcedLeaderId)){
+const leaderCard = cardById(forcedLeaderId);
+if(leaderCard) forced = [leaderCard, ...forced];
 }
-
-function searchFillRemaining(forcedRaw, effLeaderId){
-let forced = dedupe(forcedRaw);
+// 保險：避免同一位 Holomem 被鎖定兩次（隊長已排最前面，同一位 Holomem 重複時會保留隊長那張）
+const seen = new Set();
+forced = forced.filter(c=>{ if(seen.has(c.holomem)) return false; seen.add(c.holomem); return true; });
 if(forced.length > TEAM_SIZE) forced = forced.slice(0, TEAM_SIZE);
-if(forced.length===0) return null;
-const remainingSlots = TEAM_SIZE - forced.length;
-if(remainingSlots<=0) return scoreTeam(forced, effLeaderId, song);
+if(forced.length===0) return null; // 沒有鎖定卡片也沒有指定隊長時，應改用 findBestTeamOverall
 
-// 不管隊長這次上不上場，隊長本人的 Holomem 都不能再被其他候選卡佔用（同一位角色不能同時用兩張卡）。
-const pool = owned.filter(c=> !forced.some(f=>f.holomem===c.holomem) && (!leaderCard || c.holomem!==leaderCard.holomem));
+const leaderId = forcedLeaderId || forced[0].id;
+const remainingSlots = TEAM_SIZE - forced.length;
+if(remainingSlots<=0) return scoreTeam(forced, leaderId, song);
+
+const pool = owned.filter(c=> !forced.some(f=>f.holomem===c.holomem));
 const byHolomem={};
 pool.forEach(c=>{ if(!byHolomem[c.holomem]) byHolomem[c.holomem]=[]; byHolomem[c.holomem].push(c); });
 const holomemList = Object.keys(byHolomem);
@@ -3738,7 +3688,7 @@ function evalMemberSet(memberHolomems){
 function pickBest(idx, chosen){
 if(idx===memberHolomems.length){
 const trial = forced.concat(chosen);
-const r = scoreTeam(trial, effLeaderId, song);
+const r = scoreTeam(trial, leaderId, song);
 if(r.overall>bestScore){ bestScore=r.overall; best=r; }
 return;
 }
@@ -3750,7 +3700,7 @@ pickBest(0,[]);
 if(holomemList.length<=9){
 combinations(holomemList, remainingSlots).forEach(set=>evalMemberSet(set));
 } else {
-// 太多候選 Holomem 時改用貪婪法＋局部交換改善
+// 太多候選 Holomem 時改用貪婪法＋局部交換改善（跟 findBestTeamForLeader 同一套邏輯）
 let chosenHolomem=[];
 let remaining = holomemList.slice();
 for(let slot=0; slot<remainingSlots; slot++){
@@ -3758,7 +3708,7 @@ let bestH=null,bestS=-1,bestCard=null;
 remaining.forEach(h=>{
 byHolomem[h].forEach(v=>{
 const trial = forced.concat(chosenHolomem.map(x=>x.card), [v]);
-const r = scoreTeam(trial, effLeaderId, song);
+const r = scoreTeam(trial, leaderId, song);
 if(r.overall>bestS){ bestS=r.overall; bestH=h; bestCard=v; }
 });
 });
@@ -3768,40 +3718,20 @@ remaining = remaining.filter(h=>h!==bestH);
 }
 for(let pass=0; pass<2; pass++){
 for(let i=0;i<chosenHolomem.length;i++){
-let curScore = scoreTeam(forced.concat(chosenHolomem.map(x=>x.card)), effLeaderId, song).overall;
+let curScore = scoreTeam(forced.concat(chosenHolomem.map(x=>x.card)), leaderId, song).overall;
 remaining = holomemList.filter(h=>!chosenHolomem.some(x=>x.holomem===h));
 remaining.forEach(h=>{
 byHolomem[h].forEach(v=>{
 const trial = chosenHolomem.map(x=>x.card); trial[i]=v;
-const r = scoreTeam(forced.concat(trial), effLeaderId, song);
+const r = scoreTeam(forced.concat(trial), leaderId, song);
 if(r.overall>curScore){ curScore=r.overall; chosenHolomem[i]={holomem:h,card:v}; }
 });
 });
 }
 }
-best = scoreTeam(forced.concat(chosenHolomem.map(x=>x.card)), effLeaderId, song);
+best = scoreTeam(forced.concat(chosenHolomem.map(x=>x.card)), leaderId, song);
 }
 return best;
-}
-
-// 情境 A：隊長上場（使用者已把隊長卡鎖進欄位時，一定屬於這個情境）
-let resA = null;
-if(leaderCard){
-const forcedA = leaderAlreadyInFixed ? fixedCards.slice() : [leaderCard, ...fixedCards];
-resA = searchFillRemaining(forcedA, forcedLeaderId);
-} else if(fixedCards.length>0){
-// 沒有指定隊長：沿用鎖定欄位第一張卡當隊長（維持舊行為）
-resA = searchFillRemaining(fixedCards, fixedCards[0].id);
-}
-
-// 情境 B：隊長不上場、只掛服裝buff（只有「有指定隊長」且「使用者沒把隊長卡鎖進欄位」時才需要試）
-let resB = null;
-if(leaderCard && !leaderAlreadyInFixed){
-resB = searchFillRemaining(fixedCards.slice(), forcedLeaderId);
-}
-
-if(resA && resB) return resA.overall>=resB.overall ? resA : resB;
-return resA || resB;
 }
 
 /* ================= UI ================= */
@@ -3850,7 +3780,9 @@ row.className="roster-item";
 row.onclick = (e)=>rowClicked(e, c.id);
 row.innerHTML = `
 <input type="checkbox" id="chk_${c.id}" ${OWNED[c.id]?"checked":""} onchange="toggleOwned('${c.id}',this.checked)">
-<span class="name"><b>${c.holomem}</b><span class="tag"> ${holomemEn(c.holomem)}</span> — ${c.name} <span class="tag">${c.type!=="unknown"?"["+c.type+"]":""}${c.extraGenCodes&&c.extraGenCodes.length?' <span class="pill y" title="'+(c.extraGenNote||'')+'">兼'+c.extraGenCodes.map(code=>GEN_LABELS[code]||code).join("/")+'</span>':""}</span></span>
+<span class="name"><b>${c.holomem}</b> — ${c.name} <span class="tag">${c.type!=="unknown"?"["+c.type+"]":""}${c.extraGenCodes&&c.extraGenCodes.length?' <span class="pill y" title="'+(c.extraGenNote||'')+'">兼'+c.extraGenCodes.map(code=>GEN_LABELS[code]||code).join("/")+'</span>':""}</span></span>
+<span class="small">Board加成%</span>
+<input type="number" value="${BOARD[c.id]||0}" min="0" max="300" onchange="setBoard('${c.id}',this.value)" onclick="event.stopPropagation()">
 `;
 group.appendChild(row);
 });
@@ -3865,6 +3797,7 @@ cb.checked = !cb.checked;
 toggleOwned(cardId, cb.checked);
 }
 function toggleOwned(id,val){ OWNED[id]=val; saveOwned(OWNED); updateDbStat(); populateSelectors(); }
+function setBoard(id,val){ BOARD[id]=parseFloat(val)||0; saveBoard(BOARD); }
 function rosterSelectAll(val){ CARDS.forEach(c=>OWNED[c.id]=val); saveOwned(OWNED); renderRoster(); updateDbStat(); populateSelectors(); }
 
 // 把一批卡片依期生(Generation)分組，輸出成 <optgroup> 包住的 <option>，
@@ -3892,7 +3825,7 @@ const owned=ownedCardList();
 // ---- 隊伍養成分析（依現有角色，不看歌曲）用的 Leader 選單 / 手動隊伍插槽，內容與上方同步 ----
 const leaderSelPractice=document.getElementById("leaderSelectPractice");
 if(leaderSelPractice){
-leaderSelPractice.innerHTML = `<option value="">（自動選擇最佳Leader）</option>` + cardOptionsGroupedByGen(owned, c=>`${c.holomem}(${holomemEn(c.holomem)}) - ${c.name}`);
+leaderSelPractice.innerHTML = `<option value="">（自動選擇最佳Leader）</option>` + cardOptionsGroupedByGen(owned, c=>`${c.holomem} - ${c.name}`);
 }
 const slotsPractice=document.getElementById("manualSlotsPractice");
 if(slotsPractice){
@@ -3902,7 +3835,7 @@ slotsPractice.innerHTML="";
 for(let i=0;i<TEAM_SIZE;i++){
 const sel=document.createElement("select");
 sel.id="pslot"+i;
-sel.innerHTML = `<option value="">（空）</option>` + cardOptionsGroupedByGen(owned, c=>`${c.holomem}(${holomemEn(c.holomem)}) - ${c.name}`);
+sel.innerHTML = `<option value="">（空）</option>` + cardOptionsGroupedByGen(owned, c=>`${c.holomem} - ${c.name}`);
 if(prevPracticeVals[i]) sel.value = prevPracticeVals[i];
 // 使用者自己手動改了某個欄位，就不再是「系統剛自動填的」狀態，之後換隊長不應該清掉這個手動選擇。
 sel.onchange = ()=>{ practiceSlotsAutoFilled = false; };
@@ -3917,7 +3850,7 @@ slotsPractice.appendChild(wrap);
 const leaderSelPick=document.getElementById("leaderSelectPick");
 if(leaderSelPick){
 const curPick=leaderSelPick.value;
-leaderSelPick.innerHTML = `<option value="">（請選擇隊長）</option>` + cardOptionsGroupedByGen(owned, c=>`${c.holomem}(${holomemEn(c.holomem)}) - ${c.name}`);
+leaderSelPick.innerHTML = `<option value="">（請選擇隊長）</option>` + cardOptionsGroupedByGen(owned, c=>`${c.holomem} - ${c.name}`);
 if(curPick) leaderSelPick.value=curPick;
 }
 const slotsLeaderPick=document.getElementById("manualSlotsLeaderPick");
@@ -3929,7 +3862,7 @@ slotsLeaderPick.innerHTML="";
 for(let i=0;i<TEAM_SIZE;i++){
 const sel=document.createElement("select");
 sel.id="lpslot"+i;
-sel.innerHTML = `<option value="">（空）</option>` + cardOptionsGroupedByGen(CARDS, c=>`${c.holomem}(${holomemEn(c.holomem)}) - ${c.name}${OWNED[c.id]?"":"（未持有）"}`);
+sel.innerHTML = `<option value="">（空）</option>` + cardOptionsGroupedByGen(CARDS, c=>`${c.holomem} - ${c.name}${OWNED[c.id]?"":"（未持有）"}`);
 if(prevVals[i]) sel.value = prevVals[i];
 // 使用者自己手動改了某個欄位，就不再是「系統剛自動填的」狀態，之後換隊長不應該清掉這個手動選擇。
 sel.onchange = ()=>{ leaderPickSlotsAutoFilled = false; };
@@ -3977,7 +3910,7 @@ let banner = result.leaderPass
 
 const condRows = result.conditionReport.map(r=>`
 <tr>
-<td>${r.isLeader?"👑 ":""}${r.card.holomem}<span class="tag">${holomemEn(r.card.holomem)}</span><br><span class="small">${r.card.name}</span></td>
+<td>${r.isLeader?"👑 ":""}${r.card.holomem}<br><span class="small">${r.card.name}</span></td>
 ${highlightOwned? `<td>${OWNED[r.card.id]? '<span class="pill g">✅ 已持有</span>' : '<span class="pill r">🛒 未持有</span>'}</td>` : ""}
 <td>${pillFor(r.leaderOutfitCol)}</td>
 <td>${pillFor(r.passiveCol)}</td>
@@ -4000,7 +3933,7 @@ let reason = "";
 // 只在真的有「連段X+」或「生命Y+」這種會影響排序的條件時才顯示標籤，其餘卡片就只顯示名字。
 if(cond.type==="combo") reason = `SP需連段${cond.threshold}+`;
 else if(cond.type==="life") reason = `SP需生命${cond.threshold}+`;
-return `<div class="order-chip ${id===result.leaderId?'leader':''}">${c.holomem}${id===result.leaderId?' 👑':''}<br><span class="small">${holomemEn(c.holomem)}</span>${reason?`<br><span class="small">${reason}</span>`:""}</div>`;
+return `<div class="order-chip ${id===result.leaderId?'leader':''}">${c.holomem}${id===result.leaderId?' 👑':''}${reason?`<br><span class="small">${reason}</span>`:""}</div>`;
 }).join("");
 
 el.innerHTML = `
@@ -4011,12 +3944,12 @@ el.innerHTML = `
 </div>
 <div style="text-align:right;margin:-8px 0 8px;"><button class="btn small" onclick="saveCurrentAsSnapshot('${song.id}')">💾 另存為快照</button></div>
 ${banner}
-<h3>總分組成（各項權重已正規化，原始總和${WEIGHT_SUM}% → 100%；SP技能出場順序／連結不列入本工具加權，僅供參考）</h3>
+<h3>總分組成（各項權重已正規化，原始總和${WEIGHT_SUM}% → 100%；SP技能出場順序／連結／面板不列入本工具加權，僅供參考）</h3>
 ${scoreBar("隊長服裝",WEIGHTS.leader,result.leaderScore)}
 ${scoreBar("隊員被動",WEIGHTS.passive,result.passiveScore)}
-${scoreBar("時間軸覆蓋率（主動技）",WEIGHTS.timeline,result.timelineScore)}
-${scoreBar("覆蓋效率（主動技，扣除重疊）",WEIGHTS.coverage,result.coverageScore)}
-<p class="small">參考資訊（不計入總分，本工具未模擬逐拍連段成長）：連結 ${result.connectScore.toFixed(1)} / 100</p>
+${scoreBar("時間軸覆蓋率",WEIGHTS.timeline,result.timelineScore)}
+${scoreBar("覆蓋效率（扣除重疊）",WEIGHTS.coverage,result.coverageScore)}
+<p class="small">參考資訊（不計入總分，本工具未模擬逐拍連段成長）：連結 ${result.connectScore.toFixed(1)} / 100 · 面板 ${result.boardScore.toFixed(1)} / 100</p>
 
 <h3>逐位隊員條件檢查（PASS/FAIL）</h3>
 <table><thead><tr><th>隊員</th>${highlightOwned? "<th>持有狀態</th>":""}<th>隊長服裝</th><th>被動</th><th>屬性搭配</th><th>期別搭配</th></tr></thead>
@@ -4028,11 +3961,10 @@ ${scoreBar("覆蓋效率（主動技，扣除重疊）",WEIGHTS.coverage,result.
 
 <h3>主動技／SP技能時間軸</h3>
 <div class="metric-row">
-<div class="metric-box"><div class="num">${result.activeCoverage.toFixed(1)}%</div><div class="lbl">主動技覆蓋率（計分用）</div></div>
+<div class="metric-box"><div class="num">${result.coverage.toFixed(1)}%</div><div class="lbl">覆蓋率</div></div>
 <div class="metric-box"><div class="num">${result.overlap.toFixed(1)}%</div><div class="lbl">重疊（浪費）</div></div>
-<div class="metric-box"><div class="num">${result.idle.toFixed(1)}%</div><div class="lbl">空檔（完全無加成）</div></div>
+<div class="metric-box"><div class="num">${result.idle.toFixed(1)}%</div><div class="lbl">空檔</div></div>
 </div>
-<p class="small">參考資訊（不計分）：含SP技能在內的總覆蓋率 ${result.coverage.toFixed(1)}%——SP技能不管換哪5個人，加總起來幾乎都固定貢獻50~70秒左右的覆蓋時間，對「這隊主動技設計好不好」沒有鑑別度，所以評分改成只看主動技覆蓋率；空檔（完全沒有任何加成，含SP）則仍用含SP的版本計算才準確。</p>
 <div class="legend"><span><i style="background:var(--accent2)"></i>主動技</span><span><i style="background:var(--accent)"></i>SP技能</span></div>
 <div class="timeline-wrap">${buildTimelineRulerHtml(song.duration)}${timelineRows}</div>
 <p class="small">＊「重疊（浪費）」只計算<b>主動技彼此</b>同時生效的時間（同類型 Score Up 效果不可疊加）；SP技能與主動技是不同機制，會疊加，兩者重疊不算浪費、也不影響SP技能的站位順序。</p>
@@ -4352,7 +4284,7 @@ document.getElementById("roiResult").style.display="block";
 const leaderCard = getLeaderCardOf(current);
 const condRows = current.conditionReport.map(r=>`
 <tr>
-<td>${r.isLeader?"👑 ":""}${r.card.holomem}<span class="tag">${holomemEn(r.card.holomem)}</span><br><span class="small">${r.card.name}</span></td>
+<td>${r.isLeader?"👑 ":""}${r.card.holomem}<br><span class="small">${r.card.name}</span></td>
 ${src==="leaderpick" ? `<td>${OWNED[r.card.id]? '<span class="pill g">✅ 已持有</span>' : '<span class="pill r">🛒 未持有</span>'}</td>` : ""}
 <td>${pillFor(r.leaderOutfitCol)}</td>
 <td>${pillFor(r.passiveCol)}</td>
@@ -4379,7 +4311,7 @@ const top = rows.slice(0,15);
 document.getElementById("roiList").innerHTML = top.length ? top.map((r,i)=>`
 <div class="roi-row">
 <div class="roi-rank">#${i+1}</div>
-<div class="roi-name">${r.card.holomem}（${holomemEn(r.card.holomem)}） — ${r.card.name}<span class="sub">建議替換：${r.replacedCard.holomem}（${r.replacedCard.name}）${r.newLeaderId===r.card.id?" · 同時成為新隊長":""} · ${gapReasonText(current,r)} · ${GEN_LABELS[r.card.genCode]}${r.card.type!=="unknown"?" / "+r.card.type:""} · <a href="${r.card.source}" target="_blank" class="badge-src">資料來源</a></span></div>
+<div class="roi-name">${r.card.holomem} — ${r.card.name}<span class="sub">建議替換：${r.replacedCard.holomem}（${r.replacedCard.name}）${r.newLeaderId===r.card.id?" · 同時成為新隊長":""} · ${gapReasonText(current,r)} · ${GEN_LABELS[r.card.genCode]}${r.card.type!=="unknown"?" / "+r.card.type:""} · <a href="${r.card.source}" target="_blank" class="badge-src">資料來源</a></span></div>
 <div class="roi-delta">${r.delta>=0?"+":""}${r.delta.toFixed(2)}</div>
 </div>`).join("") : `<p class="small">目前找不到任何一張未持有的卡能合法換進這支隊伍（可能是 Holomem 重複衝突太多），請先到「⑥資料庫編輯」確認資料庫涵蓋範圍。</p>`;
 } else {
@@ -4402,7 +4334,7 @@ const subText = r.delta===null
 return `
 <div class="roi-row">
 <div class="roi-rank">#${i+1}</div>
-<div class="roi-name">${r.card.holomem}（${holomemEn(r.card.holomem)}） — ${r.card.name}<span class="sub">${subText} · ${GEN_LABELS[r.card.genCode]}${r.card.type!=="unknown"?" / "+r.card.type:""} · <a href="${r.card.source}" target="_blank" class="badge-src">資料來源</a></span></div>
+<div class="roi-name">${r.card.holomem} — ${r.card.name}<span class="sub">${subText} · ${GEN_LABELS[r.card.genCode]}${r.card.type!=="unknown"?" / "+r.card.type:""} · <a href="${r.card.source}" target="_blank" class="badge-src">資料來源</a></span></div>
 <div class="roi-delta" style="color:${r.delta===null?'var(--bad)':'var(--warn)'};">${r.delta===null ? "必抽" : ("−"+r.delta.toFixed(2))}</div>
 </div>`;
 }).join("");
@@ -4474,7 +4406,7 @@ const specialTxt = c.special
 ? c.special.value+"%／持續"+c.special.duration+"s"
 : "unknown";
 return `<tr>
-<td>${c.holomem}<br><span class="small">${holomemEn(c.holomem)}</span></td>
+<td>${c.holomem}</td>
 <td>${c.name}</td>
 <td>${GEN_LABELS[c.genCode]||c.genCode}</td>
 <td>${c.type!=="unknown"?c.type:'<span class="small">unknown</span>'}</td>
@@ -4526,7 +4458,7 @@ function renderCardTable(){
 const tbody=document.querySelector("#cardTable tbody");
 tbody.innerHTML = CARDS.map(c=>`
 <tr>
-<td>${c.holomem}<br><span class="small">${holomemEn(c.holomem)}</span></td>
+<td>${c.holomem}</td>
 <td>${c.name}<br><span class="small">${c.id}</span></td>
 <td>${GEN_LABELS[c.genCode]||c.genCode}${c.extraGenCodes&&c.extraGenCodes.length?"（兼"+c.extraGenCodes.map(code=>GEN_LABELS[code]||code).join("/")+"）":""}</td>
 <td>${c.type}${c.typeConfirmed===false?" (推測)":""}</td>
@@ -4557,12 +4489,12 @@ alert("已儲存卡片："+obj.id);
 function deleteCard(id){
 if(!confirm("確定刪除這張卡片？")) return;
 CARDS = CARDS.filter(c=>c.id!==id);
-delete OWNED[id];
-saveCards(CARDS); saveOwned(OWNED);
+delete OWNED[id]; delete BOARD[id];
+saveCards(CARDS); saveOwned(OWNED); saveBoard(BOARD);
 renderCardTable(); updateDbStat(); renderRoster(); populateSelectors();
 }
 function exportData(){
-const blob = new Blob([JSON.stringify({cards:CARDS, owned:OWNED},null,2)], {type:"application/json"});
+const blob = new Blob([JSON.stringify({cards:CARDS, owned:OWNED, board:BOARD},null,2)], {type:"application/json"});
 const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="hololive_dreams_data.json"; a.click();
 }
 function importData(ev){
@@ -4573,7 +4505,8 @@ try{
 const obj=JSON.parse(reader.result);
 if(obj.cards) CARDS=obj.cards;
 if(obj.owned) OWNED=obj.owned;
-saveCards(CARDS); saveOwned(OWNED);
+if(obj.board) BOARD=obj.board;
+saveCards(CARDS); saveOwned(OWNED); saveBoard(BOARD);
 renderCardTable(); renderRoster(); updateDbStat(); populateSelectors();
 alert("匯入完成");
 }catch(e){ alert("匯入失敗："+e.message); }
