@@ -129,6 +129,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <button data-tab="databrowser">⑤ 卡片／歌曲查詢</button>
 <button data-tab="editor">⑥ 資料庫編輯</button>
 <button data-tab="about">⑦ 方法論 / 資料來源</button>
+<button data-tab="exhaustive">⑧ 完整窮舉最佳化（慢速）</button>
 </nav>
 
 <details class="quicknav">
@@ -321,10 +322,40 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <li><b>Special Skill Order（SP技能站位順序，不列入本工具加權，僅供參考）</b>：SP技能每首歌只發動一次，依隊伍站位由左到右依序輪流發動（站位1最早、站位5最晚），彼此之間<b>不能重疊</b>（同時間只有1個SP技能生效），但可以自由跟主動技疊加。部分SP技能帶有額外加成條件（解析自技能說明文字，例如「40コンボ以上でスコアが120%UP」「ライフ1000以上でスキル発動率が55%UP」）：需要<b>連段(コンボ)</b>門檻的應放越右邊（越晚發動，連段數才夠）；需要<b>生命值(ライフ)</b>門檻的應放越左邊（越早發動，生命值還沒被扣掉太多）；沒有特殊條件的則依「スコアサポート效果%」數值由小到大排，數值越高越晚發動，可疊加在音樂遊戲後段通常較高的連段分數倍率上（此數值僅用於內部排序，不會顯示在站位建議的卡片標籤上）。這個排序邏輯對<b>實際遊戲分數</b>有實質影響，但因為本工具沒有逐拍模擬連段成長，所以<b>不會反映在 Overall Score</b>裡，僅作為站位建議呈現。</li>
 <li><b>Connect（不列入加權，僅供參考）</b>：本遊戲的 Connect 實際機制是「此卡放置於某 Holomem 技能板的 Connect 格時，提升該技能板效果 X%」，並非同隊成員間的加成。這項對整隊評分的實際影響難以量化，故不列入 Overall Score 加權計算，只在分析結果中列出原始數值供參考。（原本還有「Board 加成%」項目，因為需要玩家手動輸入每張卡的板面投資進度、太麻煩且無法自動抓取，已整個移除。）</li>
 <li><b>Overall Score</b>：以上各項依 Leader Outfit 30 / Passive 25 / Timeline 20 / Coverage 10 加權（原始權重總和85%，已等比例正規化為100%）。Special Skill Order／Connect 皆不計入。</li>
+<li><b>主動技能發動頻率天賦（0/4/8/12%，②③搜尋時自動納入考量）</b>：每位Holomem的天賦盤可以加成Active技能的發動頻率，效果是把該角色的Interval縮短為Interval/(1+加成%)——依實測驗證（同一張卡分別測0%/8%/12%），觸發序列是「整條從t=0開始直接套用縮短後的Interval重算」，不是保留原節奏只插入額外次數。這代表頻率天賦會讓該成員的觸發時間點整體「相位位移」，如果新的觸發窗口跟隊友的既有觸發時間撞在一起，反而會變成純粹的Overlap（浪費），不會提升整隊的Timeline/Coverage分數——頻率天賦不是「點越高分數越高」，最佳值會依隊伍其他成員的節奏而變。②③搜尋隊伍時，本工具會在「卡片組合已經定案」後，對這組隊伍窮舉4的隊伍人數次方種頻率排列組合（最多1024種），找出讓Timeline+Coverage加權分數最高的配置；貪婪法換卡校正輪也會用「換上這張卡＋配上它最適合的頻率」的分數來比較，避免因為都假設0%頻率而錯過某張卡實際上更好的可能性。分析結果的時間軸區塊會顯示每位隊員被建議的頻率天賦%，供你在遊戲內的Holomem板實際點配。</li>
 </ol>
 <h3>已知資料限制</h3>
 <p class="small">目前遊戲（2026/7/23 上線）wiki 資料仍在補齊中：(1) 內建資料庫已收錄 <b>59 張卡</b>——54 位 Holomem 各自的主力 5★卡（來自 AppMedia／Game8 星5一覧），加上 5 張最新追加的水著限定 5★卡（白銀ノエル／大空スバル／不知火フレア／角巻わため／音乃瀬奏），<b>全部 59 張都已取得完整的 Active/Passive/Special/Outfit/Connect/Stats/Type/Generation 數值</b>（AppMedia 有 19 張把技能表渲染成圖片抓不到文字，已改用 Game8 的純文字版頁面補齊，未用假數字填補）；(2) 完整遊戲每位角色通常還有第2、第3張卡（We are hololive!基礎款等），尚未全部收錄，可在「⑥ 資料庫編輯」分頁持續新增；(3) Active 技能每 X 秒判定一次、依機率發動（第三方玩家整理的數據約為高機率55%／中機率45%／低機率35%，可疊加機率加成技能），但<b>本工具的時間軸／覆蓋率計算刻意假設每次判定都必定發動（100%）</b>——這是因為本工具設計目標是「衝排行榜」場景：實際打法是刷到技能都順利發動的那一輪才算，加上天賦盤本身也能疊加發動機率，投資夠深後接近保底發動，所以以 100% 發動當作優化目標是正確假設，不是簡化偷懶；(4) 歌曲 BPM 與逐秒 note 密度（例如副歌段落是否比其他段落更密集）目前沒有任何公開資料來源——這代表「覆蓋率」只衡量技能生效的<b>時間長度</b>，同樣長度的生效時間蓋在 note 密集的段落還是稀疏的段落，實際換算到的分數可能差很多，本工具目前無法納入這個差異，覆蓋率請理解成「技能彼此設計上合不合、有沒有互相卡到」的參考指標，而不是實際分數的保證值。所有假設與資料缺口都會在介面上明確標示，不會用虛構數字掩蓋。</p>
 </div>
+</div>
+
+<!-- ============ TAB 8: 完整窮舉最佳化 ============ -->
+<div class="tab" id="tab-exhaustive">
+<div class="card">
+<h2>⑧ 完整窮舉最佳化（慢速）</h2>
+<p class="small">這裡對「卡片組合」與「頻率天賦排列」<b>同時做完全窮舉</b>，不像②③的自動搜尋走貪婪法＋局部優化去逼近最佳解——這裡保證找到候選範圍內真正的全域最佳隊伍。代價是運算量會隨候選角色數量急遽增加：候選池選「持有角色」通常幾分鐘內可以跑完；選「資料庫全部卡片」（約53位候選角色）可能需要<b>數小時</b>才能跑完全部組合。過程中會即時顯示目前為止找到的最佳結果，也可以隨時按「取消」中止，保留當下最佳解。建議先手動鎖定幾個你確定要用的角色（於下方欄位），可以大幅縮小需要窮舉的範圍、大幅縮短時間。</p>
+<div class="grid cols2">
+<div>
+<label class="small">隊長（必選）</label>
+<select id="leaderSelectExhaustive"></select>
+</div>
+<div>
+<label class="small">候選池</label>
+<select id="exhaustivePoolMode">
+<option value="owned">只從持有角色中選（範圍小，較快）</option>
+<option value="all">從資料庫全部卡片選（範圍大，可能要跑數小時）</option>
+</select>
+</div>
+</div>
+<p class="small" style="margin-top:8px;">手動鎖定隊員（可留空）：於下方 5 個欄位選卡，已選的欄位會被鎖定不動，只窮舉剩下空著的欄位——鎖越多欄位、窮舉範圍越小、跑越快。</p>
+<div class="grid cols4" id="manualSlotsExhaustive" style="margin-top:10px;"></div>
+<div style="display:flex;gap:8px;margin-top:12px;">
+<button class="btn" id="btnStartExhaustive" onclick="runFullExhaustiveSearch()">🔍 開始窮舉</button>
+<button class="btn secondary" id="btnCancelExhaustive" onclick="cancelExhaustiveSearch()" disabled>⏹ 取消（保留目前最佳結果）</button>
+</div>
+<div id="exhaustiveProgressArea" style="margin-top:14px;"></div>
+</div>
+<div id="resultAreaExhaustive"></div>
 </div>
 
 </main>
@@ -3861,27 +3892,41 @@ return {card:c,isLeader,leaderOutfitCol,passiveCol,typeCol,genCol};
 });
 }
 
-function buildTimeline(team,leaderId,songLen,order){
-// order: array of card ids in stage order (for Special sequencing)
+// 主動技能發動頻率天賦：0/4/8/12% 四個等級，屬於「每位Holomem」的天賦盤（跟卡片無關，換裝也共用同一份），
+// 效果是把該角色的Active interval縮短為 interval/(1+加成%)——依實測（同一張卡分別測0%/8%/12%）驗證：
+// 觸發序列是「整條從t=0開始，直接套用縮短後的interval重算」，不是保留原節奏、只是插入額外次數，
+// 也不是「第一次發動不受影響」，詳見開發過程中的測試記錄。
+const FREQ_LEVELS = [0,4,8,12];
+function effectiveInterval(baseInterval, freqPct){
+return baseInterval / (1 + (freqPct||0)/100);
+}
+
+// 單一成員的主動技事件列表：拆出來獨立成函式，是因為頻率天賦最佳化(bestFreqAssignmentForTeam)
+// 需要「每個成員分別在4種頻率下」各自的事件列表，先分別算好、再依排列組合混搭，
+// 這樣才不用每試一種頻率排列組合就整隊重新算一次主動技(這裡最貴的部分其實是events產生，不是coverage掃描)。
 // 主動技實際上是「每interval秒判定一次、依機率(高/中/低≈55%/45%/35%)發動」，不是100%保證觸發，
 // 但這裡刻意假設每次判定都必定發動——因為本工具是給「衝排行榜」場景用的：實際玩法是刷到技能都
 // 順利發動的那一輪才算數，加上天賦盤本身也能疊加發動機率，投資夠深後接近保底發動，
 // 所以拿100%發動當優化目標才是符合這個使用情境的正確假設，不是偷懶簡化。
-const events=[]; // {who, kind:'active'|'special', start, end}
-team.forEach(m=>{
-const c=m.card;
-const aInterval = statAtBloom(c.active, "interval", c.id);
-const aDuration = statAtBloom(c.active, "duration", c.id);
-if(c.active && aInterval && aDuration){
-let t=aInterval;
+function activeEventsForMember(card, freqPct, songLen){
+const events=[];
+const aInterval = statAtBloom(card.active, "interval", card.id);
+const aDuration = statAtBloom(card.active, "duration", card.id);
+if(card.active && aInterval && aDuration){
+const effInterval = effectiveInterval(aInterval, freqPct);
+let t=effInterval;
 while(t < songLen){
 const start=t, end=Math.min(t+aDuration, songLen);
-events.push({who:c.name, holomem:c.holomem, kind:"active", start, end});
-t += aInterval;
+events.push({who:card.name, holomem:card.holomem, kind:"active", start, end});
+t += effInterval;
 }
 }
-});
-// Special: fire sequentially in stage order, each starts when previous ends (starting at t=0)
+return events;
+}
+
+// SP技能事件：跟頻率天賦無關(頻率天賦只影響Active)，依隊伍站位順序依序觸發。
+function specialEvents(team, order, songLen){
+const events=[];
 let cursor=0;
 order.forEach(cid=>{
 const m=team.find(x=>x.card.id===cid);
@@ -3895,6 +3940,53 @@ cursor = end;
 }
 });
 return events;
+}
+
+function buildTimeline(team,leaderId,songLen,order,freqAssignment){
+// order: array of card ids in stage order (for Special sequencing)
+// freqAssignment: {holomem: freqPct}，未指定的成員視為0%（沒點頻率天賦），維持向下相容。
+freqAssignment = freqAssignment || {};
+const events=[];
+team.forEach(m=>{
+events.push(...activeEventsForMember(m.card, freqAssignment[m.card.holomem]||0, songLen));
+});
+events.push(...specialEvents(team, order, songLen));
+return events;
+}
+
+// 窮舉「這組已經定案的隊伍」在4種頻率天賦(0/4/8/12%)排列組合下(holomem數量n，最多4^n=1024種)，
+// 哪一種組合讓 timelineScore(activeCoverage)+coverageScore(activeCoverage-overlap) 的加權分數最高。
+// 只算這兩項分數用得到的欄位(activeCoverage/overlap)，因為只有這兩項會被頻率天賦影響、
+// leaderScore/passiveScore/connectScore都跟頻率天賦無關，不需要每種組合都重算一次完整scoreTeam。
+function bestFreqAssignmentForTeam(team, order, songLen){
+const n = team.length;
+if(n===0) return {freqAssignment:{}, timelineScore:0, coverageScore:0};
+const perMemberOptions = team.map(m=> FREQ_LEVELS.map(f=> activeEventsForMember(m.card, f, songLen)));
+const spEvents = specialEvents(team, order, songLen);
+let bestPartial=-1, bestAssignment=null, bestTimelineScore=0, bestCoverageScore=0;
+const idxArr = new Array(n).fill(0);
+function evalCombo(){
+let activeEvts=[];
+idxArr.forEach((fi,mi)=>{ activeEvts.push(...perMemberOptions[mi][fi]); });
+const allEvents = activeEvts.concat(spEvents);
+const {activeCoverage, overlap} = coverageMetrics(allEvents, songLen);
+const timelineScore = activeCoverage;
+const coverageScore = Math.max(0, activeCoverage-overlap);
+const partial = timelineScore*WEIGHTS.timeline + coverageScore*WEIGHTS.coverage;
+if(partial>bestPartial){
+bestPartial = partial;
+bestTimelineScore = timelineScore;
+bestCoverageScore = coverageScore;
+bestAssignment = {};
+idxArr.forEach((fi,mi)=>{ bestAssignment[team[mi].card.holomem] = FREQ_LEVELS[fi]; });
+}
+}
+function rec(i){
+if(i===n){ evalCombo(); return; }
+for(let f=0; f<FREQ_LEVELS.length; f++){ idxArr[i]=f; rec(i+1); }
+}
+rec(0);
+return {freqAssignment:bestAssignment, timelineScore:bestTimelineScore, coverageScore:bestCoverageScore};
 }
 
 function coverageMetrics(events,songLen){
@@ -3957,8 +4049,11 @@ const order = sorted.map(m=>m.card.id);
 return {order, specialEfficiency: 100};
 }
 
-function scoreTeam(ownedTeamCards, leaderId, song){
+function scoreTeam(ownedTeamCards, leaderId, song, freqAssignment){
 // ownedTeamCards: array of card objects,實際「上場5席位」的成員（不一定含隊長，見下方說明）
+// freqAssignment: 可選，{holomem: freqPct(0/4/8/12)}，指定每位上場成員採用的「主動技能發動頻率」天賦等級。
+// 不傳的話全部視為0%(沒點)，維持向下相容——想要「頻率天賦最佳化後」的分數，請改呼叫 scoreTeamWithBestFreq。
+freqAssignment = freqAssignment || {};
 let team = ownedTeamCards.map(c=>({card:c}));
 const counts = computeCounts(team);
 const leaderCard = cardById(leaderId); // 隊長服裝一律來自這張卡，不論隊長本人上場與否、上場時用的是不是同一張卡
@@ -4016,7 +4111,7 @@ const {order, specialEfficiency} = bestSpecialOrder(team, song.duration);
 // 所有會顯示 team 順序的地方都會跟「建議站位順序」一致，不會再因為這次呼叫時 team 傳進來的
 // 原始順序不同（例如鎖定欄位 vs 從頭搜尋）而跳動。events/coverage 計算本身跟 team 陣列順序無關，不受影響。
 team = order.map(id=> team.find(m=>m.card.id===id)).filter(Boolean);
-const events = buildTimeline(team, leaderId, song.duration, order);
+const events = buildTimeline(team, leaderId, song.duration, order, freqAssignment);
 const {coverage, activeCoverage, overlap, idle} = coverageMetrics(events, song.duration);
 // Timeline/Coverage 分數改用「只算主動技」的 activeCoverage：SP技能不論隊伍怎麼選，
 // 5人加起來幾乎都固定貢獻50~70秒覆蓋時間，混進評分會沖淡「主動技設計好不好」這個真正有鑑別度的訊號。
@@ -4038,9 +4133,19 @@ team, leaderId, leaderCard, leaderDeployed, counts, leaderPass, leaderScore, lea
 passiveScore, passiveDetails,
 timelineScore, coverageScore, coverage, activeCoverage, overlap, idle,
 specialScore, order, events,
-connectScore, overall,
+connectScore, overall, freqAssignment,
 conditionReport: conditionReport(team, leaderCard, counts)
 };
+}
+
+// 在「卡片組合已經定案」的前提下，額外窮舉頻率天賦排列組合(4^隊伍人數)，找出讓分數最高的那組頻率配置，
+// 回傳套用最佳頻率後的完整評分結果(freqAssignment會被填入實際搜到的最佳值，而不是全部0%)。
+// 這一步比 scoreTeam 貴(每次呼叫要跑4^n次事件計算)，所以只在「卡片候選已經篩到剩不多」的地方呼叫，
+// 不要在窮舉/貪婪法挑卡片的最外層大迴圈裡直接用這個取代 scoreTeam，否則運算量會爆炸(詳見開發過程討論)。
+function scoreTeamWithBestFreq(ownedTeamCards, leaderId, song){
+const base = scoreTeam(ownedTeamCards, leaderId, song); // freq=0，用來拿到排序後的team/order(bestSpecialOrder不受頻率影響，結果穩定)
+const bestFreq = bestFreqAssignmentForTeam(base.team, base.order, song.duration);
+return scoreTeam(ownedTeamCards, leaderId, song, bestFreq.freqAssignment);
 }
 
 /* ================= OPTIMIZER ================= */
@@ -4064,13 +4169,15 @@ pool.forEach(c=>{ if(!byHolomem[c.holomem]) byHolomem[c.holomem]=[]; byHolomem[c
 const holomemList = Object.keys(byHolomem);
 let best=null, bestScore=-1;
 
+// ≤9個候選Holomem時走窮舉：候選組合數本來就不多，直接對每組候選都用「含頻率天賦最佳化」的分數比較，
+// 精準度最高(不會有「因為用freq=0比較，換掉了其實搭配某個頻率會更好的候選」這種誤判)。
 function evalMemberSet(memberHolomems, leaderDeployed){
 function pickBest(idx, chosen){
 if(idx===memberHolomems.length){
 const neededSize = leaderDeployed ? TEAM_SIZE-1 : TEAM_SIZE;
 if(chosen.length < neededSize) return;
 const teamCards = leaderDeployed ? [leader,...chosen] : chosen;
-const r = scoreTeam(teamCards, leader.id, song);
+const r = scoreTeamWithBestFreq(teamCards, leader.id, song);
 if(r.overall>bestScore){ bestScore=r.overall; best=r; }
 return;
 }
@@ -4080,6 +4187,11 @@ variants.forEach(v=>{ chosen.push(v); pickBest(idx+1,chosen); chosen.pop(); });
 pickBest(0,[]);
 }
 
+// >9個候選Holomem時走貪婪法：候選數太多沒辦法窮舉，分兩階段控制運算量——
+// 第一輪「逐位塞入最佳角色」用便宜的scoreTeam(頻率視為0%)快速定出雛形隊伍；
+// 第二輪「局部交換改善」才改用scoreTeamWithBestFreq(每次評分都內含4^5組頻率排列的窮舉)，
+// 這樣「這張候選卡換上去、配合它自己最適合的頻率」的分數，才會被正確拿來跟現有隊伍比較，
+// 不會因為都用頻率0%比較而誤判某張卡不值得換上去(詳見開發過程的效能/精準度取捨討論)。
 function greedyBuild(slotsCount, leaderDeployed){
 let chosenHolomem=[];
 let remaining = holomemList.slice();
@@ -4100,19 +4212,19 @@ for(let pass=0; pass<2; pass++){
 for(let i=0;i<chosenHolomem.length;i++){
 remaining = holomemList.filter(h=>!chosenHolomem.some(x=>x.holomem===h));
 const curCards = leaderDeployed ? [leader,...chosenHolomem.map(x=>x.card)] : chosenHolomem.map(x=>x.card);
-let curScore = scoreTeam(curCards, leader.id, song).overall;
+let curScore = scoreTeamWithBestFreq(curCards, leader.id, song).overall;
 remaining.forEach(h=>{
 byHolomem[h].forEach(v=>{
 const trial = chosenHolomem.map(x=>x.card); trial[i]=v;
 const trialCards = leaderDeployed ? [leader,...trial] : trial;
-const r = scoreTeam(trialCards, leader.id, song);
+const r = scoreTeamWithBestFreq(trialCards, leader.id, song);
 if(r.overall>curScore){ curScore=r.overall; chosenHolomem[i]={holomem:h,card:v}; }
 });
 });
 }
 }
 const finalCards = leaderDeployed ? [leader,...chosenHolomem.map(x=>x.card)] : chosenHolomem.map(x=>x.card);
-return scoreTeam(finalCards, leader.id, song);
+return scoreTeamWithBestFreq(finalCards, leader.id, song);
 }
 
 if(holomemList.length<=9){
@@ -4146,6 +4258,168 @@ if(r && (!best || r.overall>best.overall)) best=r;
 return best;
 }
 
+/* ================= ⑧ 完整窮舉最佳化：真正的暴力法，卡片組合與頻率天賦都不省略地全部試過 =================
+本區塊只給⑧分頁用，跟②③既有的貪婪法／窮舉分支(findBestTeamForLeader等)完全獨立，故意不共用同一套函式——
+因為②③的設計目標是「幾秒到幾十秒內給出一個夠好的建議」，這裡的設計目標是「不計時間、找到候選範圍內真正的最佳解」，
+兩者的效能/精準度取捨方向相反，硬要共用反而會讓程式碼互相牽制、改一邊要顧慮另一邊會不會變慢或變不準。
+*/
+
+function dedupeByHolomem(arr){
+const seen=new Set();
+return arr.filter(c=>{ if(seen.has(c.holomem)) return false; seen.add(c.holomem); return true; });
+}
+
+// 產生「固定卡(forced) + 從candidatePool窮舉剩餘空位」的所有完整隊伍組合(每個組合是長度TEAM_SIZE的卡片陣列)。
+// excludeHolomem：額外要排除的一位角色(通常是隊長本人的holomem，隊長不上場時也不能被其他候選卡頂替他自己)。
+// 這裡刻意把「同一位holomem底下的不同卡片(例如泳裝款/常駐款)」也當成獨立候選，全部展開——
+// 跟②③的搜尋函式邏輯一致，只是這裡不論候選角色有多少位，一律全部窮舉、不會因為超過9人就切換成貪婪法。
+function buildAllCandidateJobs(forced, excludeHolomem, candidatePool){
+let f = dedupeByHolomem(forced);
+if(f.length > TEAM_SIZE) f = f.slice(0, TEAM_SIZE);
+const remainingSlots = TEAM_SIZE - f.length;
+if(remainingSlots<=0) return [f];
+const pool = candidatePool.filter(c=> !f.some(x=>x.holomem===c.holomem) && (!excludeHolomem || c.holomem!==excludeHolomem));
+const byHolomem={};
+pool.forEach(c=>{ (byHolomem[c.holomem] = byHolomem[c.holomem]||[]).push(c); });
+const holomemList = Object.keys(byHolomem);
+if(holomemList.length < remainingSlots) return [];
+const combosH = combinations(holomemList, remainingSlots);
+const jobs=[];
+function expand(idx, comboH, chosen){
+if(idx===comboH.length){ jobs.push(f.concat(chosen)); return; }
+byHolomem[comboH[idx]].forEach(v=>{ chosen.push(v); expand(idx+1, comboH, chosen); chosen.pop(); });
+}
+combosH.forEach(comboH=> expand(0, comboH, []));
+return jobs;
+}
+
+// 把「隊長上場」與「隊長不上場只掛buff」兩種情境都展開成完整的任務清單({cards, leaderId})，
+// 跟findBestTeamWithFixed的情境A/B邏輯對應，只是這裡不比較分數、單純把所有候選組合都列出來給外層的非同步迴圈逐一評分。
+function buildFullExhaustiveJobList(leaderCard, fixedCards, forcedLeaderId, pool){
+const leaderAlreadyInFixed = fixedCards.some(c=>c.holomem===leaderCard.holomem);
+const jobs=[];
+// 情境A：隊長上場
+const forcedA = leaderAlreadyInFixed ? fixedCards.slice() : [leaderCard, ...fixedCards];
+buildAllCandidateJobs(forcedA, leaderCard.holomem, pool).forEach(cards=> jobs.push({cards, leaderId:forcedLeaderId}));
+// 情境B：隊長不上場只掛服裝buff(使用者已經把隊長卡手動鎖進欄位時，視為明確要隊長上場，不需要再試這個情境)
+if(!leaderAlreadyInFixed){
+buildAllCandidateJobs(fixedCards.slice(), leaderCard.holomem, pool).forEach(cards=> jobs.push({cards, leaderId:forcedLeaderId}));
+}
+return jobs;
+}
+
+// 執行狀態：用一個簡單的物件追蹤是否正在跑/是否被使用者按下取消，讓非同步迴圈跟UI按鈕可以互相溝通。
+const exhaustiveState = { running:false, cancel:false };
+
+function cancelExhaustiveSearch(){
+exhaustiveState.cancel = true;
+}
+
+function formatDuration(ms){
+const s = Math.round(ms/1000);
+const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+return (h>0?h+"小時":"") + (m>0||h>0?m+"分":"") + sec+"秒";
+}
+
+function updateExhaustiveProgress(done, total, elapsedMs, best, statusText){
+const el = document.getElementById("exhaustiveProgressArea");
+if(!el) return;
+const pct = total>0 ? (done/total*100) : 0;
+const rate = elapsedMs>0 ? done/elapsedMs : 0; // jobs per ms
+const etaMs = (rate>0 && done<total) ? (total-done)/rate : 0;
+el.innerHTML = `
+<div class="small">進度：${done.toLocaleString()} / ${total.toLocaleString()}（${pct.toFixed(2)}%） ｜ 已花費：${formatDuration(elapsedMs)} ｜ 預估剩餘：${done<total?formatDuration(etaMs):"—"}</div>
+<div style="background:var(--panel2);border-radius:6px;height:10px;margin-top:6px;overflow:hidden;"><div style="background:var(--accent);height:100%;width:${Math.min(100,pct)}%;"></div></div>
+${best? `<div class="small" style="margin-top:6px;">目前最佳：<b>${best.overall.toFixed(1)} 分</b>（${cardById(best.leaderId).holomem} 領隊）</div>` : ""}
+${statusText? `<div class="small" style="margin-top:4px;color:var(--accent2);">${statusText}</div>` : ""}
+`;
+}
+
+// 主入口：從①UI收集參數、產生完整任務清單、以「分批＋讓出主執行緒」的方式非同步跑過全部組合，
+// 每批評分完就更新一次進度條/目前最佳結果，並讓瀏覽器有機會處理使用者的「取消」點擊與畫面重繪，
+// 不然一次性同步跑幾十萬次評分會直接讓分頁整個凍住、連取消鍵都按不到。
+async function runFullExhaustiveSearch(){
+if(exhaustiveState.running) return;
+const leaderId = document.getElementById("leaderSelectExhaustive").value;
+if(!leaderId){ alert("請先選擇一位隊長。"); return; }
+const leaderCard = cardById(leaderId);
+if(!leaderCard){ alert("找不到這張隊長卡片，請重新選擇。"); return; }
+
+const poolMode = document.getElementById("exhaustivePoolMode").value;
+const pool = poolMode==="owned" ? ownedCardList() : CARDS;
+
+const fixedIds=[];
+for(let i=0;i<TEAM_SIZE;i++){ const s=document.getElementById("exhslot"+i); if(s && s.value) fixedIds.push(s.value); }
+const fixedCards = fixedIds.map(id=>cardById(id)).filter(Boolean);
+const seenHolomem = new Set();
+for(const c of fixedCards){
+if(seenHolomem.has(c.holomem)){ alert("鎖定的欄位裡有重複的 Holomem，同一位角色不能同時上場多張卡。"); return; }
+seenHolomem.add(c.holomem);
+}
+
+const song = {id:"exhaustive", title:"完整窮舉最佳化（不指定歌曲）", performer:"", duration:200, exLevel:null};
+
+const jobs = buildFullExhaustiveJobList(leaderCard, fixedCards, leaderId, pool);
+if(jobs.length===0){ alert("找不到可行的候選組合，請確認候選池／鎖定欄位是否足夠多樣（還需其他不同 Holomem 補滿剩餘位置）。"); return; }
+
+exhaustiveState.running = true;
+exhaustiveState.cancel = false;
+document.getElementById("btnStartExhaustive").disabled = true;
+document.getElementById("btnCancelExhaustive").disabled = false;
+document.getElementById("resultAreaExhaustive").innerHTML = "";
+
+let best=null, bestScore=-1;
+const total = jobs.length;
+const CHUNK = 30; // 每批跑30組再讓出主執行緒一次；scoreTeamWithBestFreq每次約20~50ms，一批約0.6~1.5秒，兼顧流暢度與整體吞吐量
+const startTime = Date.now();
+let doneCount = 0;
+
+// 抽樣校準：先跑前面幾組實測平均每組耗時，推估總共需要多久，讓使用者在真正投入大量時間之前先確認要不要繼續。
+const sampleSize = Math.min(5, total);
+const calibStart = Date.now();
+for(let j=0;j<sampleSize;j++){
+const job = jobs[j];
+const r = scoreTeamWithBestFreq(job.cards, job.leaderId, song);
+if(r.overall>bestScore){ bestScore=r.overall; best=r; }
+}
+doneCount = sampleSize;
+const avgMs = (Date.now()-calibStart)/sampleSize;
+const estTotalMs = avgMs * total;
+updateExhaustiveProgress(doneCount, total, Date.now()-startTime, best, "已完成抽樣校準…");
+if(total>sampleSize && !confirm(`候選組合共 ${total.toLocaleString()} 組，依抽樣估算完整跑完約需 ${formatDuration(estTotalMs)}。要繼續跑完整個窮舉嗎？（可以按「確定」後隨時用「取消」按鈕中止，保留當時最佳結果）`)){
+exhaustiveState.running = false;
+document.getElementById("btnStartExhaustive").disabled = false;
+document.getElementById("btnCancelExhaustive").disabled = true;
+updateExhaustiveProgress(doneCount, total, Date.now()-startTime, best, "已取消（僅完成抽樣校準），以下為抽樣範圍內的最佳結果。");
+if(best) renderResult(best, song, "resultAreaExhaustive", poolMode==="owned");
+return;
+}
+
+for(let i=sampleSize;i<total;i+=CHUNK){
+if(exhaustiveState.cancel) break;
+const end = Math.min(i+CHUNK, total);
+for(let j=i;j<end;j++){
+const job = jobs[j];
+const r = scoreTeamWithBestFreq(job.cards, job.leaderId, song);
+if(r.overall>bestScore){ bestScore=r.overall; best=r; }
+}
+doneCount = end;
+updateExhaustiveProgress(doneCount, total, Date.now()-startTime, best, "搜尋中…");
+// eslint-disable-next-line no-await-in-loop
+await new Promise(resolve=>setTimeout(resolve, 0));
+}
+
+exhaustiveState.running = false;
+document.getElementById("btnStartExhaustive").disabled = false;
+document.getElementById("btnCancelExhaustive").disabled = true;
+
+updateExhaustiveProgress(doneCount, total, Date.now()-startTime, best, exhaustiveState.cancel? "⏹ 已取消，以下為取消當下找到的最佳結果。" : "✅ 完整窮舉已跑完全部組合，以下為候選範圍內真正的全域最佳結果。");
+
+if(best){
+renderResult(best, song, "resultAreaExhaustive", poolMode==="owned");
+}
+}
+
 // 鎖定「已手動指定的卡片」，只針對剩下的空位從 owned 中窮舉／爬山演算法找最佳搭配。
 // fixedCards：已手動選好、要固定上場的卡片（可以是 0～5 張）。
 // forcedLeaderId：可選；若指定且該卡不在 fixedCards 中，函式內部會同時嘗試「隊長也上場」與「隊長不上場只掛buff」兩種情境，取分數較高者。
@@ -4167,7 +4441,7 @@ let forced = dedupe(forcedRaw);
 if(forced.length > TEAM_SIZE) forced = forced.slice(0, TEAM_SIZE);
 if(forced.length===0) return null;
 const remainingSlots = TEAM_SIZE - forced.length;
-if(remainingSlots<=0) return scoreTeam(forced, effLeaderId, song);
+if(remainingSlots<=0) return scoreTeamWithBestFreq(forced, effLeaderId, song);
 
 // 不管隊長這次上不上場，隊長本人的 Holomem 都不能再被其他候選卡佔用（同一位角色不能同時用兩張卡）。
 const pool = owned.filter(c=> !forced.some(f=>f.holomem===c.holomem) && (!leaderCard || c.holomem!==leaderCard.holomem));
@@ -4181,7 +4455,7 @@ function evalMemberSet(memberHolomems){
 function pickBest(idx, chosen){
 if(idx===memberHolomems.length){
 const trial = forced.concat(chosen);
-const r = scoreTeam(trial, effLeaderId, song);
+const r = scoreTeamWithBestFreq(trial, effLeaderId, song);
 if(r.overall>bestScore){ bestScore=r.overall; best=r; }
 return;
 }
@@ -4211,18 +4485,18 @@ remaining = remaining.filter(h=>h!==bestH);
 }
 for(let pass=0; pass<2; pass++){
 for(let i=0;i<chosenHolomem.length;i++){
-let curScore = scoreTeam(forced.concat(chosenHolomem.map(x=>x.card)), effLeaderId, song).overall;
+let curScore = scoreTeamWithBestFreq(forced.concat(chosenHolomem.map(x=>x.card)), effLeaderId, song).overall;
 remaining = holomemList.filter(h=>!chosenHolomem.some(x=>x.holomem===h));
 remaining.forEach(h=>{
 byHolomem[h].forEach(v=>{
 const trial = chosenHolomem.map(x=>x.card); trial[i]=v;
-const r = scoreTeam(forced.concat(trial), effLeaderId, song);
+const r = scoreTeamWithBestFreq(forced.concat(trial), effLeaderId, song);
 if(r.overall>curScore){ curScore=r.overall; chosenHolomem[i]={holomem:h,card:v}; }
 });
 });
 }
 }
-best = scoreTeam(forced.concat(chosenHolomem.map(x=>x.card)), effLeaderId, song);
+best = scoreTeamWithBestFreq(forced.concat(chosenHolomem.map(x=>x.card)), effLeaderId, song);
 }
 return best;
 }
@@ -4374,7 +4648,6 @@ if(curPick) leaderSelPick.value=curPick;
 }
 const slotsLeaderPick=document.getElementById("manualSlotsLeaderPick");
 if(slotsLeaderPick){
-// 選項來自「資料庫全部卡片」而非只有持有角色，方便鎖定還沒抽到、但想看看理論隊伍的卡
 const prevVals = [];
 for(let i=0;i<TEAM_SIZE;i++){ const s=document.getElementById("lpslot"+i); prevVals.push(s?s.value:""); }
 slotsLeaderPick.innerHTML="";
@@ -4389,6 +4662,30 @@ const wrap=document.createElement("div");
 wrap.innerHTML=`<label class="small">位置 ${i+1}</label>`;
 wrap.appendChild(sel);
 slotsLeaderPick.appendChild(wrap);
+}
+}
+
+// ---- ⑧完整窮舉最佳化分頁：隊長選單(全部卡片，不論候選池模式為何都可指定任何角色當隊長)、手動鎖定欄位 ----
+const leaderSelExhaustive=document.getElementById("leaderSelectExhaustive");
+if(leaderSelExhaustive){
+const curExh=leaderSelExhaustive.value;
+leaderSelExhaustive.innerHTML = `<option value="">（請選擇隊長）</option>` + cardOptionsGroupedByGen(CARDS, c=>`${c.holomem}(${holomemEn(c.holomem)}) - ${c.name}${OWNED[c.id]?"":"（未持有）"}`);
+if(curExh) leaderSelExhaustive.value=curExh;
+}
+const slotsExhaustive=document.getElementById("manualSlotsExhaustive");
+if(slotsExhaustive){
+const prevValsExh = [];
+for(let i=0;i<TEAM_SIZE;i++){ const s=document.getElementById("exhslot"+i); prevValsExh.push(s?s.value:""); }
+slotsExhaustive.innerHTML="";
+for(let i=0;i<TEAM_SIZE;i++){
+const sel=document.createElement("select");
+sel.id="exhslot"+i;
+sel.innerHTML = `<option value="">（空）</option>` + cardOptionsGroupedByGen(CARDS, c=>`${c.holomem}(${holomemEn(c.holomem)}) - ${c.name}${OWNED[c.id]?"":"（未持有）"}`);
+if(prevValsExh[i]) sel.value = prevValsExh[i];
+const wrap=document.createElement("div");
+wrap.innerHTML=`<label class="small">位置 ${i+1}</label>`;
+wrap.appendChild(sel);
+slotsExhaustive.appendChild(wrap);
 }
 }
 }
@@ -4441,7 +4738,11 @@ const timelineRows = result.team.map((m,idx)=>{
 const c=m.card;
 const myEvents = result.events.filter(e=>e.who===c.name);
 const segs = myEvents.map(e=>`<div class="seg ${e.kind}" style="left:${e.start/song.duration*100}%;width:${(e.end-e.start)/song.duration*100}%;" title="${e.kind==='active'?'主動技':'SP技能'} ${e.start}s-${e.end}s"></div>`).join("");
-return `<div class="timeline-row"><div class="who"><div class="marquee-wrap"><span class="marquee-text">${c.holomem}</span></div><div class="marquee-wrap small"><span class="marquee-text">${c.name}</span></div></div><div class="timeline-track">${segs}</div></div>`;
+// 頻率天賦建議：這是scoreTeamWithBestFreq窮舉4^n種排列組合後、對「這組已定案的隊伍」找到的最佳頻率配置——
+// 只有透過搜尋功能(②③)產生的結果才會有非0的建議值；手動單獨檢視某隊伍時預設全部視為0%(未點)。
+const freqPct = (result.freqAssignment && result.freqAssignment[c.holomem]) || 0;
+const freqBadge = c.active ? `<span class="small" style="display:block;color:var(--accent2);">建議頻率天賦：${freqPct}%</span>` : "";
+return `<div class="timeline-row"><div class="who"><div class="marquee-wrap"><span class="marquee-text">${c.holomem}</span></div><div class="marquee-wrap small"><span class="marquee-text">${c.name}</span></div>${freqBadge}</div><div class="timeline-track">${segs}</div></div>`;
 }).join("");
 
 const orderChips = result.order.map(id=>{
@@ -4631,7 +4932,7 @@ const leaderId = document.getElementById("leaderSelectPractice").value || ids[0]
 // 隊長是「隊伍buff」角色，不強制要求也是上場5人之一；就算上場的是隊長「同一位角色的另一張卡」
 // （例如隊長服裝掛泳裝款、上場用常駐款）也完全合法，遊戲本身就支援這種混搭，不需要額外擋掉。
 const cards = ids.map(id=>cardById(id));
-const result = scoreTeam(cards, leaderId, song);
+const result = scoreTeamWithBestFreq(cards, leaderId, song);
 renderResult(result, song, "resultAreaPractice");
 TEAM_RESULTS.practice = {result, song};
 saveTeamResultsToStorage();
@@ -4699,7 +5000,7 @@ if(holomemSet.size!==TEAM_SIZE){ alert("隊伍中有重複的 Holomem，同一�
 // 隊長是「隊伍buff」角色，不強制要求也出現在下方5個上場席位裡；就算上場的是隊長「同一位角色的另一張卡」
 // （例如隊長服裝掛泳裝款、上場用常駐款）也完全合法，遊戲本身就支援這種混搭，不需要額外擋掉。
 const song = {id:"leaderpick", title:"指定隊長最佳隊伍（不指定歌曲，從全部卡片挑選）", performer:"", duration:200, exLevel:null};
-const result = scoreTeam(fixedCards, leaderId, song);
+const result = scoreTeamWithBestFreq(fixedCards, leaderId, song);
 renderResult(result, song, "resultAreaLeaderPick", true);
 TEAM_RESULTS.leaderpick = {result, song};
 saveTeamResultsToStorage();
