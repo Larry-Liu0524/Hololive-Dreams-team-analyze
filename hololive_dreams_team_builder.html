@@ -317,7 +317,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <li><b>Member Passive（25%）</b>：逐一檢查每位隊員的被動技能觸發條件是否成立（PASS/FAIL）。</li>
 <li><b>Type / Generation 檢查</b>：於「條件報告」表格中列出每位隊員的 Type、Generation 是否與隊上其他成員形成有效搭配（同屬性/期別≥2）。</li>
 <li><b>Active Skill Timeline（併入 Timeline 20%）</b>：以「首次觸發＝Interval秒，之後每隔 Interval 秒觸發一次，每次持續 Duration 秒」的確定性模型建立時間軸（例：Interval23秒/Duration8秒 → 23–31、46–54、69–77…）。＊本遊戲 Active 技能實際帶有機率（低/中/高機率），非 100% 必發；本模型以「高機率視為近似必發」簡化計算，實際遊戲表現會有隨機浮動，請將本工具的時間軸視為「理論上限」而非保證值。</li>
-<li><b>Skill Coverage（10%）</b>：同類型的 Active「Score Up」效果不可疊加，因此 Overlap（重疊/浪費）只計算<b>主動技彼此</b>同時生效的時間佔比；SP技能（Special）與主動技是不同機制、會疊加，兩者重疊不算浪費。<b>Timeline／Coverage 這兩項評分只採計「主動技」的覆蓋時間</b>，不把 SP技能算進去——因為 SP技能不論換哪 5 位角色上場，5人加總起來幾乎都固定貢獻 50~70 秒左右的覆蓋時間（每張卡 SP 持續時間落在 10~14 秒的窄區間），對「這隊主動技彼此設計合不合」沒有鑑別度，混進評分反而會沖淡真正該看的訊號。Idle（完全沒有任何技能生效的時間佔比）仍涵蓋主動技＋SP技能，才能反映真正的死時間；含SP在內的「總覆蓋率」也會在分析結果中列出，僅供參考不計分。Timeline 分數＝主動技Coverage%；Coverage 分數＝主動技Coverage% − Overlap%。</li>
+<li><b>Skill Coverage（10%）</b>：同類型的 Active「Score Up」效果不可疊加，因此 Overlap（重疊/浪費）只計算<b>主動技彼此</b>同時生效的時間佔比。<b>Timeline／Coverage／Idle（空檔）這幾項評分／指標全部只採計「主動技」</b>，完全不把 SP技能算進去——原因有兩個：(1) SP技能不論換哪 5 位角色上場，5人加總起來幾乎都固定貢獻 50~70 秒左右的覆蓋時間，對「這隊主動技彼此設計合不合」沒有鑑別度；(2) 更關鍵的是，實測發現SP技能第一次觸發的時間點<b>依歌曲不同而不同</b>（同一張卡在不同歌曲測到15秒／23秒兩種不同結果），且這個時間點無法透過選卡或天賦點數去改變，不是隊伍組成能影響的變數，公開資料裡也沒有找到說明這個機制的來源。既然玩家的決策完全無法影響它、我們也無法準確模擬它的真實時間點，混進覆蓋率/空檔/重疊率只會引入一個猜不準又幫不上決策的雜訊，所以SP技能被完全排除在這些計算之外，只在時間軸圖表上依「站位順序」呈現（順序本身是遊戲機制確認過的可信資訊），橫向時間位置僅供參考。Timeline 分數＝主動技Coverage%；Coverage 分數＝主動技Coverage% − Overlap%。</li>
 <li><b>Song Length</b>：所有時間軸與覆蓋率皆依你選擇的歌曲實際秒數重新計算（資料庫含 168 首歌曲秒數，來源 Game8）。</li>
 <li><b>Special Skill Order（SP技能站位順序，不列入本工具加權，僅供參考）</b>：SP技能每首歌只發動一次，依隊伍站位由左到右依序輪流發動（站位1最早、站位5最晚），彼此之間<b>不能重疊</b>（同時間只有1個SP技能生效），但可以自由跟主動技疊加。部分SP技能帶有額外加成條件（解析自技能說明文字，例如「40コンボ以上でスコアが120%UP」「ライフ1000以上でスキル発動率が55%UP」）：需要<b>連段(コンボ)</b>門檻的應放越右邊（越晚發動，連段數才夠）；需要<b>生命值(ライフ)</b>門檻的應放越左邊（越早發動，生命值還沒被扣掉太多）；沒有特殊條件的則依「スコアサポート效果%」數值由小到大排，數值越高越晚發動，可疊加在音樂遊戲後段通常較高的連段分數倍率上（此數值僅用於內部排序，不會顯示在站位建議的卡片標籤上）。這個排序邏輯對<b>實際遊戲分數</b>有實質影響，但因為本工具沒有逐拍模擬連段成長，所以<b>不會反映在 Overall Score</b>裡，僅作為站位建議呈現。</li>
 <li><b>Connect（不列入加權，僅供參考）</b>：本遊戲的 Connect 實際機制是「此卡放置於某 Holomem 技能板的 Connect 格時，提升該技能板效果 X%」，並非同隊成員間的加成。這項對整隊評分的實際影響難以量化，故不列入 Overall Score 加權計算，只在分析結果中列出原始數值供參考。（原本還有「Board 加成%」項目，因為需要玩家手動輸入每張卡的板面投資進度、太麻煩且無法自動抓取，已整個移除。）</li>
@@ -4004,27 +4004,24 @@ return {freqAssignment:bestAssignment, timelineScore:bestTimelineScore, coverage
 
 function coverageMetrics(events,songLen){
 const STEP=0.5;
-let covered=0, activeCovered=0, overlapT=0, n=Math.round(songLen/STEP);
+let activeCovered=0, overlapT=0, n=Math.round(songLen/STEP);
 for(let i=0;i<n;i++){
 const t=i*STEP;
-let cnt=0, activeCnt=0;
+let activeCnt=0;
 events.forEach(e=>{
-if(t>=e.start && t<e.end){
-cnt++;
-if(e.kind==="active") activeCnt++;
-}
+if(e.kind==="active" && t>=e.start && t<e.end) activeCnt++;
 });
-if(cnt>=1) covered+=STEP; // 任何技能(主動+SP)生效的時間，用來算 Idle(完全沒有任何加成的死時間)
-if(activeCnt>=1) activeCovered+=STEP; // 只算主動技生效的時間，用於評分(SP技能無論哪個隊伍幾乎都固定貢獻50~70秒，拿來評分沒有鑑別度)
+if(activeCnt>=1) activeCovered+=STEP; // 只算主動技生效的時間，用於評分
 // 重疊(浪費)只計算「主動技彼此」同時生效的情況：同類型 Score Up 效果不可疊加，才算浪費。
-// SP技能(Special)與主動技(Active)是不同機制，會疊加，故SP技能與主動技重疊不算浪費。
 if(activeCnt>=2) overlapT+=STEP;
 }
-const coverage = Math.min(100, covered/songLen*100); // 含SP，僅供參考，不用於評分
 const activeCoverage = Math.min(100, activeCovered/songLen*100); // 只算主動技，用於Timeline/Coverage評分
 const overlap = Math.min(100, overlapT/songLen*100);
-const idle = Math.max(0, 100-coverage);
-return {coverage, activeCoverage, overlap, idle};
+// Idle（空檔）也改成只依主動技計算：SP技能實際的觸發起始時間點依歌曲不同而不同（實測同一工具測過15秒/23秒兩種不同結果），
+// 且玩家無法透過選卡/天賦去影響這個時間點，把它算進覆蓋率/空檔會混入一個猜不準、也無法被隊伍決策影響的變數，
+// 所以SP技能不再參與任何覆蓋率/空檔/重疊率的計算，只在時間軸圖表上以站位順序呈現(順序資訊是遊戲機制確認過的，可信)。
+const idle = Math.max(0, 100-activeCoverage);
+return {activeCoverage, overlap, idle};
 }
 
 // 從SP技能說明文字中解析出「額外加成觸發條件」：連段(コンボ)門檻 或 生命值(ライフ)門檻。
@@ -4125,7 +4122,7 @@ const {order, specialEfficiency} = bestSpecialOrder(team, song.duration);
 // 原始順序不同（例如鎖定欄位 vs 從頭搜尋）而跳動。events/coverage 計算本身跟 team 陣列順序無關，不受影響。
 team = order.map(id=> team.find(m=>m.card.id===id)).filter(Boolean);
 const events = buildTimeline(team, leaderId, song.duration, order, freqAssignment);
-const {coverage, activeCoverage, overlap, idle} = coverageMetrics(events, song.duration);
+const {activeCoverage, overlap, idle} = coverageMetrics(events, song.duration);
 // Timeline/Coverage 分數改用「只算主動技」的 activeCoverage：SP技能不論隊伍怎麼選，
 // 5人加起來幾乎都固定貢獻50~70秒覆蓋時間，混進評分會沖淡「主動技設計好不好」這個真正有鑑別度的訊號。
 // coverage(含SP)則保留成參考資訊，Idle(完全沒有任何加成的死時間)仍用含SP的版本計算才準確。
@@ -4144,7 +4141,7 @@ const overall = overallRaw/(WEIGHT_SUM*100)*100;
 return {
 team, leaderId, leaderCard, leaderDeployed, counts, leaderPass, leaderScore, leaderNote,
 passiveScore, passiveDetails,
-timelineScore, coverageScore, coverage, activeCoverage, overlap, idle,
+timelineScore, coverageScore, activeCoverage, overlap, idle,
 specialScore, order, events,
 connectScore, overall, freqAssignment,
 conditionReport: conditionReport(team, leaderCard, counts)
@@ -4799,10 +4796,10 @@ ${scoreBar("覆蓋效率（主動技，扣除重疊）",WEIGHTS.coverage,result.
 <div class="metric-box"><div class="num">${result.overlap.toFixed(1)}%</div><div class="lbl">重疊（浪費）</div></div>
 <div class="metric-box"><div class="num">${result.idle.toFixed(1)}%</div><div class="lbl">空檔（完全無加成）</div></div>
 </div>
-<p class="small">參考資訊（不計分）：含SP技能在內的總覆蓋率 ${result.coverage.toFixed(1)}%——SP技能不管換哪5個人，加總起來幾乎都固定貢獻50~70秒左右的覆蓋時間，對「這隊主動技設計好不好」沒有鑑別度，所以評分改成只看主動技覆蓋率；空檔（完全沒有任何加成，含SP）則仍用含SP的版本計算才準確。</p>
-<div class="legend"><span><i style="background:var(--accent2)"></i>主動技</span><span><i style="background:var(--accent)"></i>SP技能</span></div>
+<p class="small">空檔＝100% − 主動技覆蓋率。SP技能不參與這裡的任何計算——實測發現同一位角色的SP技能，在不同歌曲裡第一次觸發的時間點並不固定（例如同一張卡實測過15秒／23秒兩種不同結果），且這個時間點无法透過選卡或天賦點數去改變，不是隊伍決策能影響的變數，所以覆蓋率／空檔／重疊率都只採計主動技。時間軸圖表上仍會畫出SP技能的區塊，但<b>橫向位置僅供參考</b>，實際觸發時機依歌曲而異、目前無法準確模擬；SP技能真正確定的資訊是站位順序（見上方「建議站位順序」)，不是時間點。</p>
+<div class="legend"><span><i style="background:var(--accent2)"></i>主動技</span><span><i style="background:var(--accent)"></i>SP技能（位置僅供參考）</span></div>
 <div class="timeline-wrap">${buildTimelineRulerHtml(song.duration)}${timelineRows}</div>
-<p class="small">＊「重疊（浪費）」只計算<b>主動技彼此</b>同時生效的時間（同類型 Score Up 效果不可疊加）；SP技能與主動技是不同機制，會疊加，兩者重疊不算浪費、也不影響SP技能的站位順序。</p>
+<p class="small">＊「重疊（浪費）」只計算<b>主動技彼此</b>同時生效的時間（同類型 Score Up 效果不可疊加），SP技能不計入重疊率計算。</p>
 <p class="small">＊沒有時間軸資料的卡片（主動技資料為 unknown）不會顯示色塊，代表該卡目前無法納入時間軸計算，僅其服裝/被動/隊長效果仍計入評分。</p>
 </div>
 `;
