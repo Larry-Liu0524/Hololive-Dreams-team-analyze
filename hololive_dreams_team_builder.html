@@ -3756,6 +3756,19 @@ const HOLOMEM_EN = {
 };
 function holomemEn(name){ return HOLOMEM_EN[name] || ""; }
 const GEN_ORDER = ["0","1","2","3","4","5","gamers","holox","myth","promise","regloss","advent","id1","id2","id3"];
+
+// 統一的卡片排序：先依期別（照GEN_ORDER的順序，跟①角色庫分組順序一致），組內再依角色名/卡名的日文假名排序。
+// ⑤卡片查詢、⑥資料庫編輯都共用這個函式，確保三個分頁看到的卡片順序邏輯一致，不會各排各的。
+function sortCardsCanonical(cards){
+const genIndex = {};
+GEN_ORDER.forEach((g,i)=>{ genIndex[g]=i; });
+return cards.slice().sort((a,b)=>{
+const ia = genIndex.hasOwnProperty(a.genCode) ? genIndex[a.genCode] : GEN_ORDER.length;
+const ib = genIndex.hasOwnProperty(b.genCode) ? genIndex[b.genCode] : GEN_ORDER.length;
+if(ia!==ib) return ia-ib;
+return a.holomem.localeCompare(b.holomem,"ja") || a.name.localeCompare(b.name,"ja");
+});
+}
 const TYPES = ["Happy","Cute","Pure"];
 const TEAM_SIZE = 5; // 依 Game8/Gamerch/horodori.com 確認：上場5個席位是「隊員」，隊長是獨立於這5席之外的第6個角色，只提供隊長服裝buff，可以上場(佔用5席其中1位、自己的主動/被動/SP技能照常觸發)、也可以完全不上場(單純掛buff)
 const WEIGHTS = {leader:30,passive:25,timeline:20,coverage:10}; // SP技能出場順序不列入加權(順序不影響真實分數,只影響誰先誰後上場)；Connect 也不列入加權評分，僅供參考資訊
@@ -4544,6 +4557,7 @@ list.innerHTML="";
 const filtered = CARDS.filter(c=>{
 if(!q) return true;
 return c.holomem.toLowerCase().includes(q) ||
+holomemEn(c.holomem).toLowerCase().includes(q) ||
 c.name.toLowerCase().includes(q) ||
 cardGenCodes(c).some(code=>(GEN_LABELS[code]||"").toLowerCase().includes(q)) ||
 (c.type||"").toLowerCase().includes(q);
@@ -5204,11 +5218,12 @@ const filtered = CARDS.filter(c=>{
 if(unownedOnly && OWNED[c.id]) return false;
 if(!q) return true;
 return c.holomem.toLowerCase().includes(q) ||
+holomemEn(c.holomem).toLowerCase().includes(q) ||
 c.name.toLowerCase().includes(q) ||
 (GEN_LABELS[c.genCode]||"").toLowerCase().includes(q) ||
 (c.type||"").toLowerCase().includes(q);
 });
-const sorted = filtered.slice().sort((a,b)=> a.holomem.localeCompare(b.holomem,"ja") || a.name.localeCompare(b.name,"ja"));
+const sorted = sortCardsCanonical(filtered);
 document.querySelector("#cardBrowserTable tbody").innerHTML = sorted.map(c=>{
 const outfitTxt = c.outfit
 ? (c.outfit.condType ? (c.outfit.condType==="gen"?GEN_LABELS[c.outfit.condVal]:c.outfit.condVal)+"≥"+c.outfit.condCount+"（"+c.outfit.value+"%）" : "無條件（"+c.outfit.value+"%）")
@@ -5273,7 +5288,8 @@ document.getElementById("cardJsonEditor").value = "";
 
 function renderCardTable(){
 const tbody=document.querySelector("#cardTable tbody");
-tbody.innerHTML = CARDS.map(c=>`
+const sorted = sortCardsCanonical(CARDS);
+tbody.innerHTML = sorted.map(c=>`
 <tr>
 <td>${c.holomem}<br><span class="small">${holomemEn(c.holomem)}</span></td>
 <td>${c.name}<br><span class="small">${c.id}</span></td>
