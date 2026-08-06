@@ -324,6 +324,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <li><b>Connect（不列入加權，僅供參考）</b>：本遊戲的 Connect 實際機制是「此卡放置於某 Holomem 技能板的 Connect 格時，提升該技能板效果 X%」，並非同隊成員間的加成。這項對整隊評分的實際影響難以量化，故不列入 Overall Score 加權計算，只在分析結果中列出原始數值供參考。（原本還有「Board 加成%」項目，因為需要玩家手動輸入每張卡的板面投資進度、太麻煩且無法自動抓取，已整個移除。）</li>
 <li><b>Overall Score</b>：以上各項依 Leader Outfit 30 / Passive 25 / Timeline 20 / Coverage 10 加權（原始權重總和85%，已等比例正規化為100%）。Special Skill Order／Connect 皆不計入。</li>
 <li><b>主動技能發動頻率天賦（0/4/8/12%，②③搜尋時自動納入考量）</b>：每位Holomem的天賦盤可以加成Active技能的發動頻率，效果是把該角色的Interval縮短為Interval/(1+加成%)——依實測驗證（同一張卡分別測0%/8%/12%），觸發序列是「整條從t=0開始直接套用縮短後的Interval重算」，不是保留原節奏只插入額外次數。這代表頻率天賦會讓該成員的觸發時間點整體「相位位移」，如果新的觸發窗口跟隊友的既有觸發時間撞在一起，反而會變成純粹的Overlap（浪費），不會提升整隊的Timeline/Coverage分數——頻率天賦不是「點越高分數越高」，最佳值會依隊伍其他成員的節奏而變。②③搜尋隊伍時，本工具會在「卡片組合已經定案」後，對這組隊伍窮舉4的隊伍人數次方種頻率排列組合（最多1024種），找出讓Timeline+Coverage加權分數最高的配置；貪婪法換卡校正輪也會用「換上這張卡＋配上它最適合的頻率」的分數來比較，避免因為都假設0%頻率而錯過某張卡實際上更好的可能性。分析結果的時間軸區塊會顯示每位隊員被建議的頻率天賦%，供你在遊戲內的Holomem板實際點配。</li>
+<li><b>主動技的條件式加成（約49%的卡片有這個機制）</b>：不少卡片的主動技除了固定base value之外，還有一個「條件成立時才吃得到」的更高%數（例如「ピュアタイプ2人以上でスコアが120%UP」，平常是較低的base value，條件成立時直接跳到120%）。這個機制分三類處理：<b>屬性型</b>（Pure/Happy/Cute屬性2人以上）用隊伍當下的實際屬性人數判斷，跟隊長服裝/被動的條件判定是同一套邏輯，條件成立就自動採用較高的%數；<b>生命值型</b>（ライフ達到門檻）與<b>連段型</b>（コンボ達到門檻）屬於玩家操作/歌曲進度中途才會達成的動態狀態，本工具沒有逐拍模擬生命值/連段成長，因此採樂觀假設「一輪打得漂亮的話會達成」，直接視為條件成立——這跟工具既有「Active技能100%發動」等假設是同一套設計立場，不是額外引入的樂觀程度，但這代表這部分的分數是上限估計，不是保證值。</li>
 </ol>
 <h3>已知資料限制</h3>
 <p class="small">目前遊戲（2026/7/23 上線）wiki 資料仍在補齊中：(1) 內建資料庫已收錄 <b>59 張卡</b>——54 位 Holomem 各自的主力 5★卡（來自 AppMedia／Game8 星5一覧），加上 5 張最新追加的水著限定 5★卡（白銀ノエル／大空スバル／不知火フレア／角巻わため／音乃瀬奏），<b>全部 59 張都已取得完整的 Active/Passive/Special/Outfit/Connect/Stats/Type/Generation 數值</b>（AppMedia 有 19 張把技能表渲染成圖片抓不到文字，已改用 Game8 的純文字版頁面補齊，未用假數字填補）；(2) 完整遊戲每位角色通常還有第2、第3張卡（We are hololive!基礎款等），尚未全部收錄，可在「⑥ 資料庫編輯」分頁持續新增；(3) Active 技能每 X 秒判定一次、依機率發動（第三方玩家整理的數據約為高機率55%／中機率45%／低機率35%，可疊加機率加成技能），但<b>本工具的時間軸／覆蓋率計算刻意假設每次判定都必定發動（100%）</b>——這是因為本工具設計目標是「衝排行榜」場景：實際打法是刷到技能都順利發動的那一輪才算，加上天賦盤本身也能疊加發動機率，投資夠深後接近保底發動，所以以 100% 發動當作優化目標是正確假設，不是簡化偷懶；(4) 歌曲 BPM 與逐秒 note 密度（例如副歌段落是否比其他段落更密集）目前沒有任何公開資料來源——這代表「覆蓋率」只衡量技能生效的<b>時間長度</b>，同樣長度的生效時間蓋在 note 密集的段落還是稀疏的段落，實際換算到的分數可能差很多，本工具目前無法納入這個差異，覆蓋率請理解成「技能彼此設計上合不合、有沒有互相卡到」的參考指標，而不是實際分數的保證值。所有假設與資料缺口都會在介面上明確標示，不會用虛構數字掩蓋。</p>
@@ -394,6 +395,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [29, 29, 29, 29, 29, 29],
 "durationByBloom": [10, 10, 10, 10, 10, 10],
 "probTier": "高",
+"bonusCondType": "type",
+"bonusCondVal": "Pure",
+"bonusCondCount": 2,
+"bonusValue": 120,
 "condition": "ピュアタイプ2人以上でスコアが120%UP",
 "desc": "29秒毎に高確率で10秒間スコアが60%UP ピュアタイプ2人以上でスコアが120%UP"
 },
@@ -452,6 +457,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [26, 26, 26, 26, 26, 26],
 "durationByBloom": [9, 9, 9, 9, 9, 9],
 "probTier": "高",
+"bonusCondType": "life",
+"bonusCondVal": null,
+"bonusCondCount": 600,
+"bonusValue": 120,
 "condition": "ライフ600以上でスコアが120%UP",
 "desc": "26秒毎に高確率で9秒間スコアが60%UP ライフ600以上でスコアが120%UP"
 },
@@ -510,6 +519,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [27, 27, 27, 27, 27, 27],
 "durationByBloom": [9, 9, 9, 9, 9, 9],
 "probTier": "高",
+"bonusCondType": "type",
+"bonusCondVal": "Happy",
+"bonusCondCount": 2,
+"bonusValue": 125,
 "condition": "ハッピータイプ2人以上でスコアが125%UP",
 "desc": "27秒毎に高確率で9秒間スコアが60%UP ハッピータイプ2人以上でスコアが125%UP"
 },
@@ -568,6 +581,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [23, 23, 23, 23, 23, 23],
 "durationByBloom": [8, 8, 8, 8, 8, 8],
 "probTier": "高",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "23秒毎に高確率で8秒間スコア115%UP"
 },
@@ -626,6 +643,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [29, 29, 29, 29, 29, 29],
 "durationByBloom": [10, 10, 10, 10, 10, 10],
 "probTier": "高",
+"bonusCondType": "type",
+"bonusCondVal": "Happy",
+"bonusCondCount": 2,
+"bonusValue": 120,
 "condition": "ハッピータイプ2人以上でスコアが120%UP",
 "desc": "29秒毎に高確率で10秒間スコアが60%UP ハッピータイプ2人以上でスコアが120%UP"
 },
@@ -684,6 +705,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [33, 33, 33, 33, 33, 33],
 "durationByBloom": [12, 12, 12, 12, 12, 12],
 "probTier": "高",
+"bonusCondType": "type",
+"bonusCondVal": "Cute",
+"bonusCondCount": 2,
+"bonusValue": 115,
 "condition": "キュートタイプ2人以上でスコアが115%UP",
 "desc": "33秒毎に高確率で12秒間スコアが55%UP キュートタイプ2人以上でスコアが115%UP"
 },
@@ -742,6 +767,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [20, 20, 20, 20, 20, 20],
 "durationByBloom": [7, 7, 7, 7, 7, 7],
 "probTier": "高",
+"bonusCondType": "life",
+"bonusCondVal": null,
+"bonusCondCount": 600,
+"bonusValue": 120,
 "condition": "ライフ600以上でスコアが120%UP",
 "desc": "20秒毎に高確率で7秒間スコアが60%UP ライフ600以上でスコアが120%UP"
 },
@@ -800,6 +829,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [29, 29, 29, 29, 29, 29],
 "durationByBloom": [10, 10, 10, 10, 10, 10],
 "probTier": "高",
+"bonusCondType": "life",
+"bonusCondVal": null,
+"bonusCondCount": 600,
+"bonusValue": 120,
 "condition": "ライフ600以上でスコアが120%UP",
 "desc": "29秒毎に高確率で10秒間スコアが60%UP ライフ600以上でスコアが120%UP"
 },
@@ -860,6 +893,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [30, 30, 30, 30, 30, 30],
 "durationByBloom": [11, 11, 11, 11, 11, 11],
 "probTier": "高",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "30秒毎に高確率で11秒間スコアが110%UP"
 },
@@ -918,6 +955,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [23, 23, 23, 23, 23, 23],
 "durationByBloom": [8, 8, 8, 8, 8, 8],
 "probTier": "高",
+"bonusCondType": "life",
+"bonusCondVal": null,
+"bonusCondCount": 600,
+"bonusValue": 120,
 "condition": "ライフ600以上でスコアが120%UP",
 "desc": "23秒毎に高確率で8秒間スコアが60%UP ライフ600以上でスコアが120%UP"
 },
@@ -976,6 +1017,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [34, 34, 34, 34, 34, 34],
 "durationByBloom": [12, 12, 12, 12, 12, 12],
 "probTier": "高",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "34秒毎に高確率で12秒間スコアが115%UP"
 },
@@ -1034,6 +1079,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [27, 27, 27, 27, 27, 27],
 "durationByBloom": [9, 9, 9, 9, 9, 9],
 "probTier": "高",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "27秒毎に高確率で9秒間スコアが120%UP"
 },
@@ -1092,6 +1141,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [26, 26, 26, 26, 26, 26],
 "durationByBloom": [9, 9, 9, 9, 9, 9],
 "probTier": "高",
+"bonusCondType": "combo",
+"bonusCondVal": null,
+"bonusCondCount": 40,
+"bonusValue": 100,
 "condition": "40コンボ以上でスコアが100%UP",
 "desc": "26秒毎に高確率で9秒間スコアが60%UP 40コンボ以上でスコアが100%UP"
 },
@@ -1150,6 +1203,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [23, 23, 23, 23, 23, 23],
 "durationByBloom": [8, 8, 8, 8, 8, 8],
 "probTier": "高",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "23秒毎に高確率で8秒間スコアが115%UP"
 },
@@ -1208,6 +1265,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [29, 29, 29, 29, 29, 29],
 "durationByBloom": [10, 10, 10, 10, 10, 10],
 "probTier": "高",
+"bonusCondType": "combo",
+"bonusCondVal": null,
+"bonusCondCount": 40,
+"bonusValue": 120,
 "condition": "40コンボ以上でスコアが120%UP",
 "desc": "29秒毎に高確率で10秒間スコアが60%UP 40コンボ以上でスコアが120%UP"
 },
@@ -1266,6 +1327,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [23, 23, 23, 23, 23, 23],
 "durationByBloom": [8, 8, 8, 8, 8, 8],
 "probTier": "高",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "23秒毎に高確率で8秒間スコアが115%UP"
 },
@@ -1324,6 +1389,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [30, 30, 30, 30, 30, 30],
 "durationByBloom": [11, 11, 11, 11, 11, 11],
 "probTier": "高",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "30秒毎に高確率で11秒間スコアが110%UP"
 },
@@ -1382,6 +1451,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [17, 17, 17, 17, 17, 17],
 "durationByBloom": [6, 6, 6, 6, 6, 6],
 "probTier": "中",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "17秒毎に中確率で6秒間スコアが120%UP"
 },
@@ -1440,6 +1513,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [25, 25, 25, 25, 25, 25],
 "durationByBloom": [11, 11, 11, 11, 11, 11],
 "probTier": "高",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "25秒毎に高確率で11秒間スコアが90%UP"
 },
@@ -1498,6 +1575,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [33, 33, 33, 33, 33, 33],
 "durationByBloom": [11, 11, 11, 11, 11, 11],
 "probTier": "高",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "33秒毎に高確率で11秒間スコアが120%UP"
 },
@@ -1556,6 +1637,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [23, 23, 23, 23, 23, 23],
 "durationByBloom": [8, 8, 8, 8, 8, 8],
 "probTier": "高",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "23秒毎に高確率で8秒間スコアが115%UP"
 },
@@ -1614,6 +1699,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [32, 32, 32, 32, 32, 32],
 "durationByBloom": [11, 11, 11, 11, 11, 11],
 "probTier": "高",
+"bonusCondType": "combo",
+"bonusCondVal": null,
+"bonusCondCount": 40,
+"bonusValue": 120,
 "condition": "40コンボ以上でスコアが120%UP",
 "desc": "32秒毎に高確率で11秒間スコアが60%UP 40コンボ以上でスコアが120%UP"
 },
@@ -1672,6 +1761,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [25, 25, 25, 25, 25, 25],
 "durationByBloom": [8, 8, 8, 8, 8, 8],
 "probTier": "高",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "25秒毎に高確率で8秒間スコアが125%UP"
 },
@@ -1730,6 +1823,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [27, 27, 27, 27, 27, 27],
 "durationByBloom": [12, 12, 12, 12, 12, 12],
 "probTier": "高",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "27秒毎に高確率で12秒間スコアが90%UP"
 },
@@ -1788,6 +1885,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [30, 30, 30, 30, 30, 30],
 "durationByBloom": [11, 11, 11, 11, 11, 11],
 "probTier": "高",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "30秒毎に高確率で11秒間スコアが110%UP"
 },
@@ -1846,6 +1947,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [22, 22, 22, 22, 22, 22],
 "durationByBloom": [8, 8, 8, 8, 8, 8],
 "probTier": "高",
+"bonusCondType": "life",
+"bonusCondVal": null,
+"bonusCondCount": 600,
+"bonusValue": 115,
 "condition": "ライフ600以上でスコアが115%UP",
 "desc": "22秒毎に高確率で8秒間スコアが55%UP ライフ600以上でスコアが115%UP"
 },
@@ -1904,6 +2009,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [26, 26, 26, 26, 26, 26],
 "durationByBloom": [9, 9, 9, 9, 9, 9],
 "probTier": "高",
+"bonusCondType": "combo",
+"bonusCondVal": null,
+"bonusCondCount": 40,
+"bonusValue": 120,
 "condition": "40コンボ以上でスコアが120%UP",
 "desc": "26秒毎に高確率で9秒間スコアが60%UP 40コンボ以上でスコアが120%UP"
 },
@@ -1962,6 +2071,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [24, 24, 24, 24, 24, 24],
 "durationByBloom": [10, 10, 10, 10, 10, 10],
 "probTier": "中",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "24秒毎に中確率で10秒間スコアが100%UP"
 },
@@ -2020,6 +2133,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [18, 18, 18, 18, 18, 18],
 "durationByBloom": [8, 8, 8, 8, 8, 8],
 "probTier": "高",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "18秒毎に高確率で8秒間スコアが90%UP"
 },
@@ -2078,6 +2195,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [15, 15, 15, 15, 15, 15],
 "durationByBloom": [6, 6, 6, 6, 6, 6],
 "probTier": "中",
+"bonusCondType": "combo",
+"bonusCondVal": null,
+"bonusCondCount": 40,
+"bonusValue": 110,
 "condition": "40コンボ以上でスコアが110%UP",
 "desc": "15秒毎に中確率で6秒間スコアが55%UP 40コンボ以上でスコアが110%UP"
 },
@@ -2136,6 +2257,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [21, 21, 21, 21, 21, 21],
 "durationByBloom": [8, 8, 8, 8, 8, 8],
 "probTier": "中",
+"bonusCondType": "life",
+"bonusCondVal": null,
+"bonusCondCount": 600,
+"bonusValue": 115,
 "condition": "ライフ600以上でスコアが115%UP",
 "desc": "21秒毎に中確率で8秒間スコアが55%UP ライフ600以上でスコアが115%UP"
 },
@@ -2194,6 +2319,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [19, 19, 19, 19, 19, 19],
 "durationByBloom": [7, 7, 7, 7, 7, 7],
 "probTier": "中",
+"bonusCondType": "combo",
+"bonusCondVal": null,
+"bonusCondCount": 40,
+"bonusValue": 120,
 "condition": "40コンボ以上でスコアが120%UP",
 "desc": "19秒毎に中確率で7秒間スコアが60%UP 40コンボ以上でスコアが120%UP"
 },
@@ -2252,6 +2381,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [20, 20, 20, 20, 20, 20],
 "durationByBloom": [7, 7, 7, 7, 7, 7],
 "probTier": "中",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "20秒毎に中確率で7秒間スコアが120%UP"
 },
@@ -2310,6 +2443,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [25, 25, 25, 25, 25, 25],
 "durationByBloom": [10, 10, 10, 10, 10, 10],
 "probTier": "中",
+"bonusCondType": "life",
+"bonusCondVal": null,
+"bonusCondCount": 600,
+"bonusValue": 110,
 "condition": "ライフ600以上でスコアが110%UP",
 "desc": "25秒毎に中確率で10秒間スコアが55%UP ライフ600以上でスコアが110%UP"
 },
@@ -2368,6 +2505,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [17, 17, 17, 17, 17, 17],
 "durationByBloom": [6, 6, 6, 6, 6, 6],
 "probTier": "中",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "17秒毎に中確率で6秒間スコアが120%UP"
 },
@@ -2426,6 +2567,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [30, 30, 30, 30, 30, 30],
 "durationByBloom": [11, 12, 12, 12, 12, 12],
 "probTier": "中",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "30秒毎に中確率で12秒間スコアが105%UP"
 },
@@ -2484,6 +2629,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [19, 19, 19, 19, 19, 19],
 "durationByBloom": [7, 7, 7, 7, 7, 7],
 "probTier": "中",
+"bonusCondType": "type",
+"bonusCondVal": "Happy",
+"bonusCondCount": 2,
+"bonusValue": 120,
 "condition": "ハッピータイプ2人以上でスコアが120%UP",
 "desc": "19秒毎に中確率で7秒間スコアが60%UP ハッピータイプ2人以上でスコアが120%UP"
 },
@@ -2542,6 +2691,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [15, 15, 15, 15, 15, 15],
 "durationByBloom": [6, 6, 6, 6, 6, 6],
 "probTier": "中",
+"bonusCondType": "type",
+"bonusCondVal": "Cute",
+"bonusCondCount": 2,
+"bonusValue": 110,
 "condition": "キュートタイプ2人以上でスコアが110%UP",
 "desc": "15秒毎に中確率で6秒間スコアが55%UP キュートタイプ2人以上でスコアが110%UP"
 },
@@ -2600,6 +2753,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [19, 19, 19, 19, 19, 19],
 "durationByBloom": [8, 8, 8, 8, 8, 8],
 "probTier": "高",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "19秒毎に高確率で8秒間スコアが95%UP"
 },
@@ -2658,6 +2815,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [21, 21, 21, 21, 21, 21],
 "durationByBloom": [8, 8, 8, 8, 8, 8],
 "probTier": "中",
+"bonusCondType": "type",
+"bonusCondVal": "Happy",
+"bonusCondCount": 2,
+"bonusValue": 115,
 "condition": "ハッピータイプ2人以上でスコアが115%UP",
 "desc": "21秒毎に中確率で8秒間スコアが55%UP ハッピータイプ2人以上でスコアが115%UP"
 },
@@ -2716,6 +2877,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [18, 18, 18, 18, 18, 18],
 "durationByBloom": [6, 6, 6, 6, 6, 6],
 "probTier": "中",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "18秒毎に中確率で6秒間スコアが125%UP"
 },
@@ -2774,6 +2939,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [21, 21, 21, 21, 21, 21],
 "durationByBloom": [8, 8, 8, 8, 8, 8],
 "probTier": "中",
+"bonusCondType": "type",
+"bonusCondVal": "Cute",
+"bonusCondCount": 2,
+"bonusValue": 115,
 "condition": "キュートタイプ2人以上でスコアが115%UP",
 "desc": "21秒毎に中確率で8秒間スコアが55%UP キュートタイプ2人以上でスコアが115%UP"
 },
@@ -2832,6 +3001,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [34, 34, 34, 34, 34, 34],
 "durationByBloom": [15, 15, 15, 15, 15, 15],
 "probTier": "高",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "34秒毎に高確率で15秒間スコアが90%UP"
 },
@@ -2890,6 +3063,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [30, 30, 30, 30, 30, 30],
 "durationByBloom": [11, 11, 11, 11, 11, 11],
 "probTier": "高",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "30秒毎に高確率で11秒間スコアが110%UP"
 },
@@ -2948,6 +3125,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [25, 25, 25, 25, 25, 25],
 "durationByBloom": [10, 10, 10, 10, 10, 10],
 "probTier": "中",
+"bonusCondType": "type",
+"bonusCondVal": "Pure",
+"bonusCondCount": 2,
+"bonusValue": 110,
 "condition": "ピュアタイプ2人以上でスコアが110%UP",
 "desc": "25秒毎に中確率で10秒間スコアが55%UP ピュアタイプ2人以上でスコアが110%UP"
 },
@@ -3006,6 +3187,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [24, 24, 24, 24, 24, 24],
 "durationByBloom": [10, 10, 10, 10, 10, 10],
 "probTier": "中",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "24秒毎に中確率で10秒間スコアが100%UP"
 },
@@ -3064,6 +3249,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [19, 19, 19, 19, 19, 19],
 "durationByBloom": [7, 7, 7, 7, 7, 7],
 "probTier": "中",
+"bonusCondType": "type",
+"bonusCondVal": "Cute",
+"bonusCondCount": 2,
+"bonusValue": 120,
 "condition": "キュートタイプ2人以上でスコアが120%UP",
 "desc": "19秒毎に中確率で7秒間スコアが60%UP キュートタイプ2人以上でスコアが120%UP"
 },
@@ -3122,6 +3311,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [15, 15, 15, 15, 15, 15],
 "durationByBloom": [6, 6, 6, 6, 6, 6],
 "probTier": "中",
+"bonusCondType": "type",
+"bonusCondVal": "Pure",
+"bonusCondCount": 2,
+"bonusValue": 110,
 "condition": "ピュアタイプ2人以上でスコアが110%UP",
 "desc": "15秒毎に中確率で6秒間スコアが55%UP ピュアタイプ2人以上でスコアが110%UP"
 },
@@ -3180,6 +3373,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [32, 32, 32, 32, 32, 32],
 "durationByBloom": [13, 14, 14, 14, 14, 14],
 "probTier": "高",
+"bonusCondType": "type",
+"bonusCondVal": "Pure",
+"bonusCondCount": 2,
+"bonusValue": 95,
 "condition": "ピュアタイプ2人以上でスコアが95%UP",
 "desc": "32秒毎に高確率で14秒間スコアが45%UP ピュアタイプ2人以上でスコアが95%UP"
 },
@@ -3238,6 +3435,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [25, 25, 25, 25, 25, 25],
 "durationByBloom": [11, 11, 11, 11, 11, 11],
 "probTier": "中",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "25秒毎に中確率で11秒間スコアが95%UP"
 },
@@ -3296,6 +3497,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [25, 25, 25, 25, 25, 25],
 "durationByBloom": [11, 11, 11, 11, 11, 11],
 "probTier": "高",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "25秒毎に高確率で11秒間スコアが90%UP"
 },
@@ -3354,6 +3559,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [27, 27, 27, 27, 27, 27],
 "durationByBloom": [9, 9, 9, 9, 9, 9],
 "probTier": "中",
+"bonusCondType": "combo",
+"bonusCondVal": null,
+"bonusCondCount": 40,
+"bonusValue": 130,
 "condition": "40コンボ以上でスコアが130%UP",
 "desc": "27秒毎に中確率で9秒間スコアが65%UP 40コンボ以上でスコアが130%UP"
 },
@@ -3412,6 +3621,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [15, 15, 15, 15, 15, 15],
 "durationByBloom": [7, 7, 7, 7, 7, 7],
 "probTier": "中",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "15秒毎に中確率で7秒間スコアが90%UP"
 },
@@ -3470,6 +3683,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [20, 20, 20, 20, 20, 20],
 "durationByBloom": [8, 8, 8, 8, 8, 8],
 "probTier": "中",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "20秒毎に中確率で8秒間スコアが55%UP"
 },
@@ -3528,6 +3745,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [21, 21, 21, 21, 21, 21],
 "durationByBloom": [7, 7, 7, 7, 7, 7],
 "probTier": "高",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "21秒毎に高確率で7秒間スコアが120%UP"
 },
@@ -3586,6 +3807,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [17, 17, 17, 17, 17, 17],
 "durationByBloom": [7, 7, 7, 7, 7, 7],
 "probTier": "中",
+"bonusCondType": "combo",
+"bonusCondVal": null,
+"bonusCondCount": 40,
+"bonusValue": 105,
 "condition": "40コンボ以上でスコアが105%UP",
 "desc": "17秒毎に中確率で7秒間スコアが55%UP 40コンボ以上でスコアが105%UP"
 },
@@ -3644,6 +3869,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [33, 33, 33, 33, 33, 33],
 "durationByBloom": [11, 11, 11, 11, 11, 11],
 "probTier": "高",
+"bonusCondType": "type",
+"bonusCondVal": "Happy",
+"bonusCondCount": 2,
+"bonusValue": 125,
 "condition": "ハッピータイプ2人以上でスコアが125%UP",
 "desc": "33秒毎に高確率で11秒間スコアが60%UP ハッピータイプ2人以上でスコアが125%UP"
 },
@@ -3702,6 +3931,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [35, 35, 35, 35, 35, 35],
 "durationByBloom": [12, 12, 12, 12, 12, 12],
 "probTier": "高",
+"bonusCondType": "type",
+"bonusCondVal": "Happy",
+"bonusCondCount": 2,
+"bonusValue": 120,
 "condition": "ハッピータイプ2人以上でスコアが120%UP",
 "desc": "35秒毎に高確率で12秒間スコアが60%UP ハッピータイプ2人以上でスコアが120%UP"
 },
@@ -3760,6 +3993,10 @@ const DEFAULT_CARDS = [
 "intervalByBloom": [23, 23, 23, 23, 23, 23],
 "durationByBloom": [8, 8, 8, 8, 8, 8],
 "probTier": "中",
+"bonusCondType": null,
+"bonusCondVal": null,
+"bonusCondCount": null,
+"bonusValue": null,
 "condition": null,
 "desc": "23秒毎に中確率で8秒間スコアが120%UP"
 },
@@ -4084,11 +4321,30 @@ return baseInterval / (1 + (freqPct||0)/100);
 // 但這裡刻意假設每次判定都必定發動——因為本工具是給「衝排行榜」場景用的：實際玩法是刷到技能都
 // 順利發動的那一輪才算數，加上天賦盤本身也能疊加發動機率，投資夠深後接近保底發動，
 // 所以拿100%發動當優化目標才是符合這個使用情境的正確假設，不是偷懶簡化。
-function activeEventsForMember(card, freqPct, songLen){
+// 主動技的「條件式加成」：約49%的卡片(29/59)在base value之外，還有一個條件觸發後才吃得到的更高%數
+// (例如「ピュアタイプ2人以上でスコアが120%UP」，平常是+60%，條件成立時直接跳到+120%)。
+// 這個欄位過去有存進資料庫、卡片desc也完整顯示，但從來沒有真的被算分邏輯讀取，這裡把它接上：
+// - 屬性型(type)：純粹隊伍組成的靜態事實，用team-wide的counts直接判斷條件成不成立，跟隊長服裝/被動的condMet同一套邏輯。
+// - 生命值型(life)／連段型(combo)：屬於玩家操作/歌曲進度中途才會達成的動態狀態，工具沒有逐拍模擬玩家生命值/連段成長，
+//   所以採樂觀假設「一輪打得漂亮的話會達成」，直接視為條件成立——這跟工具既有「100%發動」「乾淨一輪」等假設一致，
+//   不是新引入的樂觀程度，是延續同一套設計立場。
+function activeEffectiveValue(card, counts){
+const aValue = statAtBloom(card.active, "value", card.id);
+const bc = card.active && card.active.bonusCondType;
+if(!bc) return aValue;
+if(bc==="type"){
+const met = counts && (counts.type[card.active.bonusCondVal]||0) >= card.active.bonusCondCount;
+return met ? card.active.bonusValue : aValue;
+}
+// life / combo：樂觀假設達成
+return card.active.bonusValue;
+}
+
+function activeEventsForMember(card, freqPct, songLen, counts){
 const events=[];
 const aInterval = statAtBloom(card.active, "interval", card.id);
 const aDuration = statAtBloom(card.active, "duration", card.id);
-const aValue = statAtBloom(card.active, "value", card.id);
+const aValue = card.active ? activeEffectiveValue(card, counts) : 0;
 if(card.active && aInterval && aDuration){
 const effInterval = effectiveInterval(aInterval, freqPct);
 let t=effInterval;
@@ -4119,13 +4375,14 @@ cursor = end;
 return events;
 }
 
-function buildTimeline(team,leaderId,songLen,order,freqAssignment){
+function buildTimeline(team,leaderId,songLen,order,freqAssignment,counts){
 // order: array of card ids in stage order (for Special sequencing)
 // freqAssignment: {holomem: freqPct}，未指定的成員視為0%（沒點頻率天賦），維持向下相容。
+// counts: 隊伍的屬性/期別人數統計，供主動技的「條件式加成」判斷使用（見activeEffectiveValue）。
 freqAssignment = freqAssignment || {};
 const events=[];
 team.forEach(m=>{
-events.push(...activeEventsForMember(m.card, freqAssignment[m.card.holomem]||0, songLen));
+events.push(...activeEventsForMember(m.card, freqAssignment[m.card.holomem]||0, songLen, counts));
 });
 events.push(...specialEvents(team, order, songLen));
 return events;
@@ -4135,10 +4392,10 @@ return events;
 // 哪一種組合讓 timelineScore(activeCoverage)+coverageScore(全曲平均有效加成%，封頂100) 的加權分數最高。
 // 只算這兩項分數用得到的欄位，因為只有這兩項會被頻率天賦影響、
 // leaderScore/passiveScore/connectScore都跟頻率天賦無關，不需要每種組合都重算一次完整scoreTeam。
-function bestFreqAssignmentForTeam(team, order, songLen){
+function bestFreqAssignmentForTeam(team, order, songLen, counts){
 const n = team.length;
 if(n===0) return {freqAssignment:{}, timelineScore:0, coverageScore:0};
-const perMemberOptions = team.map(m=> FREQ_LEVELS.map(f=> activeEventsForMember(m.card, f, songLen)));
+const perMemberOptions = team.map(m=> FREQ_LEVELS.map(f=> activeEventsForMember(m.card, f, songLen, counts)));
 const spEvents = specialEvents(team, order, songLen);
 let bestPartial=-1, bestAssignment=null, bestTimelineScore=0, bestCoverageScore=0;
 const idxArr = new Array(n).fill(0);
@@ -4325,7 +4582,7 @@ PASSIVE_BREADTH.technique*r.technique + PASSIVE_BREADTH.sense*r.sense + PASSIVE_
 const passiveScore = team.length ? (memberEffective.reduce((a,b)=>a+Math.min(100,b/maxPassiveVal*100),0)/team.length) : 0;
 
 // 3/5/6. timeline / coverage
-const events = buildTimeline(team, leaderId, song.duration, order, freqAssignment);
+const events = buildTimeline(team, leaderId, song.duration, order, freqAssignment, counts);
 const {activeCoverage, coverageScore, avgEffectiveBoost, idle} = coverageMetrics(events, song.duration);
 // Timeline 分數只算「有沒有主動技生效」的時間比例，跟強度無關——SP技能不論隊伍怎麼選都不參與這裡的計算，
 // 5人加起來幾乎都固定貢獻50~70秒覆蓋時間，混進評分會沖淡「主動技設計好不好」這個真正有鑑別度的訊號。
@@ -4357,7 +4614,7 @@ conditionReport: conditionReport(team, leaderCard, counts, memberBenefits, membe
 // 不要在窮舉/貪婪法挑卡片的最外層大迴圈裡直接用這個取代 scoreTeam，否則運算量會爆炸(詳見開發過程討論)。
 function scoreTeamWithBestFreq(ownedTeamCards, leaderId, song){
 const base = scoreTeam(ownedTeamCards, leaderId, song); // freq=0，用來拿到排序後的team/order(bestSpecialOrder不受頻率影響，結果穩定)
-const bestFreq = bestFreqAssignmentForTeam(base.team, base.order, song.duration);
+const bestFreq = bestFreqAssignmentForTeam(base.team, base.order, song.duration, base.counts);
 return scoreTeam(ownedTeamCards, leaderId, song, bestFreq.freqAssignment);
 }
 
