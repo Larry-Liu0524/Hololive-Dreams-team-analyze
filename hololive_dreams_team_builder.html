@@ -311,13 +311,14 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <div class="tab" id="tab-about">
 <div class="card">
 <h2>分析方法論</h2>
-<p>本工具依照以下九步驟流程分析「整隊」（而非單卡）表現，資料來源以 <a href="https://appmedia.jp/hololive-dreams" target="_blank">AppMedia</a>、<a href="https://gamerch.com/hololive-dreams" target="_blank">Gamerch</a>、<a href="https://game8.jp/hololive-dreams" target="_blank">Game8</a> 公開 wiki 為主。</p>
+<p>本工具依照以下步驟分析「整隊」（而非單卡）表現，資料來源以 <a href="https://appmedia.jp/hololive-dreams" target="_blank">AppMedia</a>、<a href="https://gamerch.com/hololive-dreams" target="_blank">Gamerch</a>、<a href="https://game8.jp/hololive-dreams" target="_blank">Game8</a> 公開 wiki 為主。</p>
 <ol>
 <li><b>Leader Outfit（權重 30%）</b>：Leader 的衣裝技能（例如「1期生2人以上」）若未啟動，整隊視為不完整，此項得分為 0，並顯示紅色警告。條件達成時分數<b>不是固定滿分</b>，而是依這件服裝相對於全資料庫最強服裝的「實際強度」按比例給分：交叉比對全部59張5★卡的隊長服裝數值後發現一個很一致的規律——全數值(all)型無條件45%／有條件50%，單一數值(performance/technique/sense)型無條件120%／有條件130%，兩者比例穩定在約2.6倍（120/45≈2.67、130/50=2.6），因此「全數值型」的實際強度＝數值×2.6 再跟其他服裝比較；スコアサポート效果(support)型目前一律以1倍權重計算（暫無足夠交叉數據可精確換算，是簡化假設）。</li>
-<li><b>Member Passive（25%）</b>：逐一檢查每位隊員的被動技能觸發條件是否成立（PASS/FAIL）。</li>
+<li><b>Member Passive（25%）</b>：詳見下方第6點的完整說明（受益者模擬邏輯）。</li>
 <li><b>Type / Generation 檢查</b>：於「條件報告」表格中列出每位隊員的 Type、Generation 是否與隊上其他成員形成有效搭配（同屬性/期別≥2）。</li>
 <li><b>Active Skill Timeline（併入 Timeline 20%）</b>：以「首次觸發＝Interval秒，之後每隔 Interval 秒觸發一次，每次持續 Duration 秒」的確定性模型建立時間軸（例：Interval23秒/Duration8秒 → 23–31、46–54、69–77…）。＊本遊戲 Active 技能實際帶有機率（低/中/高機率），非 100% 必發；本模型以「高機率視為近似必發」簡化計算，實際遊戲表現會有隨機浮動，請將本工具的時間軸視為「理論上限」而非保證值。</li>
-<li><b>Skill Coverage（10%）</b>：同類型的 Active「Score Up」效果不可疊加，因此 Overlap（重疊/浪費）只計算<b>主動技彼此</b>同時生效的時間佔比。<b>Timeline／Coverage／Idle（空檔）這幾項評分／指標全部只採計「主動技」</b>，完全不把 SP技能算進去——原因有兩個：(1) SP技能不論換哪 5 位角色上場，5人加總起來幾乎都固定貢獻 50~70 秒左右的覆蓋時間，對「這隊主動技彼此設計合不合」沒有鑑別度；(2) 更關鍵的是，實測發現SP技能第一次觸發的時間點<b>依歌曲不同而不同</b>（同一張卡在不同歌曲測到15秒／23秒兩種不同結果），且這個時間點無法透過選卡或天賦點數去改變，不是隊伍組成能影響的變數，公開資料裡也沒有找到說明這個機制的來源。既然玩家的決策完全無法影響它、我們也無法準確模擬它的真實時間點，混進覆蓋率/空檔/重疊率只會引入一個猜不準又幫不上決策的雜訊，所以SP技能被完全排除在這些計算之外，只在時間軸圖表上依「站位順序」呈現（順序本身是遊戲機制確認過的可信資訊），橫向時間位置僅供參考。Timeline 分數＝主動技Coverage%；Coverage 分數＝主動技Coverage% − Overlap%。</li>
+<li><b>Skill Coverage（10%）</b>：已確認遊戲規則——同類型 Active「Score Up」效果<b>不會疊加</b>，多個主動技同時生效時只採計<b>當下最高的%數</b>，較低的那個被浪費掉。這裡把「每個時間點實際生效的最高%數」對整首歌積分後取平均，得到「全曲平均有效加成%」，直接取代舊版「覆蓋率 − 重疊時間佔比」的粗略扣分法——這樣同樣是「有生效」，主動技%數本身較高的隊伍會拿到更高分數，而不是只看時間長短。計分時封頂100分（維持跟其他子分數一致的0-100尺度），但分析結果頁面會額外顯示未封頂的原始數字，方便判斷即使兩隊都封頂在100分，實際強度仍可能有差異。<b>Timeline（20%）／這項的 Idle（空檔）指標全部只採計「主動技」</b>，完全不把 SP技能算進去——原因有兩個：(1) SP技能不論換哪 5 位角色上場，5人加總起來幾乎都固定貢獻 50~70 秒左右的覆蓋時間，對「這隊主動技彼此設計合不合」沒有鑑別度；(2) 更關鍵的是，實測發現SP技能第一次觸發的時間點<b>依歌曲不同而不同</b>（同一張卡在不同歌曲測到15秒／23秒兩種不同結果），且這個時間點無法透過選卡或天賦點數去改變，不是隊伍組成能影響的變數，公開資料裡也沒有找到說明這個機制的來源。既然玩家的決策完全無法影響它、我們也無法準確模擬它的真實時間點，混進覆蓋率/空檔/加成強度只會引入一個猜不準又幫不上決策的雜訊，所以SP技能被完全排除在這些計算之外，只在時間軸圖表上依「站位順序」呈現（順序本身是遊戲機制確認過的可信資訊），橫向時間位置僅供參考。Timeline 分數＝主動技Coverage%；Coverage 分數＝全曲平均有效加成%（封頂100）。</li>
+<li><b>Passive（25%）</b>：已確認遊戲規則後，改成真正的「受益者模擬」，不再只看「這張卡自己的條件有沒有觸發」就直接給持卡人記分。被動效果分四種加成對象（スコアサポート效果／單一屬性P・T・S三選一／全能力・自身限定／全能力・隊友也吃得到），先依description自動分類；受益範圍則分兩種：<b>自身限定</b>（scope=self，固定只有持卡人自己吃到，不看隊伍站位）跟<b>依站位排前N人</b>（scope=group，例如條件是「2人」，若隊伍裡符合條件的人數超過2，只有依隊伍站位順序排在最前面的2人吃得到加成，排序較後面的人即使自己條件也PASS，仍然吃不到——這代表被動分數不是「這張卡自己有沒有PASS」的加總，而是「隊伍裡每個人實際收到了多少加成」的加總，一張被動卡PASS了，也可能是「別的隊友」吃到加成、自己反而沒吃到）。全能力(all)相對單一屬性的「有效值」換算比例，依全資料庫實際數值分布估算(全能力·自身限定平均約32.5%、單一屬性平均約42.6%)得出breadth≈1.31；スコアサポート效果目前沿用跟隊長服裝outfit一致的既有假設(breadth=1，不特別加權)，這不是另外驗證過的獨立結論。逐位隊員條件檢查表格的「被動」欄位，PASS/FAIL反映的是「這位隊員自己實際上有沒有收到任何被動加成」，不是「自己的卡條件有沒有觸發」——避免卡片條件PASS但持卡人因站位排序被排除、實際0加成時顯示PASS造成誤導。</li>
 <li><b>Song Length</b>：所有時間軸與覆蓋率皆依你選擇的歌曲實際秒數重新計算（資料庫含 168 首歌曲秒數，來源 Game8）。</li>
 <li><b>Special Skill Order（SP技能站位順序，不列入本工具加權，僅供參考）</b>：SP技能每首歌只發動一次，依隊伍站位由左到右依序輪流發動（站位1最早、站位5最晚），彼此之間<b>不能重疊</b>（同時間只有1個SP技能生效），但可以自由跟主動技疊加。部分SP技能帶有額外加成條件（解析自技能說明文字，例如「40コンボ以上でスコアが120%UP」「ライフ1000以上でスキル発動率が55%UP」）：需要<b>連段(コンボ)</b>門檻的應放越右邊（越晚發動，連段數才夠）；需要<b>生命值(ライフ)</b>門檻的應放越左邊（越早發動，生命值還沒被扣掉太多）；沒有特殊條件的則依「スコアサポート效果%」數值由小到大排，數值越高越晚發動，可疊加在音樂遊戲後段通常較高的連段分數倍率上（此數值僅用於內部排序，不會顯示在站位建議的卡片標籤上）。這個排序邏輯對<b>實際遊戲分數</b>有實質影響，但因為本工具沒有逐拍模擬連段成長，所以<b>不會反映在 Overall Score</b>裡，僅作為站位建議呈現。</li>
 <li><b>Connect（不列入加權，僅供參考）</b>：本遊戲的 Connect 實際機制是「此卡放置於某 Holomem 技能板的 Connect 格時，提升該技能板效果 X%」，並非同隊成員間的加成。這項對整隊評分的實際影響難以量化，故不列入 Overall Score 加權計算，只在分析結果中列出原始數值供參考。（原本還有「Board 加成%」項目，因為需要玩家手動輸入每張卡的板面投資進度、太麻煩且無法自動抓取，已整個移除。）</li>
@@ -402,6 +403,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 41,
 "valueByBloom": [30, 30, 30, 30, 41, 41],
+"statTarget": "performance",
+"scope": "group",
 "desc": "ピュアタイプ2人のパフォーマンスが41%UP"
 },
 "outfit": {
@@ -458,6 +461,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 11,
 "valueByBloom": [8, 8, 8, 8, 11, 11],
+"statTarget": "support",
+"scope": "group",
 "desc": "キュートタイプ2人のスコアサポート効果11%"
 },
 "outfit": {
@@ -514,6 +519,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 43,
 "valueByBloom": [32, 32, 32, 32, 43, 43],
+"statTarget": "performance",
+"scope": "group",
 "desc": "ハッピータイプ2人以上でハッピータイプ2人のパフォーマンスが43%UP"
 },
 "outfit": {
@@ -570,6 +577,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 43,
 "valueByBloom": [32, 32, 32, 32, 43, 43],
+"statTarget": "sense",
+"scope": "group",
 "desc": "ピュアタイプ2人以上でピュアタイプ2人のセンスが43%UP"
 },
 "outfit": {
@@ -626,6 +635,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 41,
 "valueByBloom": [30, 30, 30, 30, 41, 41],
+"statTarget": "technique",
+"scope": "group",
 "desc": "ハッピータイプ2人のテクニックが41%UP"
 },
 "outfit": {
@@ -682,6 +693,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 41,
 "valueByBloom": [30, 30, 30, 30, 41, 41],
+"statTarget": "sense",
+"scope": "group",
 "desc": "キュートタイプ2人のセンスが41%UP"
 },
 "outfit": {
@@ -738,6 +751,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 43,
 "valueByBloom": [32, 32, 32, 32, 43, 43],
+"statTarget": "sense",
+"scope": "group",
 "desc": "0期生2人のセンスが43%UP"
 },
 "outfit": {
@@ -794,6 +809,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 41,
 "valueByBloom": [30, 30, 30, 30, 41, 41],
+"statTarget": "technique",
+"scope": "group",
 "desc": "ピュアタイプ2人のテクニックが41%UP"
 },
 "outfit": {
@@ -852,6 +869,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 45,
 "valueByBloom": [34, 34, 34, 34, 45, 45],
+"statTarget": "performance",
+"scope": "group",
 "desc": "1期生が2人以上で1期生2人のパフォーマンスが45%UP"
 },
 "outfit": {
@@ -908,6 +927,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 43,
 "valueByBloom": [32, 32, 32, 32, 43, 43],
+"statTarget": "performance",
+"scope": "group",
 "desc": "1期生2人のパフォーマンスが43%UP"
 },
 "outfit": {
@@ -964,6 +985,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 45,
 "valueByBloom": [34, 34, 34, 34, 45, 45],
+"statTarget": "performance",
+"scope": "group",
 "desc": "2期生が2人以上で2期生2人のパフォーマンスが45%UP"
 },
 "outfit": {
@@ -1020,6 +1043,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 12,
 "valueByBloom": [9, 9, 9, 9, 12, 12],
+"statTarget": "support",
+"scope": "group",
 "desc": "ゲーマーズが2人以上でゲーマーズ2人のスコアサポート効果12%"
 },
 "outfit": {
@@ -1076,6 +1101,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 43,
 "valueByBloom": [32, 32, 32, 32, 43, 43],
+"statTarget": "performance",
+"scope": "group",
 "desc": "3期生が2人以上で3期生2人のパフォーマンスが43%UP"
 },
 "outfit": {
@@ -1132,6 +1159,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 12,
 "valueByBloom": [9, 9, 9, 9, 12, 12],
+"statTarget": "support",
+"scope": "group",
 "desc": "3期生が2人以上で3期生2人のスコアサポート効果12%"
 },
 "outfit": {
@@ -1188,6 +1217,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 43,
 "valueByBloom": [32, 32, 32, 32, 43, 43],
+"statTarget": "technique",
+"scope": "group",
 "desc": "4期生2人のテクニックが43%UP"
 },
 "outfit": {
@@ -1244,6 +1275,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 33,
 "valueByBloom": [25, 25, 25, 25, 33, 33],
+"statTarget": "all",
+"scope": "self",
 "desc": "5期生が2人以上で自身の全パラメータが33%UP"
 },
 "outfit": {
@@ -1300,6 +1333,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 11,
 "valueByBloom": [8, 8, 8, 8, 11, 11],
+"statTarget": "support",
+"scope": "group",
 "desc": "キュートタイプ2人のスコアサポート効果11%"
 },
 "outfit": {
@@ -1356,6 +1391,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 41,
 "valueByBloom": [30, 30, 30, 30, 41, 41],
+"statTarget": "technique",
+"scope": "group",
 "desc": "ピュアタイプ2人のテクニックが41%UP"
 },
 "outfit": {
@@ -1412,6 +1449,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 33,
 "valueByBloom": [25, 25, 25, 25, 33, 33],
+"statTarget": "all",
+"scope": "self",
 "desc": "ID3期生が2人以上で自身の全パラメータが33%UP"
 },
 "outfit": {
@@ -1468,6 +1507,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 12,
 "valueByBloom": [9, 9, 9, 9, 12, 12],
+"statTarget": "support",
+"scope": "group",
 "desc": "Mythが2人以上でMythが2人のスコアサポート効果12%"
 },
 "outfit": {
@@ -1524,6 +1565,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 11,
 "valueByBloom": [8, 8, 8, 8, 11, 11],
+"statTarget": "support",
+"scope": "group",
 "desc": "キュートタイプ2人のスコアサポート効果11%"
 },
 "outfit": {
@@ -1580,6 +1623,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 43,
 "valueByBloom": [32, 32, 32, 32, 43, 43],
+"statTarget": "performance",
+"scope": "group",
 "desc": "Advent2人のパフォーマンスが43%UP"
 },
 "outfit": {
@@ -1636,6 +1681,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 11,
 "valueByBloom": [8, 8, 8, 8, 11, 11],
+"statTarget": "support",
+"scope": "group",
 "desc": "キュートタイプ2人のスコアサポート効果11%"
 },
 "outfit": {
@@ -1692,6 +1739,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 43,
 "valueByBloom": [32, 32, 32, 32, 43, 43],
+"statTarget": "sense",
+"scope": "group",
 "desc": "ReGLOSS2人のセンスが43%UP"
 },
 "outfit": {
@@ -1748,6 +1797,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 45,
 "valueByBloom": [34, 34, 34, 34, 45, 45],
+"statTarget": "performance",
+"scope": "group",
 "desc": "ReGLOSSが2人以上でReGLOSS2人のパフォーマンスが45%UP"
 },
 "outfit": {
@@ -1804,6 +1855,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 43,
 "valueByBloom": [32, 32, 32, 32, 43, 43],
+"statTarget": "sense",
+"scope": "group",
 "desc": "ReGLOSS2人のセンスが43%UP"
 },
 "outfit": {
@@ -1860,6 +1913,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 41,
 "valueByBloom": [30, 30, 30, 30, 41, 41],
+"statTarget": "performance",
+"scope": "group",
 "desc": "キュートタイプ2人のパフォーマンスが41%UP"
 },
 "outfit": {
@@ -1916,6 +1971,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 33,
 "valueByBloom": [25, 25, 25, 25, 33, 33],
+"statTarget": "all",
+"scope": "self",
 "desc": "0期生が2人以上で自身の全パラメータが33%UP"
 },
 "outfit": {
@@ -1972,6 +2029,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 11,
 "valueByBloom": [8, 8, 8, 8, 11, 11],
+"statTarget": "support",
+"scope": "group",
 "desc": "ハッピータイプ2人のスコアサポート効果11%"
 },
 "outfit": {
@@ -2028,6 +2087,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 11,
 "valueByBloom": [8, 8, 8, 8, 11, 11],
+"statTarget": "support",
+"scope": "group",
 "desc": "ハッピータイプ2人のスコアサポート効果11%"
 },
 "outfit": {
@@ -2084,6 +2145,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 43,
 "valueByBloom": [32, 32, 32, 32, 43, 43],
+"statTarget": "sense",
+"scope": "group",
 "desc": "1期生2人のセンスが43%UP"
 },
 "outfit": {
@@ -2140,6 +2203,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 11,
 "valueByBloom": [8, 8, 8, 8, 11, 11],
+"statTarget": "support",
+"scope": "group",
 "desc": "ピュアタイプ2人のスコアサポート効果11%"
 },
 "outfit": {
@@ -2196,6 +2261,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 11,
 "valueByBloom": [8, 8, 8, 8, 11, 11],
+"statTarget": "support",
+"scope": "group",
 "desc": "ハッピータイプ2人のスコアサポート効果11%"
 },
 "outfit": {
@@ -2252,6 +2319,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 41,
 "valueByBloom": [30, 30, 30, 30, 41, 41],
+"statTarget": "technique",
+"scope": "group",
 "desc": "キュートタイプ2人のテクニックが41%UP"
 },
 "outfit": {
@@ -2308,6 +2377,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 11,
 "valueByBloom": [8, 8, 8, 8, 11, 11],
+"statTarget": "support",
+"scope": "group",
 "desc": "ハッピータイプ2人のスコアサポート効果11%"
 },
 "outfit": {
@@ -2364,6 +2435,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 32,
 "valueByBloom": [24, 24, 24, 24, 32, 32],
+"statTarget": "all",
+"scope": "self",
 "desc": "キュートタイプ2人以上で自身の全パラメータが32%UP"
 },
 "outfit": {
@@ -2420,6 +2493,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 32,
 "valueByBloom": [24, 24, 24, 24, 32, 32],
+"statTarget": "all",
+"scope": "self",
 "desc": "ハッピータイプ2人以上で自身の全パラメータが32%UP"
 },
 "outfit": {
@@ -2476,6 +2551,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 11,
 "valueByBloom": [8, 8, 8, 8, 11, 11],
+"statTarget": "support",
+"scope": "group",
 "desc": "キュートタイプ2人のスコアサポート効果11%"
 },
 "outfit": {
@@ -2532,6 +2609,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 45,
 "valueByBloom": [34, 34, 34, 34, 45, 45],
+"statTarget": "sense",
+"scope": "group",
 "desc": "4期生が2人以上で4期生2人のセンスが45%UP"
 },
 "outfit": {
@@ -2588,6 +2667,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 11,
 "valueByBloom": [8, 8, 8, 8, 11, 11],
+"statTarget": "support",
+"scope": "group",
 "desc": "ハッピータイプ2人のスコアサポート効果11%"
 },
 "outfit": {
@@ -2644,6 +2725,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 33,
 "valueByBloom": [25, 25, 25, 25, 33, 33],
+"statTarget": "all",
+"scope": "self",
 "desc": "holoXが2人以上で自身の全パラメータが33%UP"
 },
 "outfit": {
@@ -2700,6 +2783,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 32,
 "valueByBloom": [24, 24, 24, 24, 32, 32],
+"statTarget": "all",
+"scope": "self",
 "desc": "キュートタイプ2人以上で自身の全パラメータが32%UP"
 },
 "outfit": {
@@ -2756,6 +2841,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 11,
 "valueByBloom": [8, 8, 8, 8, 11, 11],
+"statTarget": "support",
+"scope": "group",
 "desc": "ハッピータイプ2人のスコアサポート効果11%"
 },
 "outfit": {
@@ -2812,6 +2899,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 45,
 "valueByBloom": [34, 34, 34, 34, 45, 45],
+"statTarget": "sense",
+"scope": "group",
 "desc": "ID1期生が2人以上でID1期生2人のセンスが45%UP"
 },
 "outfit": {
@@ -2868,6 +2957,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 11,
 "valueByBloom": [8, 8, 8, 8, 11, 11],
+"statTarget": "support",
+"scope": "group",
 "desc": "ピュアタイプ2人のスコアサポート効果11%"
 },
 "outfit": {
@@ -2924,6 +3015,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 33,
 "valueByBloom": [25, 25, 25, 25, 33, 33],
+"statTarget": "all",
+"scope": "self",
 "desc": "ID2期生が2人以上で自身の全パラメータが33%UP"
 },
 "outfit": {
@@ -2980,6 +3073,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 41,
 "valueByBloom": [30, 30, 30, 30, 41, 41],
+"statTarget": "technique",
+"scope": "group",
 "desc": "キュートタイプ2人のテクニックが41%UP"
 },
 "outfit": {
@@ -3036,6 +3131,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 32,
 "valueByBloom": [24, 24, 24, 24, 32, 32],
+"statTarget": "all",
+"scope": "self",
 "desc": "ピュアタイプ2人以上で自身の全パラメーターが32%UP"
 },
 "outfit": {
@@ -3092,6 +3189,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 32,
 "valueByBloom": [24, 24, 24, 24, 32, 32],
+"statTarget": "all",
+"scope": "self",
 "desc": "ピュアタイプ2人以上で自身の全パラメータが32%UP"
 },
 "outfit": {
@@ -3148,6 +3247,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 43,
 "valueByBloom": [32, 32, 32, 32, 43, 43],
+"statTarget": "technique",
+"scope": "group",
 "desc": "Promise2人のテクニックが43%UP"
 },
 "outfit": {
@@ -3204,6 +3305,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 11,
 "valueByBloom": [8, 8, 8, 8, 11, 11],
+"statTarget": "support",
+"scope": "group",
 "desc": "ピュアタイプ2人のスコアサポート効果11%"
 },
 "outfit": {
@@ -3260,6 +3363,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 11,
 "valueByBloom": [8, 8, 8, 8, 11, 11],
+"statTarget": "support",
+"scope": "group",
 "desc": "ピュアタイプ2人のスコアサポート効果11%"
 },
 "outfit": {
@@ -3316,6 +3421,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 33,
 "valueByBloom": [25, 25, 25, 25, 33, 33],
+"statTarget": "all",
+"scope": "self",
 "desc": "Adventが2人以上で自身の全パラメータが33%UP"
 },
 "outfit": {
@@ -3372,6 +3479,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 41,
 "valueByBloom": [30, 30, 30, 30, 41, 41],
+"statTarget": "technique",
+"scope": "group",
 "desc": "キュートタイプ2人のテクニックが41%UP"
 },
 "outfit": {
@@ -3428,6 +3537,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 12,
 "valueByBloom": [9, 9, 9, 9, 12, 12],
+"statTarget": "support",
+"scope": "group",
 "desc": "3期生が2人以上で3期生2人のスコアサポート効果12%"
 },
 "outfit": {
@@ -3484,6 +3595,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 15,
 "valueByBloom": [11, 11, 11, 11, 15, 15],
+"statTarget": "all",
+"scope": "group",
 "desc": "ピュアタイプ2人の全パラメータが15%UP"
 },
 "outfit": {
@@ -3540,6 +3653,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 11,
 "valueByBloom": [8, 8, 8, 8, 11, 11],
+"statTarget": "support",
+"scope": "group",
 "desc": "ハッピータイプ2人のスコアサポート効果11%"
 },
 "outfit": {
@@ -3596,6 +3711,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 11,
 "valueByBloom": [8, 8, 8, 8, 11, 11],
+"statTarget": "support",
+"scope": "group",
 "desc": "ハッピータイプ2人のスコアサポート効果11%"
 },
 "outfit": {
@@ -3652,6 +3769,8 @@ const DEFAULT_CARDS = [
 "condCount": 2,
 "value": 43,
 "valueByBloom": [32, 32, 32, 32, 43, 43],
+"statTarget": "performance",
+"scope": "group",
 "desc": "ハッピータイプ2人以上でハッピータイプ2人のパフォーマンスが43%UP"
 },
 "outfit": {
@@ -3770,6 +3889,9 @@ return a.holomem.localeCompare(b.holomem,"ja") || a.name.localeCompare(b.name,"j
 });
 }
 const TYPES = ["Happy","Cute","Pure"];
+// 隊長服裝(outfit)加成對象標籤：all是全能力(P/T/S三項都加成，價值明顯高於單一能力，評分時用2.6倍乘數反映這個差異)，
+// 其餘四種都是「只加成單一能力」；support是加成SP技能的スコアサポート效果%數值，跟前三者(P/T/S三圍)是不同種類的加成。
+const STAT_TARGET_LABELS = {all:"全能力", performance:"パフォーマンス", technique:"テクニック", sense:"センス", support:"スコアサポート效果"};
 const TEAM_SIZE = 5; // 依 Game8/Gamerch/horodori.com 確認：上場5個席位是「隊員」，隊長是獨立於這5席之外的第6個角色，只提供隊長服裝buff，可以上場(佔用5席其中1位、自己的主動/被動/SP技能照常觸發)、也可以完全不上場(單純掛buff)
 const WEIGHTS = {leader:30,passive:25,timeline:20,coverage:10}; // SP技能出場順序不列入加權(順序不影響真實分數,只影響誰先誰後上場)；Connect 也不列入加權評分，僅供參考資訊
 const WEIGHT_SUM = Object.values(WEIGHTS).reduce((a,b)=>a+b,0); // 90 -> normalize
@@ -3786,7 +3908,7 @@ function saveOwned(o){ localStorage.setItem("hd_owned", JSON.stringify(o)); }
 function loadBloom(){ try{ return JSON.parse(localStorage.getItem("hd_bloom")||"{}"); }catch(e){ return {}; } }
 function saveBloom(b){ localStorage.setItem("hd_bloom", JSON.stringify(b)); }
 // ②③最後一次分析結果：自動存最新一次，重新整理頁面不會遺失；使用者也可以另外「另存為」具名快照長期保留、比較。
-function loadTeamResults(){ try{ return JSON.parse(localStorage.getItem("hd_team_results")||"null") || { practice: null, leaderpick: null }; }catch(e){ return { practice: null, leaderpick: null }; } }
+function loadTeamResults(){ try{ const parsed=JSON.parse(localStorage.getItem("hd_team_results")||"null"); return Object.assign({ practice: null, leaderpick: null, exhaustive: null }, parsed||{}); }catch(e){ return { practice: null, leaderpick: null, exhaustive: null }; } }
 function saveTeamResultsToStorage(){ localStorage.setItem("hd_team_results", JSON.stringify(TEAM_RESULTS)); }
 function loadSavedTeams(){ try{ return JSON.parse(localStorage.getItem("hd_saved_teams")||"[]"); }catch(e){ return []; } }
 function saveSavedTeamsToStorage(){ localStorage.setItem("hd_saved_teams", JSON.stringify(SAVED_TEAMS)); }
@@ -3875,6 +3997,30 @@ function maxLeaderOutfitEffectiveValue(){
   CARDS.forEach(c=>{ if(c.outfit){ const v=leaderOutfitEffectiveValue(c.outfit); if(v>max) max=v; } });
   return max;
 }
+// 被動技的%數強度標準化基準：跟隊長服裝一樣，用「相對全資料庫最強被動」的比例給分，
+// 而不是單純看PASS人數——同樣是PASS，被動+120%的成員應該比+30%的成員貢獻更高分數。
+// breadth乘數：全能力(all)相對單一屬性(performance/technique/sense)的「有效值」換算比例，
+// 依全資料庫實際數值分布估算(單屬性平均約42.6%，全能力·自身限定平均約32.5%)，全能力breadth≈42.6/32.5≈1.31，
+// 讓兩者的「有效值」大致落在同一個尺度上比較。support(スコアサポート效果)目前沿用跟隊長服裝outfit同樣的處理方式，
+// breadth維持1(不特別加權)——這是跟隊長服裝一致的既有假設，不是另外驗證過的獨立結論。
+const PASSIVE_BREADTH = {support:1, performance:1, technique:1, sense:1, all: 42.6/32.5};
+function passiveEffectiveValue(passive){
+  if(!passive || typeof passive.value!=="number") return 0;
+  const breadth = PASSIVE_BREADTH[passive.statTarget] || 1;
+  return passive.value * breadth;
+}
+function maxPassiveValue(){
+  let max = 1;
+  CARDS.forEach(c=>{ if(c.passive){ const v=passiveEffectiveValue(c.passive); if(v>max) max=v; } });
+  return max;
+}
+// 判斷某位隊員是否符合某個condType/condVal(用於被動受益者模擬：符合條件的人才有資格被選為受益者)
+function passiveMemberMatchesCond(member, condType, condVal){
+  const c = member.card;
+  if(condType==="gen") return cardGenCodes(c).includes(condVal);
+  if(condType==="type") return c.type===condVal;
+  return false;
+}
 
 function condMet(condType,condVal,condCount,counts){
 if(!condType) return true; // 無條件
@@ -3884,8 +4030,8 @@ return (map[condVal]||0) >= condCount;
 
 // leaderCard 直接傳入卡片物件，不再從 team 陣列裡反查——因為隊長不一定實際上場、
 // 不一定會出現在 team 裡（見 scoreTeam 裡 leaderDeployed 的說明），用 team.find(...) 反查在隊長沒上場時會是 undefined 而炸掉。
-function conditionReport(team,leaderCard,counts){
-return team.map(m=>{
+function conditionReport(team,leaderCard,counts,memberBenefits,memberExcluded){
+return team.map((m,idx)=>{
 const c=m.card;
 // 用 holomem 比對而非精確卡片ID：因為隊長服裝可以來自同一位角色的「另一張卡」
 // （例如隊長服裝用泳裝款、上場用常駐款），這種情況下上場的是不同的卡片ID，但仍是同一位隊長本人。
@@ -3895,13 +4041,30 @@ if(leaderCard.outfit && leaderCard.outfit.condType){
 if(leaderCard.outfit.condType==="gen") leaderOutfitCol = cardGenCodes(c).includes(leaderCard.outfit.condVal)?"PASS":"FAIL";
 else leaderOutfitCol = (c.type===leaderCard.outfit.condVal)?"PASS":"FAIL";
 } else if(leaderCard.outfit){ leaderOutfitCol="PASS(無條件)"; }
-let passiveCol="N/A";
-if(c.passive){ passiveCol = condMet(c.passive.condType,c.passive.condVal,c.passive.condCount,counts)?"PASS":"FAIL"; }
-else if(c.outfit===undefined){ passiveCol="資料缺"; }
-else { passiveCol = "資料缺"; }
+// 被動拆成兩欄：passiveCondCol是「這張卡自己的條件有沒有觸發」；passiveBenefitCol是「這位隊員自己實際上有沒有吃到加成」，
+// 有吃到就列出來源(可能是自己、也可能是隊友)，吃不到但曾經符合資格的話也列出原因(通常是站位排序被排除)。
+let passiveCondCol="N/A";
+if(c.passive){ passiveCondCol = condMet(c.passive.condType,c.passive.condVal,c.passive.condCount,counts)?"PASS":"FAIL"; }
+else { passiveCondCol="資料缺"; }
+const benefits = (memberBenefits && memberBenefits[idx]) || [];
+const excluded = (memberExcluded && memberExcluded[idx]) || [];
+let passiveBenefitCol, passiveBenefitDetail;
+if(benefits.length>0){
+passiveBenefitCol = "PASS";
+passiveBenefitDetail = benefits.map(b=> `吃到 ${b.source} 的${STAT_TARGET_LABELS[b.target]||b.target}+${b.value}%`).join("；");
+} else if(excluded.length>0){
+passiveBenefitCol = "FAIL";
+passiveBenefitDetail = excluded.map(e=> `符合 ${e.source} 的加成條件，但站位排序在其他人之後未列入受益名單`).join("；");
+} else if(c.passive){
+passiveBenefitCol = "FAIL";
+passiveBenefitDetail = "沒有吃到任何被動加成（不符合隊上任何啟動中的被動加成對象條件）";
+} else {
+passiveBenefitCol = "N/A";
+passiveBenefitDetail = "資料缺";
+}
 const typeCol = (c.type && c.type!=="unknown") ? ((counts.type[c.type]||0)>=2?"PASS":"FAIL") : "資料缺";
 const genCol = cardGenCodes(c).some(code=>(counts.gen[code]||0)>=2) ? "PASS":"FAIL";
-return {card:c,isLeader,leaderOutfitCol,passiveCol,typeCol,genCol};
+return {card:c,isLeader,leaderOutfitCol,passiveCondCol,passiveBenefitCol,passiveBenefitDetail,typeCol,genCol};
 });
 }
 
@@ -3925,12 +4088,13 @@ function activeEventsForMember(card, freqPct, songLen){
 const events=[];
 const aInterval = statAtBloom(card.active, "interval", card.id);
 const aDuration = statAtBloom(card.active, "duration", card.id);
+const aValue = statAtBloom(card.active, "value", card.id);
 if(card.active && aInterval && aDuration){
 const effInterval = effectiveInterval(aInterval, freqPct);
 let t=effInterval;
 while(t < songLen){
 const start=t, end=Math.min(t+aDuration, songLen);
-events.push({who:card.name, holomem:card.holomem, kind:"active", start, end});
+events.push({who:card.name, holomem:card.holomem, kind:"active", start, end, value:aValue||0});
 t += effInterval;
 }
 }
@@ -3968,8 +4132,8 @@ return events;
 }
 
 // 窮舉「這組已經定案的隊伍」在4種頻率天賦(0/4/8/12%)排列組合下(holomem數量n，最多4^n=1024種)，
-// 哪一種組合讓 timelineScore(activeCoverage)+coverageScore(activeCoverage-overlap) 的加權分數最高。
-// 只算這兩項分數用得到的欄位(activeCoverage/overlap)，因為只有這兩項會被頻率天賦影響、
+// 哪一種組合讓 timelineScore(activeCoverage)+coverageScore(全曲平均有效加成%，封頂100) 的加權分數最高。
+// 只算這兩項分數用得到的欄位，因為只有這兩項會被頻率天賦影響、
 // leaderScore/passiveScore/connectScore都跟頻率天賦無關，不需要每種組合都重算一次完整scoreTeam。
 function bestFreqAssignmentForTeam(team, order, songLen){
 const n = team.length;
@@ -3982,9 +4146,8 @@ function evalCombo(){
 let activeEvts=[];
 idxArr.forEach((fi,mi)=>{ activeEvts.push(...perMemberOptions[mi][fi]); });
 const allEvents = activeEvts.concat(spEvents);
-const {activeCoverage, overlap} = coverageMetrics(allEvents, songLen);
+const {activeCoverage, coverageScore} = coverageMetrics(allEvents, songLen);
 const timelineScore = activeCoverage;
-const coverageScore = Math.max(0, activeCoverage-overlap);
 const partial = timelineScore*WEIGHTS.timeline + coverageScore*WEIGHTS.coverage;
 if(partial>bestPartial){
 bestPartial = partial;
@@ -4004,24 +4167,30 @@ return {freqAssignment:bestAssignment, timelineScore:bestTimelineScore, coverage
 
 function coverageMetrics(events,songLen){
 const STEP=0.5;
-let activeCovered=0, overlapT=0, n=Math.round(songLen/STEP);
+let activeCovered=0, weightedArea=0, n=Math.round(songLen/STEP);
 for(let i=0;i<n;i++){
 const t=i*STEP;
-let activeCnt=0;
+let activeCnt=0, maxVal=0;
 events.forEach(e=>{
-if(e.kind==="active" && t>=e.start && t<e.end) activeCnt++;
-});
-if(activeCnt>=1) activeCovered+=STEP; // 只算主動技生效的時間，用於評分
-// 重疊(浪費)只計算「主動技彼此」同時生效的情況：同類型 Score Up 效果不可疊加，才算浪費。
-if(activeCnt>=2) overlapT+=STEP;
+if(e.kind==="active" && t>=e.start && t<e.end){
+activeCnt++;
+if(e.value>maxVal) maxVal=e.value;
 }
-const activeCoverage = Math.min(100, activeCovered/songLen*100); // 只算主動技，用於Timeline/Coverage評分
-const overlap = Math.min(100, overlapT/songLen*100);
-// Idle（空檔）也改成只依主動技計算：SP技能實際的觸發起始時間點依歌曲不同而不同（實測同一工具測過15秒/23秒兩種不同結果），
+});
+if(activeCnt>=1) activeCovered+=STEP; // 只算「有沒有任何主動技生效」的時間，用於Timeline評分(跟強度無關，純粹看有沒有避免空檔)
+// 覆蓋效率改成「加成強度加權」：同類型Active Score Up效果確認不會疊加，同時生效時只取當下最高的%數(較低的那個被浪費掉)，
+// 這裡直接對「當下實際生效的最高%數」這條曲線做積分，取代舊版「覆蓋率-重疊時間佔比」的粗略扣分法——
+// 空檔天生貢獻0、重疊時只有最高值算數，強度大小也直接反映在積分裡，一次修正「沒考慮強度」跟「重疊算法不夠準」兩個問題。
+weightedArea += maxVal*STEP;
+}
+const activeCoverage = Math.min(100, activeCovered/songLen*100); // 只算主動技，用於Timeline評分
+const avgEffectiveBoost = weightedArea/songLen; // 全曲平均有效加成%，未封頂的原始數字，供UI顯示真實強度差異用
+const coverageScore = Math.min(100, avgEffectiveBoost); // 封頂100分，維持跟其他子分數一致的0-100尺度
+// Idle（空檔）只依主動技的時間覆蓋計算：SP技能實際的觸發起始時間點依歌曲不同而不同（實測同一工具測過15秒/23秒兩種不同結果），
 // 且玩家無法透過選卡/天賦去影響這個時間點，把它算進覆蓋率/空檔會混入一個猜不準、也無法被隊伍決策影響的變數，
-// 所以SP技能不再參與任何覆蓋率/空檔/重疊率的計算，只在時間軸圖表上以站位順序呈現(順序資訊是遊戲機制確認過的，可信)。
+// 所以SP技能不參與覆蓋率/空檔/覆蓋效率的計算，只在時間軸圖表上以站位順序呈現(順序資訊是遊戲機制確認過的，可信)。
 const idle = Math.max(0, 100-activeCoverage);
-return {activeCoverage, overlap, idle};
+return {activeCoverage, coverageScore, avgEffectiveBoost, idle};
 }
 
 // 從SP技能說明文字中解析出「額外加成觸發條件」：連段(コンボ)門檻 或 生命值(ライフ)門檻。
@@ -4097,38 +4266,72 @@ leaderScore = leaderPass ? Math.min(100, leaderOutfitEffectiveValue(leaderCard.o
 leaderNote = (leaderCard.outfit.condType==="gen"?GEN_LABELS[leaderCard.outfit.condVal]:leaderCard.outfit.condVal)+" ≥ "+leaderCard.outfit.condCount+"（目前："+((leaderCard.outfit.condType==="gen"?counts.gen[leaderCard.outfit.condVal]:counts.type[leaderCard.outfit.condVal])||0)+"）";
 }
 
-// 2. Passive
+// 站位順序（由左到右依隊伍站位發動SP、也用於被動受益者模擬的排序依據）需要先算出來，
+// 因為被動的受益者判定規則是「依隊伍站位順序，符合條件的前N人」——沒有正確的站位順序就沒辦法判斷「前N人」是誰。
+// SP技能站位順序依連段/生命值門檻與數值高低排出，對實際遊戲分數有實質影響，但本工具沒有逐拍模擬連段成長，
+// 所以這裡算出的站位順序不會反映在specialScore以外的Overall Score計算裡，只作為參考建議。
+const {order, specialEfficiency} = bestSpecialOrder(team, song.duration);
+// 把 team 陣列依這個穩定的站位順序重排，這樣「逐位隊員條件檢查」表格、被動受益者模擬、回寫的隊伍欄位…等
+// 所有會顯示/使用 team 順序的地方都會跟「建議站位順序」一致，不會再因為這次呼叫時 team 傳進來的
+// 原始順序不同（例如鎖定欄位 vs 從頭搜尋）而跳動。
+team = order.map(id=> team.find(m=>m.card.id===id)).filter(Boolean);
+const specialScore = specialEfficiency; // 參考資訊，不計入總分
+
+// 2. Passive —— 受益者模擬：不再只看「自己的卡的條件有沒有過」就直接給自己記分。
+// 已跟你確認遊戲規則：被動條件寫「N人」，如果隊伍裡符合條件的人數超過N，只有依隊伍站位順序排在最前面的N個人
+// 吃得到加成，其餘符合條件但排序較後面的人不吃到。scope="self"（自身限定）的被動不受這個排序規則影響，
+// 固定只有持卡人自己吃到，不看隊伍站位。
+// 同時記錄每位隊員「實際吃到誰的加成」(memberBenefits)跟「符合資格但被排序排除」(memberExcluded)兩份清單，
+// 供UI把「條件PASS/FAIL」跟「有沒有吃到加成」拆成兩個獨立欄位顯示，避免像あやめ那種「條件PASS但0加成」的情況
+// 擠在同一欄造成誤導。
+const maxPassiveVal = maxPassiveValue();
+const received = team.map(()=> ({support:0, performance:0, technique:0, sense:0, all:0}));
+const memberBenefits = team.map(()=> []); // [{source:holomem, desc, target, value}]
+const memberExcluded = team.map(()=> []); // [{source:holomem, desc}] 符合類型/期別條件、來源被動也已啟動，但站位排序被排除
 const passiveDetails=[];
-let passiveOkCount=0, passiveKnownCount=0;
 team.forEach(m=>{
 const c=m.card;
-if(c.passive){
-passiveKnownCount++;
+if(!c.passive){ passiveDetails.push({name:c.name,ok:null,desc:"資料缺"}); return; }
 const ok = condMet(c.passive.condType,c.passive.condVal,c.passive.condCount,counts);
-if(ok) passiveOkCount++;
 passiveDetails.push({name:c.name,ok,desc:c.passive.desc});
+if(!ok) return;
+const val = statAtBloom(c.passive,"value",c.id);
+const target = c.passive.statTarget;
+if(c.passive.scope==="self"){
+const idx = team.indexOf(m);
+received[idx][target] += val;
+memberBenefits[idx].push({source:c.holomem, desc:c.passive.desc, target, value:val});
 } else {
-passiveDetails.push({name:c.name,ok:null,desc:"資料缺"});
+const qualifying = team.filter(mm=> passiveMemberMatchesCond(mm, c.passive.condType, c.passive.condVal));
+const beneficiaries = qualifying.slice(0, c.passive.condCount);
+const excluded = qualifying.slice(c.passive.condCount);
+beneficiaries.forEach(b=>{
+const idx = team.indexOf(b);
+received[idx][target] += val;
+memberBenefits[idx].push({source:c.holomem, desc:c.passive.desc, target, value:val});
+});
+excluded.forEach(e=>{
+const idx = team.indexOf(e);
+memberExcluded[idx].push({source:c.holomem, desc:c.passive.desc});
+});
 }
 });
-const passiveScore = passiveKnownCount>0 ? (passiveOkCount/passiveKnownCount*100) : 0;
+// 每位成員實際收到的加成（可能來自好幾張不同隊友的被動同時疊加），依statTarget breadth乘數加總成單一有效值，
+// 再用「相對全資料庫最強單張被動的有效值」的比例算分，5人平均。
+const memberEffective = received.map(r=>
+PASSIVE_BREADTH.support*r.support + PASSIVE_BREADTH.performance*r.performance +
+PASSIVE_BREADTH.technique*r.technique + PASSIVE_BREADTH.sense*r.sense + PASSIVE_BREADTH.all*r.all
+);
+const passiveScore = team.length ? (memberEffective.reduce((a,b)=>a+Math.min(100,b/maxPassiveVal*100),0)/team.length) : 0;
 
-// 3/5/6. timeline / coverage；SP技能站位順序（由左到右依序發動）依連段/生命值門檻與數值高低排出，
-// 對實際遊戲分數有影響，但本工具沒有逐拍模擬連段成長，所以這裡算出的 Coverage/Overlap/Idle 不會因此改變，
-// 站位順序本身不計入 Overall Score，只作為參考建議。
-const {order, specialEfficiency} = bestSpecialOrder(team, song.duration);
-// 把 team 陣列也依這個穩定的站位順序重排，這樣「逐位隊員條件檢查」表格、回寫的隊伍欄位…等
-// 所有會顯示 team 順序的地方都會跟「建議站位順序」一致，不會再因為這次呼叫時 team 傳進來的
-// 原始順序不同（例如鎖定欄位 vs 從頭搜尋）而跳動。events/coverage 計算本身跟 team 陣列順序無關，不受影響。
-team = order.map(id=> team.find(m=>m.card.id===id)).filter(Boolean);
+// 3/5/6. timeline / coverage
 const events = buildTimeline(team, leaderId, song.duration, order, freqAssignment);
-const {activeCoverage, overlap, idle} = coverageMetrics(events, song.duration);
-// Timeline/Coverage 分數改用「只算主動技」的 activeCoverage：SP技能不論隊伍怎麼選，
+const {activeCoverage, coverageScore, avgEffectiveBoost, idle} = coverageMetrics(events, song.duration);
+// Timeline 分數只算「有沒有主動技生效」的時間比例，跟強度無關——SP技能不論隊伍怎麼選都不參與這裡的計算，
 // 5人加起來幾乎都固定貢獻50~70秒覆蓋時間，混進評分會沖淡「主動技設計好不好」這個真正有鑑別度的訊號。
-// coverage(含SP)則保留成參考資訊，Idle(完全沒有任何加成的死時間)仍用含SP的版本計算才準確。
+// coverageScore 改成「全曲平均有效加成%」(封頂100分)，正確反映強度差異跟不疊加規則(重疊時取當下最高值)，
+// avgEffectiveBoost 是未封頂的原始數字，用於UI顯示真實強度差異(即使兩隊都被封頂在100分，這個數字還是看得出差異)。
 const timelineScore = activeCoverage;
-const coverageScore = Math.max(0, activeCoverage-overlap);
-const specialScore = specialEfficiency; // 參考資訊，不計入總分
 
 // Connect：保留原始數值做為參考資訊，但不列入 Overall Score 加權
 const connectVals = team.map(m=>m.card.connect?statAtBloom(m.card.connect,"value",m.card.id):0).filter(v=>v>0);
@@ -4141,10 +4344,10 @@ const overall = overallRaw/(WEIGHT_SUM*100)*100;
 return {
 team, leaderId, leaderCard, leaderDeployed, counts, leaderPass, leaderScore, leaderNote,
 passiveScore, passiveDetails,
-timelineScore, coverageScore, activeCoverage, overlap, idle,
+timelineScore, coverageScore, activeCoverage, avgEffectiveBoost, idle,
 specialScore, order, events,
 connectScore, overall, freqAssignment,
-conditionReport: conditionReport(team, leaderCard, counts)
+conditionReport: conditionReport(team, leaderCard, counts, memberBenefits, memberExcluded)
 };
 }
 
@@ -4401,7 +4604,11 @@ exhaustiveState.running = false;
 document.getElementById("btnStartExhaustive").disabled = false;
 document.getElementById("btnCancelExhaustive").disabled = true;
 updateExhaustiveProgress(doneCount, total, Date.now()-startTime, best, "已取消（僅完成抽樣校準），以下為抽樣範圍內的最佳結果。");
-if(best) renderResult(best, song, "resultAreaExhaustive", poolMode==="owned");
+if(best){
+TEAM_RESULTS.exhaustive = {result:best, song};
+saveTeamResultsToStorage();
+renderResult(best, song, "resultAreaExhaustive", poolMode==="owned");
+}
 return;
 }
 
@@ -4426,6 +4633,8 @@ document.getElementById("btnCancelExhaustive").disabled = true;
 updateExhaustiveProgress(doneCount, total, Date.now()-startTime, best, exhaustiveState.cancel? "⏹ 已取消，以下為取消當下找到的最佳結果。" : "✅ 完整窮舉已跑完全部組合，以下為候選範圍內真正的全域最佳結果。");
 
 if(best){
+TEAM_RESULTS.exhaustive = {result:best, song};
+saveTeamResultsToStorage();
 renderResult(best, song, "resultAreaExhaustive", poolMode==="owned");
 }
 }
@@ -4740,7 +4949,8 @@ const condRows = result.conditionReport.map(r=>`
 <td>${r.isLeader?"👑 ":""}${r.card.holomem}<span class="tag">${holomemEn(r.card.holomem)}</span><br><span class="small">${r.card.name}</span></td>
 ${highlightOwned? `<td>${OWNED[r.card.id]? '<span class="pill g">✅ 已持有</span>' : '<span class="pill r">🛒 未持有</span>'}</td>` : ""}
 <td>${pillFor(r.leaderOutfitCol)}</td>
-<td>${pillFor(r.passiveCol)}</td>
+<td>${pillFor(r.passiveCondCol)}</td>
+<td>${pillFor(r.passiveBenefitCol)}<br><span class="small">${r.passiveBenefitDetail}</span></td>
 <td>${pillFor(r.typeCol)}</td>
 <td>${pillFor(r.genCol)}</td>
 </tr>`).join("");
@@ -4779,11 +4989,11 @@ ${banner}
 ${scoreBar("隊長服裝",WEIGHTS.leader,result.leaderScore)}
 ${scoreBar("隊員被動",WEIGHTS.passive,result.passiveScore)}
 ${scoreBar("時間軸覆蓋率（主動技）",WEIGHTS.timeline,result.timelineScore)}
-${scoreBar("覆蓋效率（主動技，扣除重疊）",WEIGHTS.coverage,result.coverageScore)}
+${scoreBar("覆蓋效率（主動技，加成強度加權）",WEIGHTS.coverage,result.coverageScore)}
 <p class="small">參考資訊（不計入總分，本工具未模擬逐拍連段成長）：連結 ${result.connectScore.toFixed(1)} / 100</p>
 
 <h3>逐位隊員條件檢查（PASS/FAIL）</h3>
-<table><thead><tr><th>隊員</th>${highlightOwned? "<th>持有狀態</th>":""}<th>隊長服裝</th><th>被動</th><th>屬性搭配</th><th>期別搭配</th></tr></thead>
+<table><thead><tr><th>隊員</th>${highlightOwned? "<th>持有狀態</th>":""}<th>隊長服裝</th><th>被動條件</th><th>被動加成</th><th>屬性搭配</th><th>期別搭配</th></tr></thead>
 <tbody>${condRows}</tbody></table>
 
 <h3>建議站位順序（SP技能依隊伍站位由左到右依序輪流發動，站位1最早發動、站位5最晚）</h3>
@@ -4793,10 +5003,10 @@ ${scoreBar("覆蓋效率（主動技，扣除重疊）",WEIGHTS.coverage,result.
 <h3>主動技／SP技能時間軸</h3>
 <div class="metric-row">
 <div class="metric-box"><div class="num">${result.activeCoverage.toFixed(1)}%</div><div class="lbl">主動技覆蓋率（計分用）</div></div>
-<div class="metric-box"><div class="num">${result.overlap.toFixed(1)}%</div><div class="lbl">重疊（浪費）</div></div>
+<div class="metric-box"><div class="num">${result.avgEffectiveBoost.toFixed(1)}%${result.avgEffectiveBoost>100?'<span class="small" style="color:var(--warn);"> ⚡封頂100計分</span>':''}</div><div class="lbl">全曲平均有效加成（計分用，未封頂原始值）</div></div>
 <div class="metric-box"><div class="num">${result.idle.toFixed(1)}%</div><div class="lbl">空檔（完全無加成）</div></div>
 </div>
-<p class="small">空檔＝100% − 主動技覆蓋率。SP技能不參與這裡的任何計算——實測發現同一位角色的SP技能，在不同歌曲裡第一次觸發的時間點並不固定（例如同一張卡實測過15秒／23秒兩種不同結果），且這個時間點无法透過選卡或天賦點數去改變，不是隊伍決策能影響的變數，所以覆蓋率／空檔／重疊率都只採計主動技。時間軸圖表上仍會畫出SP技能的區塊，但<b>橫向位置僅供參考</b>，實際觸發時機依歌曲而異、目前無法準確模擬；SP技能真正確定的資訊是站位順序（見上方「建議站位順序」)，不是時間點。</p>
+<p class="small">空檔＝100% − 主動技覆蓋率。「全曲平均有效加成」已確認遊戲規則：同類型Active Score Up效果<b>不會疊加</b>，多個主動技同時生效時只採計當下最高的%數，這個指標就是把「每個時間點實際生效的最高%數」對整首歌積分後取平均——空檔天生貢獻0，重疊時較低的那個會被正確排除、不重複計分，強度大小也直接反映在數字裡。計分時封頂100分（維持跟其他子分數一致的0-100尺度），但這裡顯示的是未封頂的原始數字，方便你看出即使兩隊都封頂在100分，實際強度仍可能有差異。SP技能不參與這裡的任何計算——實測發現同一位角色的SP技能，在不同歌曲裡第一次觸發的時間點並不固定（例如同一張卡實測過15秒／23秒兩種不同結果），且這個時間點无法透過選卡或天賦點數去改變，不是隊伍決策能影響的變數，所以覆蓋率／空檔／加成強度都只採計主動技。時間軸圖表上仍會畫出SP技能的區塊，但<b>橫向位置僅供參考</b>，實際觸發時機依歌曲而異、目前無法準確模擬；SP技能真正確定的資訊是站位順序（見上方「建議站位順序」)，不是時間點。</p>
 <div class="legend"><span><i style="background:var(--accent2)"></i>主動技</span><span><i style="background:var(--accent)"></i>SP技能（位置僅供參考）</span></div>
 <div class="timeline-wrap">${buildTimelineRulerHtml(song.duration)}${timelineRows}</div>
 <p class="small">＊「重疊（浪費）」只計算<b>主動技彼此</b>同時生效的時間（同類型 Score Up 效果不可疊加），SP技能不計入重疊率計算。</p>
@@ -4841,7 +5051,7 @@ SAVED_TEAMS = SAVED_TEAMS.filter(s=>s.id!==id);
 saveSavedTeamsToStorage();
 renderSavedTeams();
 }
-// 把某筆快照載回②或③的分析結果區（依它原本存的是哪一頁），並自動切換過去讓使用者看到。
+// 把某筆快照載回②③⑧的分析結果區（依它原本存的是哪一頁），並自動切換過去讓使用者看到。
 function loadSnapshot(id){
 const snap = SAVED_TEAMS.find(s=>s.id===id);
 if(!snap) return;
@@ -4851,6 +5061,9 @@ updateRoiSourceStatus();
 if(snap.source==="practice"){
 switchTab("practice");
 renderResult(snap.result, snap.song, "resultAreaPractice");
+} else if(snap.source==="exhaustive"){
+switchTab("exhaustive");
+renderResult(snap.result, snap.song, "resultAreaExhaustive", true);
 } else {
 switchTab("leaderpick");
 renderResult(snap.result, snap.song, "resultAreaLeaderPick", true);
@@ -4862,7 +5075,7 @@ if(!el) return;
 const sorted = SAVED_TEAMS.slice().sort((a,b)=> b.savedAt.localeCompare(a.savedAt));
 el.innerHTML = sorted.length ? sorted.map(s=>{
 const leaderCard = getLeaderCardOf(s.result);
-const sourceLabel = s.source==="practice" ? "②養成分析" : "③指定隊長";
+const sourceLabel = s.source==="practice" ? "②養成分析" : s.source==="exhaustive" ? "⑧完整窮舉" : "③指定隊長";
 const dt = new Date(s.savedAt);
 const dtLabel = dt.getFullYear()+"/"+(dt.getMonth()+1)+"/"+dt.getDate()+" "+String(dt.getHours()).padStart(2,"0")+":"+String(dt.getMinutes()).padStart(2,"0");
 return `<tr>
@@ -5115,13 +5328,14 @@ const condRows = current.conditionReport.map(r=>`
 <td>${r.isLeader?"👑 ":""}${r.card.holomem}<span class="tag">${holomemEn(r.card.holomem)}</span><br><span class="small">${r.card.name}</span></td>
 ${src==="leaderpick" ? `<td>${OWNED[r.card.id]? '<span class="pill g">✅ 已持有</span>' : '<span class="pill r">🛒 未持有</span>'}</td>` : ""}
 <td>${pillFor(r.leaderOutfitCol)}</td>
-<td>${pillFor(r.passiveCol)}</td>
+<td>${pillFor(r.passiveCondCol)}</td>
+<td>${pillFor(r.passiveBenefitCol)}<br><span class="small">${r.passiveBenefitDetail}</span></td>
 <td>${pillFor(r.typeCol)}</td>
 <td>${pillFor(r.genCol)}</td>
 </tr>`).join("");
 document.getElementById("roiBaseline").innerHTML = `
 <p class="small">基準隊伍來源：<b>${sourceLabel}</b>　Leader：<b>${leaderCard.holomem}</b> — ${leaderCard.name}　總分：<b>${current.overall.toFixed(1)} / 100</b>（想換一支隊伍當基準，回②或③重新跑一次再回來按「計算」即可）</p>
-<table><thead><tr><th>隊員</th>${src==="leaderpick"?"<th>持有狀態</th>":""}<th>隊長服裝</th><th>被動</th><th>屬性搭配</th><th>期別搭配</th></tr></thead>
+<table><thead><tr><th>隊員</th>${src==="leaderpick"?"<th>持有狀態</th>":""}<th>隊長服裝</th><th>被動條件</th><th>被動加成</th><th>屬性搭配</th><th>期別搭配</th></tr></thead>
 <tbody>${condRows}</tbody></table>
 `;
 
@@ -5223,7 +5437,7 @@ c.name.toLowerCase().includes(q) ||
 const sorted = sortCardsCanonical(filtered);
 document.querySelector("#cardBrowserTable tbody").innerHTML = sorted.map(c=>{
 const outfitTxt = c.outfit
-? (c.outfit.condType ? (c.outfit.condType==="gen"?GEN_LABELS[c.outfit.condVal]:c.outfit.condVal)+"≥"+c.outfit.condCount+"（"+c.outfit.value+"%）" : "無條件（"+c.outfit.value+"%）")
+? (c.outfit.condType ? (c.outfit.condType==="gen"?GEN_LABELS[c.outfit.condVal]:c.outfit.condVal)+"≥"+c.outfit.condCount+"（"+(STAT_TARGET_LABELS[c.outfit.statTarget]||c.outfit.statTarget||"?")+"+"+c.outfit.value+"%）" : "無條件（"+(STAT_TARGET_LABELS[c.outfit.statTarget]||c.outfit.statTarget||"?")+"+"+c.outfit.value+"%）")
 : "unknown";
 const passiveTxt = c.passive
 ? (c.passive.condType==="gen"?GEN_LABELS[c.passive.condVal]:c.passive.condVal)+"≥"+c.passive.condCount+"（"+statAtBloom(c.passive,"value",c.id)+"%）"
@@ -5293,7 +5507,7 @@ tbody.innerHTML = sorted.map(c=>`
 <td>${GEN_LABELS[c.genCode]||c.genCode}${c.extraGenCodes&&c.extraGenCodes.length?"（兼"+c.extraGenCodes.map(code=>GEN_LABELS[code]||code).join("/")+"）":""}</td>
 <td>${c.type}${c.typeConfirmed===false?" (推測)":""}</td>
 <td>${c.outfit? (c.outfit.condType? (c.outfit.condType==="gen"?GEN_LABELS[c.outfit.condVal]:c.outfit.condVal)+"≥"+c.outfit.condCount : "無條件") : "unknown"}</td>
-<td>${c.outfit? c.outfit.value+"%" : "unknown"}</td>
+<td>${c.outfit? (STAT_TARGET_LABELS[c.outfit.statTarget]||c.outfit.statTarget||"?")+" +"+c.outfit.value+"%" : "unknown"}</td>
 <td>${c.active? "interval "+c.active.interval+"s/dur "+c.active.duration+"s" : "unknown"}</td>
 <td><a href="${c.source}" target="_blank">來源</a></td>
 <td><button class="btn secondary small" onclick='loadCardToEditor("${c.id}")'>編輯</button> <button class="btn secondary small" onclick="deleteCard('${c.id}')">刪除</button></td>
