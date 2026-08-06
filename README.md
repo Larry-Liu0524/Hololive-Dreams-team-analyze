@@ -2,7 +2,8 @@
 
 一個非官方的粉絲製作工具，幫《hololive Dreams》玩家評估隊伍組成、找出主動技/SP技能設計最好的隊伍搭配。單一 HTML 檔案、不需安裝，開啟即可使用，所有資料存在瀏覽器本機（`localStorage`），不會上傳到任何伺服器。
 
-🔗 **線上使用**：[[larry-liu0524.github.io/hololive_dreams_team_builder.html](https://larry-liu0524.github.io/hololive_dreams_team_builder.html](https://larry-liu0524.github.io/Hololive-Dreams-team-analyze/hololive_dreams_team_builder.html))
+🔗 **線上使用**：[https://larry-liu0524.github.io/Hololive-Dreams-team-analyze/hololive_dreams_team_builder.html](https://larry-liu0524.github.io/Hololive-Dreams-team-analyze/hololive_dreams_team_builder.html)
+
 
 > 非官方粉絲網站，與 COVER Corp. / QualiArts 無關聯。
 
