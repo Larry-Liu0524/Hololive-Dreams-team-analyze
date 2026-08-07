@@ -123,25 +123,23 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 
 <nav>
 <button data-tab="roster" class="active">① 我的角色庫</button>
-<button data-tab="practice">② 隊伍養成分析（依現有角色）</button>
-<button data-tab="leaderpick">③ 指定隊長找最佳隊伍</button>
-<button data-tab="roi">④ 抽卡 ROI 推薦</button>
-<button data-tab="databrowser">⑤ 卡片／歌曲查詢</button>
-<button data-tab="editor">⑥ 資料庫編輯</button>
-<button data-tab="about">⑦ 方法論 / 資料來源</button>
-<button data-tab="exhaustive">⑧ 完整窮舉最佳化（慢速）</button>
+<button data-tab="practice">② 隊伍分析與最佳化</button>
+<button data-tab="roi">③ 抽卡 ROI 推薦</button>
+<button data-tab="databrowser">④ 卡片／歌曲查詢</button>
+<button data-tab="editor">⑤ 資料庫編輯</button>
+<button data-tab="about">⑥ 方法論 / 資料來源</button>
 </nav>
 
 <details class="quicknav">
 <summary>🧭 不知道要先看哪一頁？點這裡看常見情境對照</summary>
 <table>
 <tbody>
-<tr><td>只是想看看目前持有的角色怎麼搭配最好</td><td>先到<b>①我的角色庫</b>勾好持有角色，再到<b>②隊伍養成分析</b>按「自動建議最佳隊伍」</td></tr>
-<tr><td>已經抽到某張五星角色，想知道適合搭配哪個隊長、還缺哪些隊友</td><td>到<b>③指定隊長找最佳隊伍</b>，把那張卡選為隊長，按「找出這位隊長的最佳隊伍」——這頁會從全部卡片找出理論最強搭配，並標示每一位你有沒有持有</td></tr>
-<tr><td>想知道現在最推薦抽哪張卡</td><td>先在②或③跑出一支隊伍，再到<b>④抽卡ROI推薦</b>按「計算」</td></tr>
-<tr><td>想估算抽到特定角色大概要花多少鑽石/日幣</td><td>到<b>④抽卡ROI推薦</b>下方的「抽卡機率／期望花費試算」</td></tr>
-<tr><td>想查某張卡或某首歌的詳細數值</td><td>到<b>⑤卡片／歌曲查詢</b>搜尋</td></tr>
-<tr><td>想新增卡片、修正資料庫裡的數值</td><td>到<b>⑥資料庫編輯</b></td></tr>
+<tr><td>只是想看看目前持有的角色怎麼搭配最好</td><td>先到<b>①我的角色庫</b>勾好持有角色，再到<b>②隊伍分析與最佳化</b>，候選池選「持有角色」，按「搜尋最佳隊伍」</td></tr>
+<tr><td>已經抽到某張五星角色，想知道適合搭配哪個隊長、還缺哪些隊友</td><td>到<b>②隊伍分析與最佳化</b>，把那張卡選為隊長、候選池選「資料庫全部卡片」，按「搜尋最佳隊伍」——會從全部卡片找出理論最強搭配，並標示每一位你有沒有持有</td></tr>
+<tr><td>想知道現在最推薦抽哪張卡</td><td>先在②跑出一支隊伍，再到<b>③抽卡ROI推薦</b>按「計算」</td></tr>
+<tr><td>想估算抽到特定角色大概要花多少鑽石/日幣</td><td>到<b>③抽卡ROI推薦</b>下方的「抽卡機率／期望花費試算」</td></tr>
+<tr><td>想查某張卡或某首歌的詳細數值</td><td>到<b>④卡片／歌曲查詢</b>搜尋</td></tr>
+<tr><td>想新增卡片、修正資料庫裡的數值</td><td>到<b>⑤資料庫編輯</b></td></tr>
 </tbody>
 </table>
 </details>
@@ -164,69 +162,45 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 </div>
 </div>
 
-<!-- ============ TAB 2b: PRACTICE (依現有角色，不看歌曲) ============ -->
+<!-- ============ TAB 2: 隊伍分析與最佳化（合併原②③⑧） ============ -->
 <div class="tab" id="tab-practice">
 <div class="card">
-<h2>Step 0 · 選擇隊長（依現有角色，不指定歌曲）</h2>
-<p class="small">這一頁<b>不綁定任何特定歌曲</b>，系統會直接依你在①勾選的持有角色，找出技能節奏彼此重疊最少、空檔最少的隊伍。原因：短歌曲常常會把主動技能「攔腰截斷」——例如 Interval 29 秒的技能，在一首 24 秒的短歌裡根本來不及發動，導致覆蓋率分數看起來很差，但那其實是歌曲太短，不代表這隊搭配不好。這頁改用系統內部一個較長的評估區間，讓每張卡的主動技／SP技能都能跑完好幾輪週期，這樣才看得出這隊技能彼此的「間隔／重疊／空檔」本質上合不合，適合先在這裡練出一隊技能節奏鬆一點、重疊低的隊伍。</p>
-<p class="small">＊隊長本質上是「隊伍buff」角色，不強制要求也要佔用下面5個上場席位之一——只是多數人前期資源有限、又想讓主推角色一起上場，才會順便把隊長也放進隊伍組成裡。這裡兩種情況都支援：如果你上面選的隊長沒有出現在下面5個欄位裡，分析時會當成「隊長沒上場、只掛隊長服裝buff」處理，隊長自己的主動技/被動/SP技能就不會計入這次分析。</p>
-<div class="grid cols2">
-<div>
-<label class="small">Leader（必須為持有角色）</label>
-<select id="leaderSelectPractice" onchange="onPracticeLeaderChanged()"></select>
-</div>
-<div style="display:flex;align-items:flex-end;gap:8px;">
-<button class="btn" onclick="runAutoBuildPractice()">🪄 自動建議最佳隊伍</button>
-<button class="btn secondary" onclick="runAnalyzeManualPractice()">分析目前手動隊伍</button>
-<button class="btn secondary" onclick="clearPractice()">🗑 清空</button>
-</div>
-</div>
-<p class="small" style="margin-top:8px;">手動隊伍：於下方「隊伍組成」直接於 5 個欄位選卡。按「🪄 自動建議最佳隊伍」時，<b>已經選好的欄位會被鎖定不動</b>，系統只會針對還空著的欄位，從你持有角色中窮舉／爬山演算法找出最佳搭配；如果 5 個欄位全部空白，則會從頭找出整隊最佳組合。全部選好後也可以按「分析目前手動隊伍」直接查看這組隊伍的分數，不會幫你調整任何欄位。</p>
-<div class="grid cols4" id="manualSlotsPractice" style="margin-top:10px;"></div>
-</div>
-
-<div id="resultAreaPractice"></div>
-</div>
-
-<!-- ============ TAB 3b: LEADER-PICK ============ -->
-<div class="tab" id="tab-leaderpick">
-<div class="card">
-<h2>Step 0 · 指定隊長</h2>
-<p class="small">這一頁<b>一定要先選好一位隊長</b>（不提供「自動選擇最佳Leader」，隊長仍只列出你持有的角色），也不需要選歌曲。系統會從<b>資料庫全部卡片</b>（不限於你持有的）窮舉／爬山演算法找出搭配這位隊長客觀上最強的隊友，並在下方結果的「逐位隊員條件檢查」表格標示每一位是<b>✅ 已持有</b>還是<b>🛒 未持有</b>——這樣你就能一次看出理論最佳隊伍長怎樣、以及還缺哪些卡值得抽。</p>
-<p class="small">＊隊長本質上是「隊伍buff」角色，不強制要求也要佔用下面5個上場席位之一——「🪄找出這位隊長的最佳隊伍」預設仍會把隊長排進上場5人裡（多數人實際玩法如此，也比較省資源）；但如果你用「分析目前手動隊伍」，下面5格選的是你想上場的成員，隊長不用一定也選進這5格裡——沒放進去就會當成「隊長沒上場、只掛隊長服裝buff」處理。</p>
+<h2>② 隊伍分析與最佳化</h2>
+<p class="small">這一頁<b>不綁定任何特定歌曲</b>，用系統內部一個較長的評估區間（200秒）分析隊伍的技能節奏彼此重疊多少、空檔多少，不會因為挑到太短的歌曲而讓覆蓋率分數失真。</p>
+<p class="small">＊隊長本質上是「隊伍buff」角色，不強制要求也要佔用下面5個上場席位之一——沒放進5格裡就會當成「隊長沒上場、只掛隊長服裝buff」處理，隊長自己的主動技/被動/SP技能不計入這次分析。隊長必須是你<b>持有</b>的角色（遊戲規則本來就要求持有才能設為隊長），下方5個上場席位則依候選池設定決定範圍。</p>
+<p class="small">這裡對「卡片組合」與「頻率天賦排列」<b>同時做完全窮舉</b>，保證找到候選範圍內真正的全域最佳隊伍，不是近似解。代價是運算量會隨候選角色數量急遽增加：候選池選「持有角色」通常幾分鐘內可以跑完；選「資料庫全部卡片」（約53位候選角色）可能需要<b>數小時</b>才能跑完全部組合。過程中會即時顯示目前為止找到的最佳結果，也可以隨時按「取消」中止，保留當下最佳解。建議先手動鎖定幾個你確定要用的角色，可以大幅縮小需要窮舉的範圍、大幅縮短時間。如果5個欄位都已經手動選好，可以直接按「分析目前手動隊伍」看分數，不用跑搜尋。</p>
 <div class="grid cols2">
 <div>
 <label class="small">隊長（必選，僅列出持有角色）</label>
-<select id="leaderSelectPick" onchange="onLeaderPickChanged()"></select>
+<select id="leaderSelectExhaustive"></select>
 </div>
-<div style="display:flex;align-items:flex-end;gap:8px;">
-<button class="btn" onclick="runFindBestForLeader()">🪄 找出這位隊長的最佳隊伍</button>
-<button class="btn secondary" onclick="runAnalyzeManualLeaderPick()">分析目前手動隊伍</button>
-<button class="btn secondary" onclick="clearLeaderPick()">🗑 清空</button>
+<div>
+<label class="small">候選池（決定下方5個席位可以從哪裡選）</label>
+<select id="exhaustivePoolMode">
+<option value="owned">只從持有角色中選（範圍小，較快）</option>
+<option value="all">從資料庫全部卡片選（範圍大，可能要跑數小時；可看出理論最佳隊伍、還缺哪些卡值得抽）</option>
+</select>
 </div>
 </div>
-<p class="small" style="margin-top:8px;">手動隊伍：於下方「隊伍組成」直接於 5 個欄位選卡（<b>選項包含資料庫全部卡片，不限於你持有的</b>），可以先把想固定用的角色（不論有沒有持有）放進去。按「🪄 找出這位隊長的最佳隊伍」時，<b>已經選好的欄位（以及上方選的隊長）會被鎖定不動</b>，系統只針對還空著的欄位，從全部卡片中找最佳搭配；全部空白則從頭找出整隊最佳組合。全部選好後也可以按「分析目前手動隊伍」直接查看這組隊伍的分數，不會幫你調整任何欄位。</p>
-<div class="grid cols4" id="manualSlotsLeaderPick" style="margin-top:10px;"></div>
+<p class="small" style="margin-top:8px;">手動鎖定隊員（可留空）：於下方 5 個欄位選卡，已選的欄位會被鎖定不動，只窮舉剩下空著的欄位——鎖越多欄位、窮舉範圍越小、跑越快。</p>
+<div class="grid cols4" id="manualSlotsExhaustive" style="margin-top:10px;"></div>
+<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+<button class="btn" id="btnStartExhaustive" onclick="runFullExhaustiveSearch()">🔍 搜尋最佳隊伍（完整窮舉）</button>
+<button class="btn secondary" onclick="runAnalyzeManualExhaustive()">分析目前手動隊伍</button>
+<button class="btn secondary" onclick="clearExhaustiveSlots()">🗑 清空</button>
+<button class="btn secondary" id="btnCancelExhaustive" onclick="cancelExhaustiveSearch()" disabled>⏹ 取消（保留目前最佳結果）</button>
 </div>
-
-<div id="resultAreaLeaderPick"></div>
+<div id="exhaustiveProgressArea" style="margin-top:14px;"></div>
+</div>
+<div id="resultAreaExhaustive"></div>
 </div>
 
 <!-- ============ TAB 3: ROI ============ -->
 <div class="tab" id="tab-roi">
 <div class="card">
 <h2>抽卡投資報酬率（ROI）推薦</h2>
-<p class="small">這一頁<b>不會自己重新搜尋隊伍</b>，而是直接沿用你在②或③算出的隊伍當基準——但②和③問的問題本質不同，所以分成兩種模式：<b>②的隊伍</b>只從你「目前持有」的角色組成，還有優化空間，這裡會告訴你「抽哪張未持有的卡、換掉哪一位，分數提升最多」。<b>③的隊伍</b>本來就是從資料庫全部卡片搜尋出的理論最佳隊伍，未持有的格位已經是那個位置客觀最好的選擇，換別的未持有卡不會更好——這裡改成告訴你「如果抽不到這張、只能用你現有角色頂替，分數會掉多少」，掉越多代表越該優先抽。請先在下方選擇要以哪一頁的隊伍為基準，再按「計算」。</p>
-<div class="grid cols2" style="margin-bottom:10px;">
-<label class="roi-source-option">
-<input type="radio" name="roiSource" value="practice" checked onchange="updateRoiSourceStatus()">
-<div><b>② 隊伍養成分析</b>目前隊伍<div class="small" id="roiSrcPracticeStatus">（尚未在②跑出隊伍）</div></div>
-</label>
-<label class="roi-source-option">
-<input type="radio" name="roiSource" value="leaderpick" onchange="updateRoiSourceStatus()">
-<div><b>③ 指定隊長找最佳隊伍</b>目前隊伍<div class="small" id="roiSrcLeaderpickStatus">（尚未在③跑出隊伍）</div></div>
-</label>
-</div>
+<p class="small">這一頁<b>不會自己重新搜尋隊伍</b>，而是直接沿用你在②算出的隊伍當基準——但依②的候選池設定不同，問的問題本質不同，所以分成兩種模式：候選池選<b>「持有角色」</b>時，隊伍只從你「目前持有」的角色組成，還有優化空間，這裡會告訴你「抽哪張未持有的卡、換掉哪一位，分數提升最多」。候選池選<b>「資料庫全部卡片」</b>時，隊伍本來就是從資料庫全部卡片搜尋出的理論最佳隊伍，未持有的格位已經是那個位置客觀最好的選擇，換別的未持有卡不會更好——這裡改成告訴你「如果抽不到這張、只能用你現有角色頂替，分數會掉多少」，掉越多代表越該優先抽。請先在②跑出一支隊伍，再回來按「計算」。</p>
+<div class="small" id="roiSrcStatus" style="margin-bottom:10px;">（尚未在②跑出隊伍）</div>
 <div style="display:flex;gap:8px;">
 <button class="btn" onclick="runROI()">🎯 計算</button>
 <button class="btn secondary" onclick="clearROI()">🗑 清空</button>
@@ -257,7 +231,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <div class="tab" id="tab-databrowser">
 <div class="card">
 <h2>卡片資料查詢</h2>
-<p class="small">瀏覽資料庫目前收錄的全部卡片，可依 Holomem／卡名／期別／屬性搜尋，方便查對某張卡的技能數值。這裡僅供查詢，若要新增／修改卡片請到「⑥ 資料庫編輯」。</p>
+<p class="small">瀏覽資料庫目前收錄的全部卡片，可依 Holomem／卡名／期別／屬性搜尋，方便查對某張卡的技能數值。這裡僅供查詢，若要新增／修改卡片請到「⑤ 資料庫編輯」。</p>
 <input type="search" class="searchbar" placeholder="搜尋 Holomem / 卡名 / 期別 / 屬性..." id="cardBrowserSearch" oninput="renderCardBrowser()">
 <label class="small" style="display:inline-flex;align-items:center;gap:6px;margin:6px 0;">
 <input type="checkbox" id="cardBrowserUnownedOnly" onchange="renderCardBrowser()"> 只顯示未持有
@@ -268,7 +242,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 </div>
 <div class="card">
 <h2>歌曲資料查詢</h2>
-<p class="small">資料庫目前收錄 <b id="songCountLabel"></b> 首歌曲秒數（來源 Game8），可依歌名／演唱者搜尋，點欄位標題可切換排序。目前最長歌曲約166秒，②③頁分析區間已涵蓋所有歌曲長度，故不需依單曲秒數另外調整。</p>
+<p class="small">資料庫目前收錄 <b id="songCountLabel"></b> 首歌曲秒數（來源 Game8），可依歌名／演唱者搜尋，點欄位標題可切換排序。目前最長歌曲約166秒，②頁分析區間已涵蓋所有歌曲長度，故不需依單曲秒數另外調整。</p>
 <input type="search" class="searchbar" placeholder="搜尋歌名 / 演唱者..." id="songBrowserSearch" oninput="renderSongBrowser()">
 <div style="max-height:520px;overflow:auto;">
 <table id="songBrowserTable"><thead><tr><th onclick="setSongSort('title')" style="cursor:pointer;">歌曲名稱 ⇅</th><th onclick="setSongSort('performer')" style="cursor:pointer;">演唱者 ⇅</th><th onclick="setSongSort('duration')" style="cursor:pointer;">秒數 ⇅</th><th onclick="setSongSort('exLevel')" style="cursor:pointer;">EX等級 ⇅</th></tr></thead><tbody></tbody></table>
@@ -276,7 +250,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 </div>
 <div class="card">
 <h2>已儲存的隊伍快照</h2>
-<p class="small">在②或③跑出分析結果後，按結果卡片右上角「💾 另存為快照」即可存一份到這裡永久保留（存在瀏覽器 localStorage，換瀏覽器/清快取會遺失，重要隊伍建議另外自行截圖備份）。「載入查看」會把這筆快照還原成②/③目前的分析結果並帶你切過去。</p>
+<p class="small">在②跑出分析結果後，按結果卡片右上角「💾 另存為快照」即可存一份到這裡永久保留（存在瀏覽器 localStorage，換瀏覽器/清快取會遺失，重要隊伍建議另外自行截圖備份）。「載入查看」會把這筆快照還原成②目前的分析結果並帶你切過去。</p>
 <div style="max-height:400px;overflow:auto;">
 <table id="savedTeamsTable"><thead><tr><th>名稱</th><th>來源</th><th>隊長</th><th>總分</th><th>存檔時間</th><th>操作</th></tr></thead><tbody></tbody></table>
 </div>
@@ -323,41 +297,12 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <li><b>Special Skill Order（SP技能站位順序，不列入本工具加權，僅供參考）</b>：SP技能每首歌只發動一次，依隊伍站位由左到右依序輪流發動（站位1最早、站位5最晚），彼此之間<b>不能重疊</b>（同時間只有1個SP技能生效），但可以自由跟主動技疊加。部分SP技能帶有額外加成條件（解析自技能說明文字，例如「40コンボ以上でスコアが120%UP」「ライフ1000以上でスキル発動率が55%UP」）：需要<b>連段(コンボ)</b>門檻的應放越右邊（越晚發動，連段數才夠）；需要<b>生命值(ライフ)</b>門檻的應放越左邊（越早發動，生命值還沒被扣掉太多）；沒有特殊條件的則依「スコアサポート效果%」數值由小到大排，數值越高越晚發動，可疊加在音樂遊戲後段通常較高的連段分數倍率上（此數值僅用於內部排序，不會顯示在站位建議的卡片標籤上）。這個排序邏輯對<b>實際遊戲分數</b>有實質影響，但因為本工具沒有逐拍模擬連段成長，所以<b>不會反映在 Overall Score</b>裡，僅作為站位建議呈現。</li>
 <li><b>Connect（不列入加權，僅供參考）</b>：本遊戲的 Connect 實際機制是「此卡放置於某 Holomem 技能板的 Connect 格時，提升該技能板效果 X%」，並非同隊成員間的加成。這項對整隊評分的實際影響難以量化，故不列入 Overall Score 加權計算，只在分析結果中列出原始數值供參考。（原本還有「Board 加成%」項目，因為需要玩家手動輸入每張卡的板面投資進度、太麻煩且無法自動抓取，已整個移除。）</li>
 <li><b>Overall Score</b>：以上各項依 Leader Outfit 30 / Passive 25 / Timeline 20 / Coverage 10 加權（原始權重總和85%，已等比例正規化為100%）。Special Skill Order／Connect 皆不計入。</li>
-<li><b>主動技能發動頻率天賦（0/4/8/12%，②③搜尋時自動納入考量）</b>：每位Holomem的天賦盤可以加成Active技能的發動頻率，效果是把該角色的Interval縮短為Interval/(1+加成%)——依實測驗證（同一張卡分別測0%/8%/12%），觸發序列是「整條從t=0開始直接套用縮短後的Interval重算」，不是保留原節奏只插入額外次數。這代表頻率天賦會讓該成員的觸發時間點整體「相位位移」，如果新的觸發窗口跟隊友的既有觸發時間撞在一起，反而會變成純粹的Overlap（浪費），不會提升整隊的Timeline/Coverage分數——頻率天賦不是「點越高分數越高」，最佳值會依隊伍其他成員的節奏而變。②③搜尋隊伍時，本工具會在「卡片組合已經定案」後，對這組隊伍窮舉4的隊伍人數次方種頻率排列組合（最多1024種），找出讓Timeline+Coverage加權分數最高的配置；貪婪法換卡校正輪也會用「換上這張卡＋配上它最適合的頻率」的分數來比較，避免因為都假設0%頻率而錯過某張卡實際上更好的可能性。分析結果的時間軸區塊會顯示每位隊員被建議的頻率天賦%，供你在遊戲內的Holomem板實際點配。</li>
+<li><b>主動技能發動頻率天賦（0/4/8/12%，②搜尋時自動納入考量）</b>：每位Holomem的天賦盤可以加成Active技能的發動頻率，效果是把該角色的Interval縮短為Interval/(1+加成%)——依實測驗證（同一張卡分別測0%/8%/12%），觸發序列是「整條從t=0開始直接套用縮短後的Interval重算」，不是保留原節奏只插入額外次數。這代表頻率天賦會讓該成員的觸發時間點整體「相位位移」，如果新的觸發窗口跟隊友的既有觸發時間撞在一起，反而會變成純粹的Overlap（浪費），不會提升整隊的Timeline/Coverage分數——頻率天賦不是「點越高分數越高」，最佳值會依隊伍其他成員的節奏而變。②搜尋隊伍時（連卡片組合都不省略地全部窮舉），對每個候選隊伍都窮舉4的隊伍人數次方種頻率排列組合（最多1024種），找出讓Timeline+Coverage加權分數最高的配置。分析結果的時間軸區塊會顯示每位隊員被建議的頻率天賦%，供你在遊戲內的Holomem板實際點配。</li>
 <li><b>主動技的條件式加成（約49%的卡片有這個機制）</b>：不少卡片的主動技除了固定base value之外，還有一個「條件成立時才吃得到」的更高%數（例如「ピュアタイプ2人以上でスコアが120%UP」，平常是較低的base value，條件成立時直接跳到120%）。這個機制分三類處理：<b>屬性型</b>（Pure/Happy/Cute屬性2人以上）用隊伍當下的實際屬性人數判斷，跟隊長服裝/被動的條件判定是同一套邏輯，條件成立就自動採用較高的%數；<b>生命值型</b>（ライフ達到門檻）與<b>連段型</b>（コンボ達到門檻）屬於玩家操作/歌曲進度中途才會達成的動態狀態，本工具沒有逐拍模擬生命值/連段成長，因此採樂觀假設「一輪打得漂亮的話會達成」，直接視為條件成立——這跟工具既有「Active技能100%發動」等假設是同一套設計立場，不是額外引入的樂觀程度，但這代表這部分的分數是上限估計，不是保證值。</li>
 </ol>
 <h3>已知資料限制</h3>
-<p class="small">目前遊戲（2026/7/23 上線）wiki 資料仍在補齊中：(1) 內建資料庫已收錄 <b>59 張卡</b>——54 位 Holomem 各自的主力 5★卡（來自 AppMedia／Game8 星5一覧），加上 5 張最新追加的水著限定 5★卡（白銀ノエル／大空スバル／不知火フレア／角巻わため／音乃瀬奏），<b>全部 59 張都已取得完整的 Active/Passive/Special/Outfit/Connect/Stats/Type/Generation 數值</b>（AppMedia 有 19 張把技能表渲染成圖片抓不到文字，已改用 Game8 的純文字版頁面補齊，未用假數字填補）；(2) 完整遊戲每位角色通常還有第2、第3張卡（We are hololive!基礎款等），尚未全部收錄，可在「⑥ 資料庫編輯」分頁持續新增；(3) Active 技能每 X 秒判定一次、依機率發動（第三方玩家整理的數據約為高機率55%／中機率45%／低機率35%，可疊加機率加成技能），但<b>本工具的時間軸／覆蓋率計算刻意假設每次判定都必定發動（100%）</b>——這是因為本工具設計目標是「衝排行榜」場景：實際打法是刷到技能都順利發動的那一輪才算，加上天賦盤本身也能疊加發動機率，投資夠深後接近保底發動，所以以 100% 發動當作優化目標是正確假設，不是簡化偷懶；(4) 歌曲 BPM 與逐秒 note 密度（例如副歌段落是否比其他段落更密集）目前沒有任何公開資料來源——這代表「覆蓋率」只衡量技能生效的<b>時間長度</b>，同樣長度的生效時間蓋在 note 密集的段落還是稀疏的段落，實際換算到的分數可能差很多，本工具目前無法納入這個差異，覆蓋率請理解成「技能彼此設計上合不合、有沒有互相卡到」的參考指標，而不是實際分數的保證值。所有假設與資料缺口都會在介面上明確標示，不會用虛構數字掩蓋。</p>
+<p class="small">目前遊戲（2026/7/23 上線）wiki 資料仍在補齊中：(1) 內建資料庫已收錄 <b>59 張卡</b>——54 位 Holomem 各自的主力 5★卡（來自 AppMedia／Game8 星5一覧），加上 5 張最新追加的水著限定 5★卡（白銀ノエル／大空スバル／不知火フレア／角巻わため／音乃瀬奏），<b>全部 59 張都已取得完整的 Active/Passive/Special/Outfit/Connect/Stats/Type/Generation 數值</b>（AppMedia 有 19 張把技能表渲染成圖片抓不到文字，已改用 Game8 的純文字版頁面補齊，未用假數字填補）；(2) 完整遊戲每位角色通常還有第2、第3張卡（We are hololive!基礎款等），尚未全部收錄，可在「⑤ 資料庫編輯」分頁持續新增；(3) Active 技能每 X 秒判定一次、依機率發動（第三方玩家整理的數據約為高機率55%／中機率45%／低機率35%，可疊加機率加成技能），但<b>本工具的時間軸／覆蓋率計算刻意假設每次判定都必定發動（100%）</b>——這是因為本工具設計目標是「衝排行榜」場景：實際打法是刷到技能都順利發動的那一輪才算，加上天賦盤本身也能疊加發動機率，投資夠深後接近保底發動，所以以 100% 發動當作優化目標是正確假設，不是簡化偷懶；(4) 歌曲 BPM 與逐秒 note 密度（例如副歌段落是否比其他段落更密集）目前沒有任何公開資料來源——這代表「覆蓋率」只衡量技能生效的<b>時間長度</b>，同樣長度的生效時間蓋在 note 密集的段落還是稀疏的段落，實際換算到的分數可能差很多，本工具目前無法納入這個差異，覆蓋率請理解成「技能彼此設計上合不合、有沒有互相卡到」的參考指標，而不是實際分數的保證值。所有假設與資料缺口都會在介面上明確標示，不會用虛構數字掩蓋。</p>
 </div>
-</div>
-
-<!-- ============ TAB 8: 完整窮舉最佳化 ============ -->
-<div class="tab" id="tab-exhaustive">
-<div class="card">
-<h2>⑧ 完整窮舉最佳化（慢速）</h2>
-<p class="small">這裡對「卡片組合」與「頻率天賦排列」<b>同時做完全窮舉</b>，不像②③的自動搜尋走貪婪法＋局部優化去逼近最佳解——這裡保證找到候選範圍內真正的全域最佳隊伍。代價是運算量會隨候選角色數量急遽增加：候選池選「持有角色」通常幾分鐘內可以跑完；選「資料庫全部卡片」（約53位候選角色）可能需要<b>數小時</b>才能跑完全部組合。過程中會即時顯示目前為止找到的最佳結果，也可以隨時按「取消」中止，保留當下最佳解。建議先手動鎖定幾個你確定要用的角色（於下方欄位），可以大幅縮小需要窮舉的範圍、大幅縮短時間。</p>
-<div class="grid cols2">
-<div>
-<label class="small">隊長（必選）</label>
-<select id="leaderSelectExhaustive"></select>
-</div>
-<div>
-<label class="small">候選池</label>
-<select id="exhaustivePoolMode">
-<option value="owned">只從持有角色中選（範圍小，較快）</option>
-<option value="all">從資料庫全部卡片選（範圍大，可能要跑數小時）</option>
-</select>
-</div>
-</div>
-<p class="small" style="margin-top:8px;">手動鎖定隊員（可留空）：於下方 5 個欄位選卡，已選的欄位會被鎖定不動，只窮舉剩下空著的欄位——鎖越多欄位、窮舉範圍越小、跑越快。</p>
-<div class="grid cols4" id="manualSlotsExhaustive" style="margin-top:10px;"></div>
-<div style="display:flex;gap:8px;margin-top:12px;">
-<button class="btn" id="btnStartExhaustive" onclick="runFullExhaustiveSearch()">🔍 開始窮舉</button>
-<button class="btn secondary" id="btnCancelExhaustive" onclick="cancelExhaustiveSearch()" disabled>⏹ 取消（保留目前最佳結果）</button>
-</div>
-<div id="exhaustiveProgressArea" style="margin-top:14px;"></div>
-</div>
-<div id="resultAreaExhaustive"></div>
 </div>
 
 </main>
@@ -4114,7 +4059,7 @@ function holomemEn(name){ return HOLOMEM_EN[name] || ""; }
 const GEN_ORDER = ["0","1","2","3","4","5","gamers","holox","myth","promise","regloss","advent","id1","id2","id3"];
 
 // 統一的卡片排序：先依期別（照GEN_ORDER的順序，跟①角色庫分組順序一致），組內再依角色名/卡名的日文假名排序。
-// ⑤卡片查詢、⑥資料庫編輯都共用這個函式，確保三個分頁看到的卡片順序邏輯一致，不會各排各的。
+// ④卡片查詢、⑤資料庫編輯都共用這個函式，確保兩個分頁看到的卡片順序邏輯一致，不會各排各的。
 function sortCardsCanonical(cards){
 const genIndex = {};
 GEN_ORDER.forEach((g,i)=>{ genIndex[g]=i; });
@@ -4144,7 +4089,7 @@ function loadOwned(){ try{ return JSON.parse(localStorage.getItem("hd_owned")||"
 function saveOwned(o){ localStorage.setItem("hd_owned", JSON.stringify(o)); }
 function loadBloom(){ try{ return JSON.parse(localStorage.getItem("hd_bloom")||"{}"); }catch(e){ return {}; } }
 function saveBloom(b){ localStorage.setItem("hd_bloom", JSON.stringify(b)); }
-// ②③最後一次分析結果：自動存最新一次，重新整理頁面不會遺失；使用者也可以另外「另存為」具名快照長期保留、比較。
+// ②最後一次分析結果：自動存最新一次，重新整理頁面不會遺失；使用者也可以另外「另存為」具名快照長期保留、比較。
 function loadTeamResults(){ try{ const parsed=JSON.parse(localStorage.getItem("hd_team_results")||"null"); return Object.assign({ practice: null, leaderpick: null, exhaustive: null }, parsed||{}); }catch(e){ return { practice: null, leaderpick: null, exhaustive: null }; } }
 function saveTeamResultsToStorage(){ localStorage.setItem("hd_team_results", JSON.stringify(TEAM_RESULTS)); }
 function loadSavedTeams(){ try{ return JSON.parse(localStorage.getItem("hd_saved_teams")||"[]"); }catch(e){ return []; } }
@@ -4157,7 +4102,7 @@ function getBloom(cardId){
 const v = BLOOM[cardId];
 return (typeof v==="number" && v>=0 && v<=5) ? v : 0;
 }
-// 依開花等級取得某項技能欄位的實際數值：如果這張卡有 xxxByBloom 陣列就查表，沒有就退回原本的固定值(相容沒有開花資料的卡，例如之後用⑥資料庫編輯手動新增的卡)。
+// 依開花等級取得某項技能欄位的實際數值：如果這張卡有 xxxByBloom 陣列就查表，沒有就退回原本的固定值(相容沒有開花資料的卡，例如之後用⑤資料庫編輯手動新增的卡)。
 function statAtBloom(statObj, field, cardId){
 if(!statObj) return undefined;
 const arr = statObj[field+"ByBloom"];
@@ -4168,33 +4113,13 @@ return arr[lvl];
 return statObj[field];
 }
 
-// ROI（④）的計算基準：直接沿用②「隊伍養成分析」或③「指定隊長找最佳隊伍」最後一次算出的隊伍結果，
-// 而不是自己在④裡另外重新搜尋一次。②和③問的問題本質不同，所以分開存、分開處理：
-// - practice（②）：隊伍只從「目前持有」的角色組成，還有優化空間 → ROI 問的是「抽哪張未持有的卡能讓這隊變強」。
-// - leaderpick（③）：隊伍本來就是從資料庫全部卡片搜尋出的理論最佳隊伍，未持有的格位已經是那個位置客觀最好的選擇，
+// ROI（③）的計算基準：直接沿用②「隊伍分析與最佳化」最後一次算出的隊伍結果，
+// 而不是自己在③裡另外重新搜尋一次。依②當時用的候選池設定不同，問的問題本質不同，所以要記錄poolMode一起處理：
+// - poolMode="owned"：隊伍只從「目前持有」的角色組成，還有優化空間 → ROI 問的是「抽哪張未持有的卡能讓這隊變強」。
+// - poolMode="all"：隊伍本來就是從資料庫全部卡片搜尋出的理論最佳隊伍，未持有的格位已經是那個位置客觀最好的選擇，
 //   換別的未持有卡不會更好 → ROI 改問「如果抽不到這張、只能用現有角色頂替，分數會掉多少」，掉越多代表越該優先抽。
-let TEAM_RESULTS = loadTeamResults(); // {result, song}，開頁時自動還原上次分析結果
+let TEAM_RESULTS = loadTeamResults(); // {result, song, poolMode}，開頁時自動還原上次分析結果
 let SAVED_TEAMS = loadSavedTeams(); // 使用者手動「另存為」的具名隊伍快照清單
-
-// 修BUG：②③頁「隊伍組成」的5個欄位，在按下自動搜尋後會被系統填入找到的隊伍卡片，方便你接著微調。
-// 但如果填好之後又去上方換一位不同的隊長再按一次搜尋，這些欄位就會被當成「使用者手動鎖定」的卡片，
-// 導致新的搜尋其實被舊隊伍卡死、甚至可能因為隊長被截斷而整個沒反應（見 findBestTeamWithFixed 修BUG 註解）。
-// 用這兩個旗標追蹤「目前欄位內容是不是系統剛自動填的、使用者還沒手動動過」：是的話，換隊長時就自動清空，
-// 讓新的隊長從頭全新搜尋；如果使用者已經手動改過任一欄位（代表是刻意要鎖定的），換隊長就不會動到這些欄位。
-let practiceSlotsAutoFilled = false;
-let leaderPickSlotsAutoFilled = false;
-function onPracticeLeaderChanged(){
-if(practiceSlotsAutoFilled){
-for(let i=0;i<TEAM_SIZE;i++){ const s=document.getElementById("pslot"+i); if(s) s.value=""; }
-practiceSlotsAutoFilled = false;
-}
-}
-function onLeaderPickChanged(){
-if(leaderPickSlotsAutoFilled){
-for(let i=0;i<TEAM_SIZE;i++){ const s=document.getElementById("lpslot"+i); if(s) s.value=""; }
-leaderPickSlotsAutoFilled = false;
-}
-}
 
 /* ================= ENGINE ================= */
 function ownedCardList(){ return CARDS.filter(c=>OWNED[c.id]); }
@@ -4629,109 +4554,11 @@ go(0,[]);
 return res;
 }
 
-function findBestTeamForLeader(leader, pool, song){
-// pool: owned cards excluding leader's holomem, unique holomem only (pick best card per holomem to reduce search)
-// 隊長是獨立於5個上場席位之外的角色，所以要同時試兩種情境並取分數較高者：
-//   (a) 隊長也上場：5席＝隊長＋pool選4位
-//   (b) 隊長不上場、只掛隊長服裝buff：5席全部從pool選（隊長自己的主動/被動/SP不會觸發）
-const byHolomem={};
-pool.forEach(c=>{ if(!byHolomem[c.holomem]) byHolomem[c.holomem]=[]; byHolomem[c.holomem].push(c); });
-const holomemList = Object.keys(byHolomem);
-let best=null, bestScore=-1;
-
-// ≤9個候選Holomem時走窮舉：候選組合數本來就不多，直接對每組候選都用「含頻率天賦最佳化」的分數比較，
-// 精準度最高(不會有「因為用freq=0比較，換掉了其實搭配某個頻率會更好的候選」這種誤判)。
-function evalMemberSet(memberHolomems, leaderDeployed){
-function pickBest(idx, chosen){
-if(idx===memberHolomems.length){
-const neededSize = leaderDeployed ? TEAM_SIZE-1 : TEAM_SIZE;
-if(chosen.length < neededSize) return;
-const teamCards = leaderDeployed ? [leader,...chosen] : chosen;
-const r = scoreTeamWithBestFreq(teamCards, leader.id, song);
-if(r.overall>bestScore){ bestScore=r.overall; best=r; }
-return;
-}
-const variants = byHolomem[memberHolomems[idx]];
-variants.forEach(v=>{ chosen.push(v); pickBest(idx+1,chosen); chosen.pop(); });
-}
-pickBest(0,[]);
-}
-
-// >9個候選Holomem時走貪婪法：候選數太多沒辦法窮舉，分兩階段控制運算量——
-// 第一輪「逐位塞入最佳角色」用便宜的scoreTeam(頻率視為0%)快速定出雛形隊伍；
-// 第二輪「局部交換改善」才改用scoreTeamWithBestFreq(每次評分都內含4^5組頻率排列的窮舉)，
-// 這樣「這張候選卡換上去、配合它自己最適合的頻率」的分數，才會被正確拿來跟現有隊伍比較，
-// 不會因為都用頻率0%比較而誤判某張卡不值得換上去(詳見開發過程的效能/精準度取捨討論)。
-function greedyBuild(slotsCount, leaderDeployed){
-let chosenHolomem=[];
-let remaining = holomemList.slice();
-for(let slot=0; slot<slotsCount; slot++){
-let bestH=null,bestS=-1,bestCard=null;
-remaining.forEach(h=>{
-byHolomem[h].forEach(v=>{
-const trialCards = leaderDeployed ? [leader,...chosenHolomem.map(x=>x.card),v] : [...chosenHolomem.map(x=>x.card),v];
-const r=scoreTeam(trialCards, leader.id, song);
-if(r.overall>bestS){ bestS=r.overall; bestH=h; bestCard=v; }
-});
-});
-if(!bestH) break;
-chosenHolomem.push({holomem:bestH,card:bestCard});
-remaining = remaining.filter(h=>h!==bestH);
-}
-for(let pass=0; pass<2; pass++){
-for(let i=0;i<chosenHolomem.length;i++){
-remaining = holomemList.filter(h=>!chosenHolomem.some(x=>x.holomem===h));
-const curCards = leaderDeployed ? [leader,...chosenHolomem.map(x=>x.card)] : chosenHolomem.map(x=>x.card);
-let curScore = scoreTeamWithBestFreq(curCards, leader.id, song).overall;
-remaining.forEach(h=>{
-byHolomem[h].forEach(v=>{
-const trial = chosenHolomem.map(x=>x.card); trial[i]=v;
-const trialCards = leaderDeployed ? [leader,...trial] : trial;
-const r = scoreTeamWithBestFreq(trialCards, leader.id, song);
-if(r.overall>curScore){ curScore=r.overall; chosenHolomem[i]={holomem:h,card:v}; }
-});
-});
-}
-}
-const finalCards = leaderDeployed ? [leader,...chosenHolomem.map(x=>x.card)] : chosenHolomem.map(x=>x.card);
-return scoreTeamWithBestFreq(finalCards, leader.id, song);
-}
-
-if(holomemList.length<=9){
-// (a) 隊長上場：pool 選 TEAM_SIZE-1 位
-combinations(holomemList, Math.min(TEAM_SIZE-1, holomemList.length)).forEach(set=>evalMemberSet(set, true));
-// (b) 隊長不上場：pool 選 TEAM_SIZE 位（需要pool至少有5個不同holomem才夠選）
-if(holomemList.length>=TEAM_SIZE){
-combinations(holomemList, TEAM_SIZE).forEach(set=>evalMemberSet(set, false));
-}
-} else {
-// 太多候選 Holomem 時改用貪婪法＋局部交換改善，兩種情境都跑一次再比較
-const resA = greedyBuild(TEAM_SIZE-1, true);
-if(resA.overall>bestScore){ bestScore=resA.overall; best=resA; }
-if(holomemList.length>=TEAM_SIZE){
-const resB = greedyBuild(TEAM_SIZE, false);
-if(resB.overall>bestScore){ bestScore=resB.overall; best=resB; }
-}
-}
-return best;
-}
-
-function findBestTeamOverall(owned, song, forcedLeaderId){
-let candidates = forcedLeaderId ? owned.filter(c=>c.id===forcedLeaderId) : owned;
-let best=null;
-candidates.forEach(leader=>{
-const pool = owned.filter(c=>c.holomem!==leader.holomem);
-if(pool.length < TEAM_SIZE-1) return; // not enough for full team
-const r = findBestTeamForLeader(leader, pool, song);
-if(r && (!best || r.overall>best.overall)) best=r;
-});
-return best;
-}
-
-/* ================= ⑧ 完整窮舉最佳化：真正的暴力法，卡片組合與頻率天賦都不省略地全部試過 =================
-本區塊只給⑧分頁用，跟②③既有的貪婪法／窮舉分支(findBestTeamForLeader等)完全獨立，故意不共用同一套函式——
-因為②③的設計目標是「幾秒到幾十秒內給出一個夠好的建議」，這裡的設計目標是「不計時間、找到候選範圍內真正的最佳解」，
-兩者的效能/精準度取捨方向相反，硬要共用反而會讓程式碼互相牽制、改一邊要顧慮另一邊會不會變慢或變不準。
+/* ================= ②隊伍分析與最佳化：真正的暴力法，卡片組合與頻率天賦都不省略地全部試過 =================
+這是②分頁唯一的搜尋引擎，卡片組合＋頻率天賦排列同時完全窮舉，保證找到候選範圍內真正的全域最佳隊伍。
+早期版本另外有一套貪婪法＋局部優化的「近似解、跑得快」搜尋（分散在②③兩個獨立分頁），
+但考量到這款遊戲養角色需要投入大量資源與時間、沒辦法說換隊就換隊，近似解不夠用，
+已經把貪婪法整套移除、②③兩個分頁也合併成一個，全部改用這裡的完整窮舉。
 */
 
 function dedupeByHolomem(arr){
@@ -4742,7 +4569,6 @@ return arr.filter(c=>{ if(seen.has(c.holomem)) return false; seen.add(c.holomem)
 // 產生「固定卡(forced) + 從candidatePool窮舉剩餘空位」的所有完整隊伍組合(每個組合是長度TEAM_SIZE的卡片陣列)。
 // excludeHolomem：額外要排除的一位角色(通常是隊長本人的holomem，隊長不上場時也不能被其他候選卡頂替他自己)。
 // 這裡刻意把「同一位holomem底下的不同卡片(例如泳裝款/常駐款)」也當成獨立候選，全部展開——
-// 跟②③的搜尋函式邏輯一致，只是這裡不論候選角色有多少位，一律全部窮舉、不會因為超過9人就切換成貪婪法。
 function buildAllCandidateJobs(forced, excludeHolomem, candidatePool){
 let f = dedupeByHolomem(forced);
 if(f.length > TEAM_SIZE) f = f.slice(0, TEAM_SIZE);
@@ -4764,7 +4590,7 @@ return jobs;
 }
 
 // 把「隊長上場」與「隊長不上場只掛buff」兩種情境都展開成完整的任務清單({cards, leaderId})，
-// 跟findBestTeamWithFixed的情境A/B邏輯對應，只是這裡不比較分數、單純把所有候選組合都列出來給外層的非同步迴圈逐一評分。
+// 這裡不比較分數、單純把所有候選組合都列出來給外層的非同步迴圈逐一評分。
 function buildFullExhaustiveJobList(leaderCard, fixedCards, forcedLeaderId, pool){
 const leaderAlreadyInFixed = fixedCards.some(c=>c.holomem===leaderCard.holomem);
 const jobs=[];
@@ -4805,7 +4631,7 @@ ${statusText? `<div class="small" style="margin-top:4px;color:var(--accent2);">$
 `;
 }
 
-// 主入口：從①UI收集參數、產生完整任務清單、以「分批＋讓出主執行緒」的方式非同步跑過全部組合，
+// 主入口：從②UI收集參數、產生完整任務清單、以「分批＋讓出主執行緒」的方式非同步跑過全部組合，
 // 每批評分完就更新一次進度條/目前最佳結果，並讓瀏覽器有機會處理使用者的「取消」點擊與畫面重繪，
 // 不然一次性同步跑幾十萬次評分會直接讓分頁整個凍住、連取消鍵都按不到。
 async function runFullExhaustiveSearch(){
@@ -4827,7 +4653,7 @@ if(seenHolomem.has(c.holomem)){ alert("鎖定的欄位裡有重複的 Holomem，
 seenHolomem.add(c.holomem);
 }
 
-const song = {id:"exhaustive", title:"完整窮舉最佳化（不指定歌曲）", performer:"", duration:200, exLevel:null};
+const song = {id:"exhaustive", title:"隊伍分析與最佳化（不指定歌曲）", performer:"", duration:200, exLevel:null};
 
 const jobs = buildFullExhaustiveJobList(leaderCard, fixedCards, leaderId, pool);
 if(jobs.length===0){ alert("找不到可行的候選組合，請確認候選池／鎖定欄位是否足夠多樣（還需其他不同 Holomem 補滿剩餘位置）。"); return; }
@@ -4899,104 +4725,6 @@ renderResult(best, song, "resultAreaExhaustive", poolMode==="owned");
 // 鎖定「已手動指定的卡片」，只針對剩下的空位從 owned 中窮舉／爬山演算法找最佳搭配。
 // fixedCards：已手動選好、要固定上場的卡片（可以是 0～5 張）。
 // forcedLeaderId：可選；若指定且該卡不在 fixedCards 中，函式內部會同時嘗試「隊長也上場」與「隊長不上場只掛buff」兩種情境，取分數較高者。
-function findBestTeamWithFixed(fixedCards, forcedLeaderId, owned, song){
-// 隊長是獨立於5個上場席位之外的角色，所以要同時試「隊長上場」與「隊長不上場只掛buff」兩種情境並取分數較高者——
-// 除非使用者已經把隊長那張卡明確放進鎖定欄位裡，這種情況視為使用者明確要隊長上場，只跑上場那個情境。
-const leaderCard = forcedLeaderId ? cardById(forcedLeaderId) : null;
-// 用 holomem 比對而非精確卡片ID：使用者可能鎖定的是隊長「同一位角色的另一張卡」
-// （例如隊長服裝選泳裝款、但手動把常駐款放進欄位上場），這樣也算「使用者明確要隊長上場」。
-const leaderAlreadyInFixed = leaderCard && fixedCards.some(c=>c.holomem===leaderCard.holomem);
-
-function dedupe(arr){
-const seen=new Set();
-return arr.filter(c=>{ if(seen.has(c.holomem)) return false; seen.add(c.holomem); return true; });
-}
-
-function searchFillRemaining(forcedRaw, effLeaderId){
-let forced = dedupe(forcedRaw);
-if(forced.length > TEAM_SIZE) forced = forced.slice(0, TEAM_SIZE);
-if(forced.length===0) return null;
-const remainingSlots = TEAM_SIZE - forced.length;
-if(remainingSlots<=0) return scoreTeamWithBestFreq(forced, effLeaderId, song);
-
-// 不管隊長這次上不上場，隊長本人的 Holomem 都不能再被其他候選卡佔用（同一位角色不能同時用兩張卡）。
-const pool = owned.filter(c=> !forced.some(f=>f.holomem===c.holomem) && (!leaderCard || c.holomem!==leaderCard.holomem));
-const byHolomem={};
-pool.forEach(c=>{ if(!byHolomem[c.holomem]) byHolomem[c.holomem]=[]; byHolomem[c.holomem].push(c); });
-const holomemList = Object.keys(byHolomem);
-if(holomemList.length < remainingSlots) return null; // 持有角色不夠多樣，補不滿剩餘位置
-
-let best=null, bestScore=-1;
-function evalMemberSet(memberHolomems){
-function pickBest(idx, chosen){
-if(idx===memberHolomems.length){
-const trial = forced.concat(chosen);
-const r = scoreTeamWithBestFreq(trial, effLeaderId, song);
-if(r.overall>bestScore){ bestScore=r.overall; best=r; }
-return;
-}
-byHolomem[memberHolomems[idx]].forEach(v=>{ chosen.push(v); pickBest(idx+1,chosen); chosen.pop(); });
-}
-pickBest(0,[]);
-}
-
-if(holomemList.length<=9){
-combinations(holomemList, remainingSlots).forEach(set=>evalMemberSet(set));
-} else {
-// 太多候選 Holomem 時改用貪婪法＋局部交換改善
-let chosenHolomem=[];
-let remaining = holomemList.slice();
-for(let slot=0; slot<remainingSlots; slot++){
-let bestH=null,bestS=-1,bestCard=null;
-remaining.forEach(h=>{
-byHolomem[h].forEach(v=>{
-const trial = forced.concat(chosenHolomem.map(x=>x.card), [v]);
-const r = scoreTeam(trial, effLeaderId, song);
-if(r.overall>bestS){ bestS=r.overall; bestH=h; bestCard=v; }
-});
-});
-if(!bestH) break;
-chosenHolomem.push({holomem:bestH,card:bestCard});
-remaining = remaining.filter(h=>h!==bestH);
-}
-for(let pass=0; pass<2; pass++){
-for(let i=0;i<chosenHolomem.length;i++){
-let curScore = scoreTeamWithBestFreq(forced.concat(chosenHolomem.map(x=>x.card)), effLeaderId, song).overall;
-remaining = holomemList.filter(h=>!chosenHolomem.some(x=>x.holomem===h));
-remaining.forEach(h=>{
-byHolomem[h].forEach(v=>{
-const trial = chosenHolomem.map(x=>x.card); trial[i]=v;
-const r = scoreTeamWithBestFreq(forced.concat(trial), effLeaderId, song);
-if(r.overall>curScore){ curScore=r.overall; chosenHolomem[i]={holomem:h,card:v}; }
-});
-});
-}
-}
-best = scoreTeamWithBestFreq(forced.concat(chosenHolomem.map(x=>x.card)), effLeaderId, song);
-}
-return best;
-}
-
-// 情境 A：隊長上場（使用者已把隊長卡鎖進欄位時，一定屬於這個情境）
-let resA = null;
-if(leaderCard){
-const forcedA = leaderAlreadyInFixed ? fixedCards.slice() : [leaderCard, ...fixedCards];
-resA = searchFillRemaining(forcedA, forcedLeaderId);
-} else if(fixedCards.length>0){
-// 沒有指定隊長：沿用鎖定欄位第一張卡當隊長（維持舊行為）
-resA = searchFillRemaining(fixedCards, fixedCards[0].id);
-}
-
-// 情境 B：隊長不上場、只掛服裝buff（只有「有指定隊長」且「使用者沒把隊長卡鎖進欄位」時才需要試）
-let resB = null;
-if(leaderCard && !leaderAlreadyInFixed){
-resB = searchFillRemaining(fixedCards.slice(), forcedLeaderId);
-}
-
-if(resA && resB) return resA.overall>=resB.overall ? resA : resB;
-return resA || resB;
-}
-
 /* ================= UI ================= */
 function switchTab(name){
 document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active", b.dataset.tab===name));
@@ -5092,61 +4820,11 @@ return `<optgroup label="${label}">${opts}</optgroup>`;
 function populateSelectors(){
 const owned=ownedCardList();
 
-// ---- 隊伍養成分析（依現有角色，不看歌曲）用的 Leader 選單 / 手動隊伍插槽，內容與上方同步 ----
-const leaderSelPractice=document.getElementById("leaderSelectPractice");
-if(leaderSelPractice){
-leaderSelPractice.innerHTML = `<option value="">（自動選擇最佳Leader）</option>` + cardOptionsGroupedByGen(owned, c=>`${c.holomem}(${holomemEn(c.holomem)}) - ${c.name}`);
-}
-const slotsPractice=document.getElementById("manualSlotsPractice");
-if(slotsPractice){
-const prevPracticeVals = [];
-for(let i=0;i<TEAM_SIZE;i++){ const s=document.getElementById("pslot"+i); prevPracticeVals.push(s?s.value:""); }
-slotsPractice.innerHTML="";
-for(let i=0;i<TEAM_SIZE;i++){
-const sel=document.createElement("select");
-sel.id="pslot"+i;
-sel.innerHTML = `<option value="">（空）</option>` + cardOptionsGroupedByGen(owned, c=>`${c.holomem}(${holomemEn(c.holomem)}) - ${c.name}`);
-if(prevPracticeVals[i]) sel.value = prevPracticeVals[i];
-// 使用者自己手動改了某個欄位，就不再是「系統剛自動填的」狀態，之後換隊長不應該清掉這個手動選擇。
-sel.onchange = ()=>{ practiceSlotsAutoFilled = false; };
-const wrap=document.createElement("div");
-wrap.innerHTML=`<label class="small">位置 ${i+1}${i===0?"（預設Leader，可於上方Leader選單覆蓋）":""}</label>`;
-wrap.appendChild(sel);
-slotsPractice.appendChild(wrap);
-}
-}
-
-// ---- 指定隊長找最佳隊伍分頁：隊長（必選，不含自動選項，僅列持有角色；隊友則從全部卡片挑選）----
-const leaderSelPick=document.getElementById("leaderSelectPick");
-if(leaderSelPick){
-const curPick=leaderSelPick.value;
-leaderSelPick.innerHTML = `<option value="">（請選擇隊長）</option>` + cardOptionsGroupedByGen(owned, c=>`${c.holomem}(${holomemEn(c.holomem)}) - ${c.name}`);
-if(curPick) leaderSelPick.value=curPick;
-}
-const slotsLeaderPick=document.getElementById("manualSlotsLeaderPick");
-if(slotsLeaderPick){
-const prevVals = [];
-for(let i=0;i<TEAM_SIZE;i++){ const s=document.getElementById("lpslot"+i); prevVals.push(s?s.value:""); }
-slotsLeaderPick.innerHTML="";
-for(let i=0;i<TEAM_SIZE;i++){
-const sel=document.createElement("select");
-sel.id="lpslot"+i;
-sel.innerHTML = `<option value="">（空）</option>` + cardOptionsGroupedByGen(CARDS, c=>`${c.holomem}(${holomemEn(c.holomem)}) - ${c.name}${OWNED[c.id]?"":"（未持有）"}`);
-if(prevVals[i]) sel.value = prevVals[i];
-// 使用者自己手動改了某個欄位，就不再是「系統剛自動填的」狀態，之後換隊長不應該清掉這個手動選擇。
-sel.onchange = ()=>{ leaderPickSlotsAutoFilled = false; };
-const wrap=document.createElement("div");
-wrap.innerHTML=`<label class="small">位置 ${i+1}</label>`;
-wrap.appendChild(sel);
-slotsLeaderPick.appendChild(wrap);
-}
-}
-
-// ---- ⑧完整窮舉最佳化分頁：隊長選單(全部卡片，不論候選池模式為何都可指定任何角色當隊長)、手動鎖定欄位 ----
+// ---- ②隊伍分析與最佳化：隊長選單(僅列持有角色，遊戲規則要求持有才能當隊長)、手動鎖定欄位(選項含全部卡片，方便鎖定還沒抽到的候選) ----
 const leaderSelExhaustive=document.getElementById("leaderSelectExhaustive");
 if(leaderSelExhaustive){
 const curExh=leaderSelExhaustive.value;
-leaderSelExhaustive.innerHTML = `<option value="">（請選擇隊長）</option>` + cardOptionsGroupedByGen(CARDS, c=>`${c.holomem}(${holomemEn(c.holomem)}) - ${c.name}${OWNED[c.id]?"":"（未持有）"}`);
+leaderSelExhaustive.innerHTML = `<option value="">（請選擇隊長）</option>` + cardOptionsGroupedByGen(owned, c=>`${c.holomem}(${holomemEn(c.holomem)}) - ${c.name}`);
 if(curExh) leaderSelExhaustive.value=curExh;
 }
 const slotsExhaustive=document.getElementById("manualSlotsExhaustive");
@@ -5217,7 +4895,7 @@ const c=m.card;
 const myEvents = result.events.filter(e=>e.who===c.name);
 const segs = myEvents.map(e=>`<div class="seg ${e.kind}" style="left:${e.start/song.duration*100}%;width:${(e.end-e.start)/song.duration*100}%;" title="${e.kind==='active'?'主動技':'SP技能'} ${e.start}s-${e.end}s"></div>`).join("");
 // 頻率天賦建議：這是scoreTeamWithBestFreq窮舉4^n種排列組合後、對「這組已定案的隊伍」找到的最佳頻率配置——
-// 只有透過搜尋功能(②③)產生的結果才會有非0的建議值；手動單獨檢視某隊伍時預設全部視為0%(未點)。
+// 只有透過搜尋功能才會有非0的建議值；手動單獨檢視某隊伍時預設全部視為0%(未點)。
 const freqPct = (result.freqAssignment && result.freqAssignment[c.holomem]) || 0;
 const freqBadge = c.active ? `<span class="small" style="display:block;color:var(--accent2);">建議頻率天賦：${freqPct}%</span>` : "";
 return `<div class="timeline-row"><div class="who"><div class="marquee-wrap"><span class="marquee-text">${c.holomem}</span></div><div class="marquee-wrap small"><span class="marquee-text">${c.name}</span></div>${freqBadge}</div><div class="timeline-track">${segs}</div></div>`;
@@ -5288,7 +4966,7 @@ text.style.animationDuration = duration.toFixed(1)+"s";
 }
 });
 }
-// 把目前②或③最新一次的分析結果另存成一筆具名快照，永久保留在 localStorage，供之後查看／比較／刪除。
+// 把目前②最新一次的分析結果另存成一筆具名快照，永久保留在 localStorage，供之後查看／比較／刪除。
 // source 是 "practice" 或 "leaderpick"（剛好等於 song.id），對應 TEAM_RESULTS 裡的哪一份結果。
 function saveCurrentAsSnapshot(source){
 const stored = TEAM_RESULTS[source];
@@ -5300,7 +4978,7 @@ if(!name) return;
 SAVED_TEAMS.push({ id:"snap_"+Date.now(), name, savedAt:new Date().toISOString(), source, result:stored.result, song:stored.song });
 saveSavedTeamsToStorage();
 renderSavedTeams();
-alert("已儲存「"+name+"」。可到「⑤卡片／歌曲查詢」頁下方查看所有已存快照。");
+alert("已儲存「"+name+"」。可到「④卡片／歌曲查詢」頁下方查看所有已存快照。");
 }
 function deleteSnapshot(id){
 if(!confirm("確定要刪除這筆已儲存的隊伍快照嗎？")) return;
@@ -5308,23 +4986,16 @@ SAVED_TEAMS = SAVED_TEAMS.filter(s=>s.id!==id);
 saveSavedTeamsToStorage();
 renderSavedTeams();
 }
-// 把某筆快照載回②③⑧的分析結果區（依它原本存的是哪一頁），並自動切換過去讓使用者看到。
+// 把某筆快照載回②的分析結果區，並自動切換過去讓使用者看到。
+// source欄位可能是舊版資料留下的"practice"/"leaderpick"（②③尚未合併前的分頁），這裡統一導回現在唯一的②分頁。
 function loadSnapshot(id){
 const snap = SAVED_TEAMS.find(s=>s.id===id);
 if(!snap) return;
-TEAM_RESULTS[snap.source] = { result:snap.result, song:snap.song };
+TEAM_RESULTS.exhaustive = { result:snap.result, song:snap.song, poolMode: snap.result && snap.result.conditionReport && snap.result.conditionReport.some(r=>!OWNED[r.card.id]) ? "all" : "owned" };
 saveTeamResultsToStorage();
 updateRoiSourceStatus();
-if(snap.source==="practice"){
 switchTab("practice");
-renderResult(snap.result, snap.song, "resultAreaPractice");
-} else if(snap.source==="exhaustive"){
-switchTab("exhaustive");
 renderResult(snap.result, snap.song, "resultAreaExhaustive", true);
-} else {
-switchTab("leaderpick");
-renderResult(snap.result, snap.song, "resultAreaLeaderPick", true);
-}
 }
 function renderSavedTeams(){
 const el = document.querySelector("#savedTeamsTable tbody");
@@ -5332,7 +5003,7 @@ if(!el) return;
 const sorted = SAVED_TEAMS.slice().sort((a,b)=> b.savedAt.localeCompare(a.savedAt));
 el.innerHTML = sorted.length ? sorted.map(s=>{
 const leaderCard = getLeaderCardOf(s.result);
-const sourceLabel = s.source==="practice" ? "②養成分析" : s.source==="exhaustive" ? "⑧完整窮舉" : "③指定隊長";
+const sourceLabel = s.source==="exhaustive" ? "②隊伍分析" : "②隊伍分析（舊版資料）";
 const dt = new Date(s.savedAt);
 const dtLabel = dt.getFullYear()+"/"+(dt.getMonth()+1)+"/"+dt.getDate()+" "+String(dt.getHours()).padStart(2,"0")+":"+String(dt.getMinutes()).padStart(2,"0");
 return `<tr>
@@ -5343,7 +5014,7 @@ return `<tr>
 <td class="small">${dtLabel}</td>
 <td><button class="btn secondary small" onclick="loadSnapshot('${s.id}')">載入查看</button> <button class="btn secondary small" onclick="deleteSnapshot('${s.id}')">刪除</button></td>
 </tr>`;
-}).join("") : `<tr><td colspan="6" class="small">目前還沒有儲存任何快照。到②或③分析出隊伍後，按結果卡片右上角的「💾 另存為快照」即可存到這裡。</td></tr>`;
+}).join("") : `<tr><td colspan="6" class="small">目前還沒有儲存任何快照。到②分析出隊伍後，按結果卡片右上角的「💾 另存為快照」即可存到這裡。</td></tr>`;
 }
 // 相容舊資料用：新版 scoreTeam() 回傳的 result 會直接帶 leaderCard 欄位（因為隊長不一定在 team 陣列裡，見 scoreTeam 註解）；
 // 但 localStorage 裡可能還留著這次更新之前存的舊 result（沒有 leaderCard 欄位，當時隊長一定在 team 裡），這裡做個相容讀取。
@@ -5362,137 +5033,32 @@ function scoreBar(label,weight,score){
 return `<div class="score-bar-row"><div class="label">${label}（${weight}%）</div><div class="score-bar-track"><div class="score-bar-fill" style="width:${score}%;"></div></div><div class="score-bar-val">${score.toFixed(1)}</div></div>`;
 }
 
-/* ================= PRACTICE (no song length) ================= */
-function getPracticeSong(){
-// 不需使用者輸入：內部固定用一個較長的評估區間，讓每張卡的主動技/SP技能都能跑完好幾輪週期，
-// 這樣才能純粹看出隊伍技能節奏彼此合不合，不受任何特定歌曲秒數影響。
-const PRACTICE_DURATION = 200;
-return {id:"practice", title:"隊伍養成分析（依現有角色，不指定歌曲）", performer:"", duration: PRACTICE_DURATION, exLevel:null};
-}
 
-function runAutoBuildPractice(){
-const owned = ownedCardList();
-if(owned.length < TEAM_SIZE){ alert("持有角色不足 "+TEAM_SIZE+" 張（需來自至少 "+TEAM_SIZE+" 位不同Holomem），請先到「①我的角色庫」勾選。"); return; }
-const uniqueHolomem = [...new Set(owned.map(c=>c.holomem))];
-if(uniqueHolomem.length < TEAM_SIZE){ alert("持有角色的『不同Holomem』數量不足 "+TEAM_SIZE+" 位，同一位Holomem不能同時上場多張卡。"); return; }
-const song = getPracticeSong();
-const forcedLeader = document.getElementById("leaderSelectPractice").value || null;
-
-// 手動隊伍組成欄位如果已經有指定卡片，視為「鎖定」，只為還空著的欄位找最佳搭配。
-const fixedIds=[];
-for(let i=0;i<TEAM_SIZE;i++){ const v=document.getElementById("pslot"+i).value; if(v) fixedIds.push(v); }
-const fixedCards = fixedIds.map(id=>cardById(id)).filter(Boolean);
-const fixedHolomemSet = new Set(fixedCards.map(c=>c.holomem));
-if(fixedHolomemSet.size !== fixedCards.length){ alert("手動指定的隊伍組成中有重複的 Holomem，同一位角色不能同時上場多張卡。"); return; }
-
-let result;
-if(fixedCards.length>0){
-result = findBestTeamWithFixed(fixedCards, forcedLeader, owned, song);
-if(!result){ alert("找不到可行隊伍，請確認持有角色是否足夠多樣（還需其他不同 Holomem 補滿剩餘位置）。"); return; }
-} else {
-result = findBestTeamOverall(owned, song, forcedLeader);
-if(!result){ alert("找不到可行隊伍，請確認角色庫是否足夠多樣。"); return; }
-}
-renderResult(result, song, "resultAreaPractice");
-result.order.forEach((id,i)=>{ const sel=document.getElementById("pslot"+i); if(sel) sel.value=id; });
-document.getElementById("leaderSelectPractice").value = result.leaderId;
-practiceSlotsAutoFilled = true; // 這5個欄位剛被系統自動填入，換隊長時應該自動清空重新搜尋
-TEAM_RESULTS.practice = {result, song};
-saveTeamResultsToStorage();
-updateRoiSourceStatus();
-}
-
-function runAnalyzeManualPractice(){
-const song = getPracticeSong();
+// 分析目前手動排好的固定隊伍(5格全選好+隊長)，不做搜尋，單純評分——比搜尋快很多(只算1次，含1024種頻率排列)，
+// 不需要跑完整窮舉。候選池選項只影響「搜尋」時的範圍，這裡手動選好的5張卡不受候選池限制(可以鎖未持有的卡進來看)。
+function runAnalyzeManualExhaustive(){
+const leaderId = document.getElementById("leaderSelectExhaustive").value;
+if(!leaderId){ alert("請先選擇一位隊長。"); return; }
 const ids=[];
-for(let i=0;i<TEAM_SIZE;i++){ const v=document.getElementById("pslot"+i).value; if(v) ids.push(v); }
-if(ids.length!==TEAM_SIZE){ alert("請於「隊伍組成」5個欄位都選好卡片，或改用「自動建議最佳隊伍」。"); return; }
+for(let i=0;i<TEAM_SIZE;i++){ const v=document.getElementById("exhslot"+i).value; if(v) ids.push(v); }
+if(ids.length!==TEAM_SIZE){ alert("請於下方5個欄位都選好卡片，或改用「搜尋最佳隊伍」。"); return; }
 const holomemSet = new Set(ids.map(id=>cardById(id).holomem));
 if(holomemSet.size!==TEAM_SIZE){ alert("隊伍中有重複的 Holomem，同一位角色不能同時上場多張卡。"); return; }
-const leaderId = document.getElementById("leaderSelectPractice").value || ids[0];
-// 隊長是「隊伍buff」角色，不強制要求也是上場5人之一；就算上場的是隊長「同一位角色的另一張卡」
-// （例如隊長服裝掛泳裝款、上場用常駐款）也完全合法，遊戲本身就支援這種混搭，不需要額外擋掉。
+const poolMode = document.getElementById("exhaustivePoolMode").value;
 const cards = ids.map(id=>cardById(id));
+const song = {id:"exhaustive", title:"隊伍分析與最佳化（不指定歌曲）", performer:"", duration:200, exLevel:null};
 const result = scoreTeamWithBestFreq(cards, leaderId, song);
-renderResult(result, song, "resultAreaPractice");
-TEAM_RESULTS.practice = {result, song};
+renderResult(result, song, "resultAreaExhaustive", poolMode==="owned");
+TEAM_RESULTS.exhaustive = {result, song, poolMode};
 saveTeamResultsToStorage();
 updateRoiSourceStatus();
 }
 
-function clearPractice(){
-document.getElementById("leaderSelectPractice").value = "";
-for(let i=0;i<TEAM_SIZE;i++){ const sel=document.getElementById("pslot"+i); if(sel) sel.value=""; }
-practiceSlotsAutoFilled = false;
-const el=document.getElementById("resultAreaPractice"); if(el) el.innerHTML="";
-}
-
-/* ================= LEADER-PICK (必須先選隊長，從「全部卡片」找最佳隊友並標示持有狀態) ================= */
-function getLeaderPickFixedCards(){
-const ids=[];
-for(let i=0;i<TEAM_SIZE;i++){ const sel=document.getElementById("lpslot"+i); if(sel && sel.value) ids.push(sel.value); }
-return ids.map(id=>cardById(id)).filter(Boolean);
-}
-
-function runFindBestForLeader(){
-const leaderId = document.getElementById("leaderSelectPick").value;
-if(!leaderId){ alert("請先選擇一位隊長。"); return; }
-const leaderCard = cardById(leaderId);
-if(!leaderCard){ alert("找不到這張隊長卡片，請重新選擇。"); return; }
-
-// 鎖定欄位裡如果放了跟隊長「同一位 Holomem」的卡（不論是不是同一張卡本人），
-// 代表使用者明確要這位角色上場——即使那張卡跟隊長服裝來源不同張也沒關係
-// （遊戲允許隊長服裝用A卡、上場用同一角色的B卡這種混搭，例如隊長服裝掛泳裝款、上場用常駐款）。
-// 真正的衝突只有「鎖定欄位裡自己出現兩張不同 Holomem 的重複」，同一位角色不能同時上場兩張不同卡。
-const fixedCards = getLeaderPickFixedCards();
-const holomemSeen = new Set();
-for(const c of fixedCards){
-if(holomemSeen.has(c.holomem)){ alert("鎖定的欄位裡有重複的 Holomem，同一位角色不能同時上場多張卡。"); return; }
-holomemSeen.add(c.holomem);
-}
-
-const song = {id:"leaderpick", title:"指定隊長最佳隊伍（不指定歌曲，從全部卡片挑選）", performer:"", duration:200, exLevel:null};
-
-let result;
-if(fixedCards.length>0){
-result = findBestTeamWithFixed(fixedCards, leaderId, CARDS, song);
-if(!result){ alert("找不到可行隊伍，請確認資料庫是否足夠多樣（还需其他不同 Holomem 補滿剩餘位置）。"); return; }
-} else {
-const uniqueHolomem = [...new Set(CARDS.filter(c=>c.holomem!==leaderCard.holomem).map(c=>c.holomem))];
-if(uniqueHolomem.length < TEAM_SIZE-1){ alert("資料庫中可搭配的不同 Holomem 數量不足，請先到「⑥資料庫編輯」補充卡片。"); return; }
-result = findBestTeamOverall(CARDS, song, leaderId);
-if(!result){ alert("找不到可行隊伍，請確認資料庫是否足夠多樣。"); return; }
-}
-renderResult(result, song, "resultAreaLeaderPick", true);
-result.order.forEach((id,i)=>{ const sel=document.getElementById("lpslot"+i); if(sel) sel.value=id; });
-leaderPickSlotsAutoFilled = true; // 這5個欄位剛被系統自動填入，換隊長時應該自動清空重新搜尋
-TEAM_RESULTS.leaderpick = {result, song};
-saveTeamResultsToStorage();
-updateRoiSourceStatus();
-}
-
-function runAnalyzeManualLeaderPick(){
-const leaderId = document.getElementById("leaderSelectPick").value;
-if(!leaderId){ alert("請先選擇一位隊長。"); return; }
-const fixedCards = getLeaderPickFixedCards();
-if(fixedCards.length!==TEAM_SIZE){ alert("請於「隊伍組成」5個欄位都選好卡片（這5格是實際上場成員；隊長只提供隊長buff，不一定要放進這5格），或改用「自動建議最佳隊伍」。"); return; }
-const holomemSet = new Set(fixedCards.map(c=>c.holomem));
-if(holomemSet.size!==TEAM_SIZE){ alert("隊伍中有重複的 Holomem，同一位角色不能同時上場多張卡。"); return; }
-// 隊長是「隊伍buff」角色，不強制要求也出現在下方5個上場席位裡；就算上場的是隊長「同一位角色的另一張卡」
-// （例如隊長服裝掛泳裝款、上場用常駐款）也完全合法，遊戲本身就支援這種混搭，不需要額外擋掉。
-const song = {id:"leaderpick", title:"指定隊長最佳隊伍（不指定歌曲，從全部卡片挑選）", performer:"", duration:200, exLevel:null};
-const result = scoreTeamWithBestFreq(fixedCards, leaderId, song);
-renderResult(result, song, "resultAreaLeaderPick", true);
-TEAM_RESULTS.leaderpick = {result, song};
-saveTeamResultsToStorage();
-updateRoiSourceStatus();
-}
-
-function clearLeaderPick(){
-document.getElementById("leaderSelectPick").value = "";
-for(let i=0;i<TEAM_SIZE;i++){ const sel=document.getElementById("lpslot"+i); if(sel) sel.value=""; }
-leaderPickSlotsAutoFilled = false;
-const el=document.getElementById("resultAreaLeaderPick"); if(el) el.innerHTML="";
+function clearExhaustiveSlots(){
+document.getElementById("leaderSelectExhaustive").value = "";
+for(let i=0;i<TEAM_SIZE;i++){ const sel=document.getElementById("exhslot"+i); if(sel) sel.value=""; }
+const el=document.getElementById("resultAreaExhaustive"); if(el) el.innerHTML="";
+const p=document.getElementById("exhaustiveProgressArea"); if(p) p.innerHTML="";
 }
 
 // 針對「目前最佳隊伍」(current)，測試把 cand 換進隊伍的每一個位置（含隊長），
@@ -5527,19 +5093,14 @@ return parts.join("、");
 }
 
 function updateRoiSourceStatus(){
-const ps = document.getElementById("roiSrcPracticeStatus");
-const ls = document.getElementById("roiSrcLeaderpickStatus");
-if(ps){
-const p = TEAM_RESULTS.practice;
-ps.textContent = p ? `目前：${cardById(p.result.leaderId).holomem} 領隊，總分 ${p.result.overall.toFixed(1)}` : "（尚未在②跑出隊伍）";
-}
-if(ls){
-const l = TEAM_RESULTS.leaderpick;
-ls.textContent = l ? `目前：${cardById(l.result.leaderId).holomem} 領隊，總分 ${l.result.overall.toFixed(1)}` : "（尚未在③跑出隊伍）";
+const st = document.getElementById("roiSrcStatus");
+if(st){
+const r = TEAM_RESULTS.exhaustive;
+st.textContent = r ? `目前：${cardById(r.result.leaderId).holomem} 領隊，總分 ${r.result.overall.toFixed(1)}（候選池：${r.poolMode==="owned"?"持有角色":"資料庫全部卡片"}）` : "（尚未在②跑出隊伍）";
 }
 }
 
-// 針對③「指定隊長找最佳隊伍」這種本來就已經從資料庫全部卡片搜尋出理論最佳隊伍的情境：
+// 針對候選池選「資料庫全部卡片」這種本來就已經從全部卡片搜尋出理論最佳隊伍的情境：
 // 隊伍裡還沒持有的每一張卡，如果抽不到、只能用「目前持有」的角色頂替該位置，分數會掉多少？
 // 掉越多，代表這張卡對這隊的重要性／優先度越高，值得優先抽；如果連可頂替的持有角色都湊不出來，
 // 代表這張卡目前是「沒有它就湊不滿整隊」的必抽卡。
@@ -5565,17 +5126,13 @@ return results;
 }
 
 function runROI(){
-const srcEl = document.querySelector('input[name="roiSource"]:checked');
-const src = srcEl ? srcEl.value : "practice";
-const stored = TEAM_RESULTS[src];
+const stored = TEAM_RESULTS.exhaustive;
 if(!stored){
-alert(src==="practice"
-? "請先到「②隊伍養成分析」按「自動建議最佳隊伍」或「分析目前手動隊伍」找出一支隊伍。"
-: "請先到「③指定隊長找最佳隊伍」按「找出這位隊長的最佳隊伍」或「分析目前手動隊伍」找出一支隊伍。");
+alert("請先到「②隊伍分析與最佳化」搜尋或分析出一支隊伍。");
 return;
 }
-const {result: current, song} = stored;
-const sourceLabel = src==="practice" ? "② 隊伍養成分析（依現有角色）" : "③ 指定隊長找最佳隊伍";
+const {result: current, song, poolMode} = stored;
+const sourceLabel = poolMode==="owned" ? "② 隊伍分析與最佳化（候選池：持有角色）" : "② 隊伍分析與最佳化（候選池：資料庫全部卡片）";
 
 document.getElementById("roiResult").style.display="block";
 
@@ -5583,7 +5140,7 @@ const leaderCard = getLeaderCardOf(current);
 const condRows = current.conditionReport.map(r=>`
 <tr>
 <td>${r.isLeader?"👑 ":""}${r.card.holomem}<span class="tag">${holomemEn(r.card.holomem)}</span><br><span class="small">${r.card.name}</span></td>
-${src==="leaderpick" ? `<td>${OWNED[r.card.id]? '<span class="pill g">✅ 已持有</span>' : '<span class="pill r">🛒 未持有</span>'}</td>` : ""}
+${poolMode==="all" ? `<td>${OWNED[r.card.id]? '<span class="pill g">✅ 已持有</span>' : '<span class="pill r">🛒 未持有</span>'}</td>` : ""}
 <td>${pillFor(r.leaderOutfitCol)}</td>
 <td>${pillFor(r.passiveCondCol)}</td>
 <td>${pillFor(r.passiveBenefitCol)}<br><span class="small">${r.passiveBenefitDetail}</span></td>
@@ -5591,13 +5148,13 @@ ${src==="leaderpick" ? `<td>${OWNED[r.card.id]? '<span class="pill g">✅ 已持
 <td>${pillFor(r.genCol)}</td>
 </tr>`).join("");
 document.getElementById("roiBaseline").innerHTML = `
-<p class="small">基準隊伍來源：<b>${sourceLabel}</b>　Leader：<b>${leaderCard.holomem}</b> — ${leaderCard.name}　總分：<b>${current.overall.toFixed(1)} / 100</b>（想換一支隊伍當基準，回②或③重新跑一次再回來按「計算」即可）</p>
-<table><thead><tr><th>隊員</th>${src==="leaderpick"?"<th>持有狀態</th>":""}<th>隊長服裝</th><th>被動條件</th><th>被動加成</th><th>屬性搭配</th><th>期別搭配</th></tr></thead>
+<p class="small">基準隊伍來源：<b>${sourceLabel}</b>　Leader：<b>${leaderCard.holomem}</b> — ${leaderCard.name}　總分：<b>${current.overall.toFixed(1)} / 100</b>（想換一支隊伍當基準，回②重新跑一次再回來按「計算」即可）</p>
+<table><thead><tr><th>隊員</th>${poolMode==="all"?"<th>持有狀態</th>":""}<th>隊長服裝</th><th>被動條件</th><th>被動加成</th><th>屬性搭配</th><th>期別搭配</th></tr></thead>
 <tbody>${condRows}</tbody></table>
 `;
 
-if(src==="practice"){
-// ②的隊伍只從持有角色組成，還有優化空間：找出「抽哪張未持有的卡、換掉哪一位，分數提升最多」。
+if(poolMode==="owned"){
+// 候選池是「持有角色」：隊伍只從目前持有的角色組成，還有優化空間，找出「抽哪張未持有的卡、換掉哪一位，分數提升最多」。
 document.getElementById("roiListTitle").textContent = "ROI 排行榜（換掉最弱一位後的分數提升幅度）";
 const unowned = CARDS.filter(c=>!OWNED[c.id]);
 const rows=[];
@@ -5612,9 +5169,9 @@ document.getElementById("roiList").innerHTML = top.length ? top.map((r,i)=>`
 <div class="roi-rank">#${i+1}</div>
 <div class="roi-name">${r.card.holomem}（${holomemEn(r.card.holomem)}） — ${r.card.name}<span class="sub">建議替換：${r.replacedCard.holomem}（${r.replacedCard.name}）${r.newLeaderId===r.card.id?" · 同時成為新隊長":""} · ${gapReasonText(current,r)} · ${GEN_LABELS[r.card.genCode]}${r.card.type!=="unknown"?" / "+r.card.type:""} · <a href="${r.card.source}" target="_blank" class="badge-src">資料來源</a></span></div>
 <div class="roi-delta">${r.delta>=0?"+":""}${r.delta.toFixed(2)}</div>
-</div>`).join("") : `<p class="small">目前找不到任何一張未持有的卡能合法換進這支隊伍（可能是 Holomem 重複衝突太多），請先到「⑥資料庫編輯」確認資料庫涵蓋範圍。</p>`;
+</div>`).join("") : `<p class="small">目前找不到任何一張未持有的卡能合法換進這支隊伍（可能是 Holomem 重複衝突太多），請先到「⑤資料庫編輯」確認資料庫涵蓋範圍。</p>`;
 } else {
-// ③的隊伍本來就是從資料庫全部卡片搜尋出的理論最佳隊伍，未持有的格位已經是那個位置客觀最好的選擇，
+// 候選池是「資料庫全部卡片」：隊伍本來就是理論最佳隊伍，未持有的格位已經是那個位置客觀最好的選擇，
 // 換別的未持有卡不會更好；改成算「抽卡優先順序」——沒抽到、只能用持有角色頂替時，分數會掉多少。
 document.getElementById("roiListTitle").textContent = "抽卡優先順序（這隊裡尚未持有的卡，依「沒有它會少多少分」排序）";
 const priorities = analyzeAcquirePriority(current, song);
@@ -5827,20 +5384,13 @@ updateDbStat();
 renderRoster();
 populateSelectors();
 renderCardTable();
-// 開頁時把上次自動保存的②③分析結果還原顯示出來，不用重新整理頁面就再跑一次分析；連同下方「隊伍組成」欄位也一併還原，維持一致。
-if(TEAM_RESULTS.practice){
-const r = TEAM_RESULTS.practice;
-renderResult(r.result, r.song, "resultAreaPractice");
-r.result.order.forEach((id,i)=>{ const sel=document.getElementById("pslot"+i); if(sel) sel.value=id; });
-const ls=document.getElementById("leaderSelectPractice"); if(ls) ls.value = r.result.leaderId;
-practiceSlotsAutoFilled = true;
-}
-if(TEAM_RESULTS.leaderpick){
-const r = TEAM_RESULTS.leaderpick;
-renderResult(r.result, r.song, "resultAreaLeaderPick", true);
-r.result.order.forEach((id,i)=>{ const sel=document.getElementById("lpslot"+i); if(sel) sel.value=id; });
-const ls=document.getElementById("leaderSelectPick"); if(ls) ls.value = r.result.leaderId;
-leaderPickSlotsAutoFilled = true;
+// 開頁時把上次自動保存的②分析結果還原顯示出來，不用重新整理頁面就再跑一次分析；連同下方「隊伍組成」欄位也一併還原，維持一致。
+if(TEAM_RESULTS.exhaustive){
+const r = TEAM_RESULTS.exhaustive;
+renderResult(r.result, r.song, "resultAreaExhaustive", r.poolMode==="all");
+r.result.order.forEach((id,i)=>{ const sel=document.getElementById("exhslot"+i); if(sel) sel.value=id; });
+const ls=document.getElementById("leaderSelectExhaustive"); if(ls) ls.value = r.result.leaderId;
+const pm=document.getElementById("exhaustivePoolMode"); if(pm && r.poolMode) pm.value = r.poolMode;
 }
 updateRoiSourceStatus();
 runGachaCalc();
