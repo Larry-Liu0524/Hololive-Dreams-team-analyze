@@ -71,6 +71,8 @@ th{color:var(--sub);font-weight:600;position:sticky;top:0;background:var(--panel
 70%{transform:translateX(var(--marquee-shift,0px));}
 100%{transform:translateX(0);}
 }
+@keyframes spin-rotate{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+.spin-icon{display:inline-block;animation:spin-rotate 1s linear infinite;}
 .timeline-track{position:relative;flex:1;height:20px;background:var(--panel2);border-radius:4px;overflow:hidden;}
 .timeline-track.ruler{overflow:visible;background:none;border-bottom:1px solid var(--border);height:14px;}
 .timeline-track.ruler span{font-size:10px;color:var(--sub);font-variant-numeric:tabular-nums;}
@@ -4618,14 +4620,15 @@ const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
 return (h>0?h+"小時":"") + (m>0||h>0?m+"分":"") + sec+"秒";
 }
 
-function updateExhaustiveProgress(done, total, elapsedMs, best, statusText){
+function updateExhaustiveProgress(done, total, elapsedMs, best, statusText, running){
 const el = document.getElementById("exhaustiveProgressArea");
 if(!el) return;
 const pct = total>0 ? (done/total*100) : 0;
 const rate = elapsedMs>0 ? done/elapsedMs : 0; // jobs per ms
 const etaMs = (rate>0 && done<total) ? (total-done)/rate : 0;
+const spinner = running ? `<span class="spin-icon">⚙️</span> ` : "";
 el.innerHTML = `
-<div class="small">進度：${done.toLocaleString()} / ${total.toLocaleString()}（${pct.toFixed(2)}%） ｜ 已花費：${formatDuration(elapsedMs)} ｜ 預估剩餘：${done<total?formatDuration(etaMs):"—"}</div>
+<div class="small">${spinner}進度：${done.toLocaleString()} / ${total.toLocaleString()}（${pct.toFixed(2)}%） ｜ 已花費：${formatDuration(elapsedMs)}</div>
 <div style="background:var(--panel2);border-radius:6px;height:10px;margin-top:6px;overflow:hidden;"><div style="background:var(--accent);height:100%;width:${Math.min(100,pct)}%;"></div></div>
 ${best? `<div class="small" style="margin-top:6px;">目前最佳：<b>${best.overall.toFixed(1)} 分</b>（${cardById(best.leaderId).holomem} 領隊）</div>` : ""}
 ${statusText? `<div class="small" style="margin-top:4px;color:var(--accent2);">${statusText}</div>` : ""}
@@ -4690,7 +4693,7 @@ tierOf[j] = (base.leaderPass?2:0) + (passiveAllOk?1:0); // 0~3，數字越大優
 if(tierOf[j]>bestTier) bestTier=tierOf[j];
 }
 cheapDone = end;
-updateExhaustiveProgress(cheapDone, total, Date.now()-startTime, null, `第一階段：篩選候選中（隊長條件／被動全員滿足）…`);
+updateExhaustiveProgress(cheapDone, total, Date.now()-startTime, null, `第一階段：篩選候選中（隊長條件／被動全員滿足）…`, true);
 // eslint-disable-next-line no-await-in-loop
 await new Promise(resolve=>setTimeout(resolve, 0));
 }
@@ -4699,7 +4702,7 @@ if(exhaustiveState.cancel){
 exhaustiveState.running = false;
 document.getElementById("btnStartExhaustive").disabled = false;
 document.getElementById("btnCancelExhaustive").disabled = true;
-updateExhaustiveProgress(cheapDone, total, Date.now()-startTime, null, "⏹ 已取消（僅完成第一階段篩選，尚未進入頻率最佳化，沒有可用結果）。");
+updateExhaustiveProgress(cheapDone, total, Date.now()-startTime, null, "⏹ 已取消（僅完成第一階段篩選，尚未進入頻率最佳化，沒有可用結果）。", false);
 return;
 }
 
@@ -4725,21 +4728,7 @@ const r = scoreTeamWithBestFreq(job.cards, job.leaderId, song);
 if(r.overall>bestScore){ bestScore=r.overall; best=r; }
 }
 doneCount = sampleSize;
-const avgMs = (Date.now()-calibStart)/Math.max(1,sampleSize);
-const estTotalMs = avgMs * total2;
-updateExhaustiveProgress(doneCount, total2, Date.now()-phase2Start, best, `第一階段篩選完成，最高優先層級：${tierLabel}。已完成抽樣校準…`);
-if(total2>sampleSize && !confirm(`第一階段從 ${total.toLocaleString()} 組候選中篩出 ${total2.toLocaleString()} 組符合最高優先層級（${tierLabel}）。接下來只需要對這 ${total2.toLocaleString()} 組做頻率天賦最佳化，依抽樣估算約需 ${formatDuration(estTotalMs)}。要繼續嗎？（可以按「確定」後隨時用「取消」按鈕中止，保留當時最佳結果）`)){
-exhaustiveState.running = false;
-document.getElementById("btnStartExhaustive").disabled = false;
-document.getElementById("btnCancelExhaustive").disabled = true;
-updateExhaustiveProgress(doneCount, total2, Date.now()-phase2Start, best, "已取消（僅完成抽樣校準），以下為抽樣範圍內的最佳結果。");
-if(best){
-TEAM_RESULTS.exhaustive = {result:best, song, poolMode};
-saveTeamResultsToStorage();
-renderResult(best, song, "resultAreaExhaustive", poolMode==="owned");
-}
-return;
-}
+updateExhaustiveProgress(doneCount, total2, Date.now()-phase2Start, best, `第一階段篩選完成，最高優先層級：${tierLabel}。共 ${total2.toLocaleString()} 組候選需要做頻率天賦最佳化，執行中…`, true);
 
 for(let i=sampleSize;i<total2;i+=CHUNK){
 if(exhaustiveState.cancel) break;
@@ -4750,7 +4739,7 @@ const r = scoreTeamWithBestFreq(job.cards, job.leaderId, song);
 if(r.overall>bestScore){ bestScore=r.overall; best=r; }
 }
 doneCount = end;
-updateExhaustiveProgress(doneCount, total2, Date.now()-phase2Start, best, `第二階段：${tierLabel}，頻率最佳化中…`);
+updateExhaustiveProgress(doneCount, total2, Date.now()-phase2Start, best, `第二階段：${tierLabel}，頻率最佳化中…`, true);
 // eslint-disable-next-line no-await-in-loop
 await new Promise(resolve=>setTimeout(resolve, 0));
 }
@@ -4759,7 +4748,7 @@ exhaustiveState.running = false;
 document.getElementById("btnStartExhaustive").disabled = false;
 document.getElementById("btnCancelExhaustive").disabled = true;
 
-updateExhaustiveProgress(doneCount, total2, Date.now()-phase2Start, best, exhaustiveState.cancel? `⏹ 已取消，以下為「${tierLabel}」候選中，取消當下找到的最佳結果。` : `✅ 完整窮舉已跑完全部組合，以下為「${tierLabel}」候選範圍內真正的全域最佳結果。`);
+updateExhaustiveProgress(doneCount, total2, Date.now()-phase2Start, best, exhaustiveState.cancel? `⏹ 已取消，以下為「${tierLabel}」候選中，取消當下找到的最佳結果。` : `✅ 完整窮舉已跑完全部組合，以下為「${tierLabel}」候選範圍內真正的全域最佳結果。`, false);
 
 if(best){
 TEAM_RESULTS.exhaustive = {result:best, song, poolMode};
