@@ -297,6 +297,7 @@ footer{text-align:center;color:var(--sub);font-size:11px;padding:20px;}
 <li><b>Special Skill Order（SP技能站位順序，不列入本工具加權，僅供參考）</b>：SP技能每首歌只發動一次，依隊伍站位由左到右依序輪流發動（站位1最早、站位5最晚），彼此之間<b>不能重疊</b>（同時間只有1個SP技能生效），但可以自由跟主動技疊加。部分SP技能帶有額外加成條件（解析自技能說明文字，例如「40コンボ以上でスコアが120%UP」「ライフ1000以上でスキル発動率が55%UP」）：需要<b>連段(コンボ)</b>門檻的應放越右邊（越晚發動，連段數才夠）；需要<b>生命值(ライフ)</b>門檻的應放越左邊（越早發動，生命值還沒被扣掉太多）；沒有特殊條件的則依「スコアサポート效果%」數值由小到大排，數值越高越晚發動，可疊加在音樂遊戲後段通常較高的連段分數倍率上（此數值僅用於內部排序，不會顯示在站位建議的卡片標籤上）。這個排序邏輯對<b>實際遊戲分數</b>有實質影響，但因為本工具沒有逐拍模擬連段成長，所以<b>不會反映在 Overall Score</b>裡，僅作為站位建議呈現。</li>
 <li><b>Connect（不列入加權，僅供參考）</b>：本遊戲的 Connect 實際機制是「此卡放置於某 Holomem 技能板的 Connect 格時，提升該技能板效果 X%」，並非同隊成員間的加成。這項對整隊評分的實際影響難以量化，故不列入 Overall Score 加權計算，只在分析結果中列出原始數值供參考。（原本還有「Board 加成%」項目，因為需要玩家手動輸入每張卡的板面投資進度、太麻煩且無法自動抓取，已整個移除。）</li>
 <li><b>Overall Score</b>：以上各項依 Leader Outfit 30 / Passive 25 / Timeline 20 / Coverage 10 加權（原始權重總和85%，已等比例正規化為100%）。Special Skill Order／Connect 皆不計入。</li>
+<li><b>②搜尋時的分層優先邏輯</b>：Overall Score 這個加權總分本身只用來在「同一優先層級內」比較候選隊伍，不是唯一的比較依據。②的搜尋會先把所有候選依兩個硬性條件分層：<b>隊長服裝條件有沒有PASS</b>優先於<b>隊員被動是不是全員都吃到加成</b>，優先於其他分數（強度/覆蓋率）——只有落在「最高優先層級」的候選才會進一步比較 Overall Score 找出最佳解。這代表「時間軸完美但隊長條件沒過、或被動沒有全員吃到」的隊伍，不管加權總分算出來多高，都不會贏過「隊長條件PASS＋被動全員滿足」的隊伍，是分層比較保證的結果，不是加權比例湊出來的「大概率贏」。實作上這個分層還帶來明顯的效能提升：隊長PASS/被動全員滿足這兩件事都不受頻率天賦影響，用不含頻率窮舉的便宜版評分（約1毫秒/組）就能正確判斷，只有落在最高層級的候選才需要真的跑完整的頻率天賦窮舉（約20~110毫秒/組）——實測53位候選角色的規模下，篩選後通常只剩不到20%的候選需要做昂貴計算，大幅縮短完整窮舉的實際耗時。</li>
 <li><b>主動技能發動頻率天賦（0/4/8/12%，②搜尋時自動納入考量）</b>：每位Holomem的天賦盤可以加成Active技能的發動頻率，效果是把該角色的Interval縮短為Interval/(1+加成%)——依實測驗證（同一張卡分別測0%/8%/12%），觸發序列是「整條從t=0開始直接套用縮短後的Interval重算」，不是保留原節奏只插入額外次數。這代表頻率天賦會讓該成員的觸發時間點整體「相位位移」，如果新的觸發窗口跟隊友的既有觸發時間撞在一起，反而會變成純粹的Overlap（浪費），不會提升整隊的Timeline/Coverage分數——頻率天賦不是「點越高分數越高」，最佳值會依隊伍其他成員的節奏而變。②搜尋隊伍時（連卡片組合都不省略地全部窮舉），對每個候選隊伍都窮舉4的隊伍人數次方種頻率排列組合（最多1024種），找出讓Timeline+Coverage加權分數最高的配置。分析結果的時間軸區塊會顯示每位隊員被建議的頻率天賦%，供你在遊戲內的Holomem板實際點配。</li>
 <li><b>主動技的條件式加成（約49%的卡片有這個機制）</b>：不少卡片的主動技除了固定base value之外，還有一個「條件成立時才吃得到」的更高%數（例如「ピュアタイプ2人以上でスコアが120%UP」，平常是較低的base value，條件成立時直接跳到120%）。這個機制分三類處理：<b>屬性型</b>（Pure/Happy/Cute屬性2人以上）用隊伍當下的實際屬性人數判斷，跟隊長服裝/被動的條件判定是同一套邏輯，條件成立就自動採用較高的%數；<b>生命值型</b>（ライフ達到門檻）與<b>連段型</b>（コンボ達到門檻）屬於玩家操作/歌曲進度中途才會達成的動態狀態，本工具沒有逐拍模擬生命值/連段成長，因此採樂觀假設「一輪打得漂亮的話會達成」，直接視為條件成立——這跟工具既有「Active技能100%發動」等假設是同一套設計立場，不是額外引入的樂觀程度，但這代表這部分的分數是上限估計，不是保證值。</li>
 </ol>
@@ -4664,47 +4665,92 @@ document.getElementById("btnStartExhaustive").disabled = true;
 document.getElementById("btnCancelExhaustive").disabled = false;
 document.getElementById("resultAreaExhaustive").innerHTML = "";
 
-let best=null, bestScore=-1;
 const total = jobs.length;
-const CHUNK = 30; // 每批跑30組再讓出主執行緒一次；scoreTeamWithBestFreq每次約20~50ms，一批約0.6~1.5秒，兼顧流暢度與整體吞吐量
 const startTime = Date.now();
+
+// ===== 第一階段：便宜的分層篩選 =====
+// 隊長服裝PASS/FAIL、被動有沒有全員吃到加成，這兩件事都不受頻率天賦影響——用便宜版scoreTeam(頻率固定0%，
+// 不用跑1024種頻率排列組合，一次約1毫秒)就能正確判斷，不需要為每個候選都跑昂貴的頻率窮舉才知道。
+// 已確認優先順序：隊長條件 > 被動全員滿足 > 其他分數(強度/覆蓋率)，是分層比較，不是加權總分——
+// 這代表「時間軸完美但隊長條件沒過/被動沒全員滿足」的隊伍，不管分數再高都不該贏過「條件都過」的隊伍。
+// 所以先把全部候選依這兩個硬性條件分層，只留下「最高層級」的候選才進入第二階段的頻率最佳化，
+// 大幅減少需要做昂貴計算的候選數量(通常會篩掉絕大多數候選，只留下真正夠格的一小部分)。
+const CHEAP_CHUNK = 300; // 便宜版一次可以跑更多組再讓出主執行緒
+const tierOf = new Array(total);
+let bestTier = -1;
+let cheapDone = 0;
+for(let i=0;i<total;i+=CHEAP_CHUNK){
+if(exhaustiveState.cancel) break;
+const end = Math.min(i+CHEAP_CHUNK, total);
+for(let j=i;j<end;j++){
+const job = jobs[j];
+const base = scoreTeam(job.cards, job.leaderId, song);
+const passiveAllOk = base.conditionReport.every(r=> r.passiveBenefitCol==="PASS" || r.passiveBenefitCol==="N/A");
+tierOf[j] = (base.leaderPass?2:0) + (passiveAllOk?1:0); // 0~3，數字越大優先層級越高
+if(tierOf[j]>bestTier) bestTier=tierOf[j];
+}
+cheapDone = end;
+updateExhaustiveProgress(cheapDone, total, Date.now()-startTime, null, `第一階段：篩選候選中（隊長條件／被動全員滿足）…`);
+// eslint-disable-next-line no-await-in-loop
+await new Promise(resolve=>setTimeout(resolve, 0));
+}
+
+if(exhaustiveState.cancel){
+exhaustiveState.running = false;
+document.getElementById("btnStartExhaustive").disabled = false;
+document.getElementById("btnCancelExhaustive").disabled = true;
+updateExhaustiveProgress(cheapDone, total, Date.now()-startTime, null, "⏹ 已取消（僅完成第一階段篩選，尚未進入頻率最佳化，沒有可用結果）。");
+return;
+}
+
+const candidateIndices = [];
+for(let j=0;j<total;j++){ if(tierOf[j]===bestTier) candidateIndices.push(j); }
+const tierLabel = bestTier===3 ? "隊長條件PASS ＋ 被動全員滿足"
+: bestTier===2 ? "隊長條件PASS（被動未能全員滿足）"
+: bestTier===1 ? "被動全員滿足（隊長條件未PASS）"
+: "隊長條件與被動皆未能滿足（候選池裡沒有任何組合能同時或分別滿足這兩項，這是候選範圍能做到的最佳層級）";
+
+// ===== 第二階段：只對最高層級的候選做完整頻率天賦窮舉 =====
+let best=null, bestScore=-1;
+const total2 = candidateIndices.length;
+const CHUNK = 30; // 每批跑30組再讓出主執行緒一次；scoreTeamWithBestFreq每次約20~110ms，一批約0.6~3秒，兼顧流暢度與整體吞吐量
+const phase2Start = Date.now();
 let doneCount = 0;
 
-// 抽樣校準：先跑前面幾組實測平均每組耗時，推估總共需要多久，讓使用者在真正投入大量時間之前先確認要不要繼續。
-const sampleSize = Math.min(5, total);
+const sampleSize = Math.min(5, total2);
 const calibStart = Date.now();
-for(let j=0;j<sampleSize;j++){
-const job = jobs[j];
+for(let k=0;k<sampleSize;k++){
+const job = jobs[candidateIndices[k]];
 const r = scoreTeamWithBestFreq(job.cards, job.leaderId, song);
 if(r.overall>bestScore){ bestScore=r.overall; best=r; }
 }
 doneCount = sampleSize;
-const avgMs = (Date.now()-calibStart)/sampleSize;
-const estTotalMs = avgMs * total;
-updateExhaustiveProgress(doneCount, total, Date.now()-startTime, best, "已完成抽樣校準…");
-if(total>sampleSize && !confirm(`候選組合共 ${total.toLocaleString()} 組，依抽樣估算完整跑完約需 ${formatDuration(estTotalMs)}。要繼續跑完整個窮舉嗎？（可以按「確定」後隨時用「取消」按鈕中止，保留當時最佳結果）`)){
+const avgMs = (Date.now()-calibStart)/Math.max(1,sampleSize);
+const estTotalMs = avgMs * total2;
+updateExhaustiveProgress(doneCount, total2, Date.now()-phase2Start, best, `第一階段篩選完成，最高優先層級：${tierLabel}。已完成抽樣校準…`);
+if(total2>sampleSize && !confirm(`第一階段從 ${total.toLocaleString()} 組候選中篩出 ${total2.toLocaleString()} 組符合最高優先層級（${tierLabel}）。接下來只需要對這 ${total2.toLocaleString()} 組做頻率天賦最佳化，依抽樣估算約需 ${formatDuration(estTotalMs)}。要繼續嗎？（可以按「確定」後隨時用「取消」按鈕中止，保留當時最佳結果）`)){
 exhaustiveState.running = false;
 document.getElementById("btnStartExhaustive").disabled = false;
 document.getElementById("btnCancelExhaustive").disabled = true;
-updateExhaustiveProgress(doneCount, total, Date.now()-startTime, best, "已取消（僅完成抽樣校準），以下為抽樣範圍內的最佳結果。");
+updateExhaustiveProgress(doneCount, total2, Date.now()-phase2Start, best, "已取消（僅完成抽樣校準），以下為抽樣範圍內的最佳結果。");
 if(best){
-TEAM_RESULTS.exhaustive = {result:best, song};
+TEAM_RESULTS.exhaustive = {result:best, song, poolMode};
 saveTeamResultsToStorage();
 renderResult(best, song, "resultAreaExhaustive", poolMode==="owned");
 }
 return;
 }
 
-for(let i=sampleSize;i<total;i+=CHUNK){
+for(let i=sampleSize;i<total2;i+=CHUNK){
 if(exhaustiveState.cancel) break;
-const end = Math.min(i+CHUNK, total);
-for(let j=i;j<end;j++){
-const job = jobs[j];
+const end = Math.min(i+CHUNK, total2);
+for(let k=i;k<end;k++){
+const job = jobs[candidateIndices[k]];
 const r = scoreTeamWithBestFreq(job.cards, job.leaderId, song);
 if(r.overall>bestScore){ bestScore=r.overall; best=r; }
 }
 doneCount = end;
-updateExhaustiveProgress(doneCount, total, Date.now()-startTime, best, "搜尋中…");
+updateExhaustiveProgress(doneCount, total2, Date.now()-phase2Start, best, `第二階段：${tierLabel}，頻率最佳化中…`);
 // eslint-disable-next-line no-await-in-loop
 await new Promise(resolve=>setTimeout(resolve, 0));
 }
@@ -4713,18 +4759,15 @@ exhaustiveState.running = false;
 document.getElementById("btnStartExhaustive").disabled = false;
 document.getElementById("btnCancelExhaustive").disabled = true;
 
-updateExhaustiveProgress(doneCount, total, Date.now()-startTime, best, exhaustiveState.cancel? "⏹ 已取消，以下為取消當下找到的最佳結果。" : "✅ 完整窮舉已跑完全部組合，以下為候選範圍內真正的全域最佳結果。");
+updateExhaustiveProgress(doneCount, total2, Date.now()-phase2Start, best, exhaustiveState.cancel? `⏹ 已取消，以下為「${tierLabel}」候選中，取消當下找到的最佳結果。` : `✅ 完整窮舉已跑完全部組合，以下為「${tierLabel}」候選範圍內真正的全域最佳結果。`);
 
 if(best){
-TEAM_RESULTS.exhaustive = {result:best, song};
+TEAM_RESULTS.exhaustive = {result:best, song, poolMode};
 saveTeamResultsToStorage();
 renderResult(best, song, "resultAreaExhaustive", poolMode==="owned");
 }
 }
 
-// 鎖定「已手動指定的卡片」，只針對剩下的空位從 owned 中窮舉／爬山演算法找最佳搭配。
-// fixedCards：已手動選好、要固定上場的卡片（可以是 0～5 張）。
-// forcedLeaderId：可選；若指定且該卡不在 fixedCards 中，函式內部會同時嘗試「隊長也上場」與「隊長不上場只掛buff」兩種情境，取分數較高者。
 /* ================= UI ================= */
 function switchTab(name){
 document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active", b.dataset.tab===name));
