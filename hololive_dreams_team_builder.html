@@ -370,8 +370,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 200,
+"range": 4,
 "valueByBloom": [150, 150, 150, 150, 150, 200],
-"desc": "範囲内のホロメンボード効果を200%UP"
+"desc": "4マス 範囲内のホロメンボード効果を200%UP（未開花150%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234545"
@@ -432,8 +433,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 135,
+"range": 8,
 "valueByBloom": [85, 85, 85, 85, 85, 135],
-"desc": "範囲内のホロメンボード効果を135%UP"
+"desc": "8マス 範囲内のホロメンボード効果を135%UP（未開花85%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234587"
@@ -494,8 +496,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 250,
+"range": 3,
 "valueByBloom": [200, 200, 200, 200, 200, 250],
-"desc": "範囲内のホロメンボード効果を250%UP"
+"desc": "3マス 範囲内のホロメンボード効果を250%UP（未開花200%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234590"
@@ -556,8 +559,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 135,
+"range": 8,
 "valueByBloom": [85, 85, 85, 85, 85, 135],
-"desc": "範囲内のホロメンボード効果を135%UP"
+"desc": "8マス 範囲内のホロメンボード効果を135%UP（未開花85%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234602"
@@ -618,8 +622,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 135,
+"range": 8,
 "valueByBloom": [85, 85, 85, 85, 85, 135],
-"desc": "範囲内のホロメンボード効果を135%UP"
+"desc": "8マス 範囲内のホロメンボード効果を135%UP（未開花85%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234623"
@@ -680,27 +685,32 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 200,
+"range": 4,
 "valueByBloom": [150, 150, 150, 150, 150, 200],
-"desc": "範囲内のホロメンボード効果を200%UP"
+"desc": "4マス 範囲内のホロメンボード効果を200%UP（未開花150%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234647"
 },
 {
 "id": "sakuramiko_beach_de_hajikeru_kousai_shot",
-"name": "ビーチで弾ける、光彩ショット！",
+"name": "ビーチで弾ける、光彩ショット！（水着さくらみこ）",
 "holomem": "さくらみこ",
 "genCode": "0",
 "genLabel": "0期生",
-"type": "unknown",
-"typeConfirmed": false,
+"type": "Pure",
+"typeConfirmed": true,
 "rarity": 5,
 "stats": {
 "performance": 11145,
 "technique": 7828,
 "sense": 6947
 },
-"special": null,
+"special": {
+"duration": 11,
+"value": 145,
+"desc": "11秒間スコアサポート効果145%"
+},
 "active": {
 "interval": 27,
 "duration": 10,
@@ -730,26 +740,35 @@ const DEFAULT_CARDS = [
 "value": 80,
 "desc": "ピュアタイプ2人以上で全員のパフォーマンスが80%UP、ピュアタイプ2人以上で全員のスコアサポート効果25%"
 },
-"connect": null,
+"connect": {
+"value": 200,
+"range": 4,
+"valueByBloom": [150, 150, 150, 150, 150, 200],
+"desc": "4マス 範囲内のホロメンボード効果を200%UP（未開花150%）"
+},
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80287840",
-"note": "2026/8/7新上線水着限定卡，AppMedia個別頁面尚未填入スペシャル/コネクト/開花分階數值，此處數值取自最強キャラランキング頁彙整表(最大育成時)；type未經官方頁面確認(タイプ欄位仍顯示ー)，暫標記unknown；スペシャル(必殺)技能資料尚未公開，special設為null；沒有開花分階數值，所有開花等級一律使用同一組數值，等公開細節後再回來補完整。"
+"note": "2026/8/7新上線水着限定卡，type/special/connect已補齊確認(2026/8/7更新)。沒有開花分階數值，所有開花等級一律使用同一組數值，等公開細節後再回來補完整。"
 },
 {
 "id": "hoshimachi_suisei_natsu_ni_issen_mizudeppou_no_arpeggio",
-"name": "夏に一閃！水鉄砲のアルペジオ",
+"name": "夏に一閃！水鉄砲のアルペジオ（水着星街すいせい）",
 "holomem": "星街すいせい",
 "genCode": "0",
 "genLabel": "0期生",
-"type": "unknown",
-"typeConfirmed": false,
+"type": "Cute",
+"typeConfirmed": true,
 "rarity": 5,
 "stats": {
 "performance": 7828,
 "technique": 6947,
 "sense": 11145
 },
-"special": null,
+"special": {
+"duration": 12,
+"value": 120,
+"desc": "12秒間スコアサポート効果120% 0期生が2人以上でスキル発動率が45%UP"
+},
 "active": {
 "interval": 23,
 "duration": 8,
@@ -779,10 +798,15 @@ const DEFAULT_CARDS = [
 "value": 135,
 "desc": "0期生が2人以上で全員のセンスが135%UP"
 },
-"connect": null,
+"connect": {
+"value": 250,
+"range": 3,
+"valueByBloom": [200, 200, 200, 200, 200, 250],
+"desc": "3マス 範囲内のホロメンボード効果を250%UP（未開花200%）"
+},
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80287912",
-"note": "2026/8/7新上線水着限定卡，AppMedia個別頁面尚未填入スペシャル/コネクト/開花分階數值，此處數值取自最強キャラランキング頁彙整表(最大育成時)；type未經官方頁面確認(タイプ欄位仍顯示ー)，暫標記unknown；スペシャル(必殺)技能資料尚未公開，special設為null；沒有開花分階數值，所有開花等級一律使用同一組數值，等公開細節後再回來補完整。"
+"note": "2026/8/7新上線水着限定卡，type/special/connect已補齊確認(2026/8/7更新)。special的スキル発動率+45%是額外的條件式加成、跟スコアサポート效果是不同種類的效果，目前只記錄在desc文字裡，沒有拆成結構化欄位(本工具目前尚未對special做條件式加成的結構化解析，跟active的bonusCondType機制不同)。沒有開花分階數值，所有開花等級一律使用同一組數值，等公開細節後再回來補完整。"
 },
 {
 "id": "azki_sakihokoru_ichizuna_hana",
@@ -840,8 +864,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 135,
+"range": 8,
 "valueByBloom": [85, 85, 85, 85, 85, 135],
-"desc": "範囲内のホロメンボード効果を135%UP"
+"desc": "8マス 範囲内のホロメンボード効果を135%UP（未開花85%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234524"
@@ -902,8 +927,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 190,
+"range": 5,
 "valueByBloom": [140, 140, 140, 140, 140, 190],
-"desc": "範囲内のホロメンボード効果を190%UP"
+"desc": "5マス 範囲内のホロメンボード効果を190%UP（未開花140%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234530"
@@ -966,8 +992,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 200,
+"range": 4,
 "valueByBloom": [150, 150, 150, 150, 150, 200],
-"desc": "範囲内のホロメンボード効果を200%UP"
+"desc": "4マス 範囲内のホロメンボード効果を200%UP（未開花150%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234539"
@@ -1028,8 +1055,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 200,
+"range": 4,
 "valueByBloom": [150, 150, 150, 150, 150, 200],
-"desc": "範囲内のホロメンボード効果を200%UP"
+"desc": "4マス 範囲内のホロメンボード効果を200%UP（未開花150%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234542"
@@ -1090,8 +1118,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 160,
+"range": 6,
 "valueByBloom": [110, 110, 110, 110, 110, 160],
-"desc": "範囲内のホロメンボード効果を160%UP"
+"desc": "6マス 範囲内のホロメンボード効果を160%UP（未開花110%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234551"
@@ -1152,8 +1181,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 190,
+"range": 5,
 "valueByBloom": [140, 140, 140, 140, 140, 190],
-"desc": "範囲内のホロメンボード効果を190%UP"
+"desc": "5マス 範囲内のホロメンボード効果を190%UP（未開花140%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234554"
@@ -1214,8 +1244,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 160,
+"range": 6,
 "valueByBloom": [110, 110, 110, 110, 110, 160],
-"desc": "範囲内のホロメンボード効果を160%UP"
+"desc": "6マス 範囲内のホロメンボード効果を160%UP（未開花110%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234566"
@@ -1276,8 +1307,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 190,
+"range": 5,
 "valueByBloom": [140, 140, 140, 140, 140, 190],
-"desc": "範囲内のホロメンボード効果を190%UP"
+"desc": "5マス 範囲内のホロメンボード効果を190%UP（未開花140%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234572"
@@ -1338,8 +1370,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 270,
+"range": 3,
 "valueByBloom": [220, 220, 220, 220, 220, 270],
-"desc": "範囲内のホロメンボード効果を270%UP"
+"desc": "3マス 範囲内のホロメンボード効果を270%UP（未開花220%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234581"
@@ -1400,8 +1433,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 260,
+"range": 3,
 "valueByBloom": [210, 210, 210, 210, 210, 260],
-"desc": "範囲内のホロメンボード効果を260%UP"
+"desc": "3マス 範囲内のホロメンボード効果を260%UP（未開花210%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234584"
@@ -1462,8 +1496,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 260,
+"range": 3,
 "valueByBloom": [210, 210, 210, 210, 210, 260],
-"desc": "範囲内のホロメンボード効果を260%UP"
+"desc": "3マス 範囲内のホロメンボード効果を260%UP（未開花210%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234605"
@@ -1524,8 +1559,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 200,
+"range": 4,
 "valueByBloom": [150, 150, 150, 150, 150, 200],
-"desc": "範囲内のホロメンボード効果を200%UP"
+"desc": "4マス 範囲内のホロメンボード効果を200%UP（未開花150%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234614"
@@ -1586,8 +1622,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 190,
+"range": 5,
 "valueByBloom": [140, 140, 140, 140, 140, 190],
-"desc": "範囲内のホロメンボード効果を190%UP"
+"desc": "5マス 範囲内のホロメンボード効果を190%UP（未開花140%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234626"
@@ -1648,8 +1685,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 190,
+"range": 5,
 "valueByBloom": [140, 140, 140, 140, 140, 190],
-"desc": "範囲内のホロメンボード効果を190%UP"
+"desc": "5マス 範囲内のホロメンボード効果を190%UP（未開花140%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234635"
@@ -1710,15 +1748,16 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 190,
+"range": 5,
 "valueByBloom": [140, 140, 140, 140, 140, 190],
-"desc": "範囲内のホロメンボード効果を190%UP 効果マス範囲5マス"
+"desc": "5マス 範囲内のホロメンボード効果を190%UP（未開花140%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234638"
 },
 {
 "id": "shiori_novella_shoko_de_hagukumu_tankyushin",
-"name": "書庫ではぐくむ探究心",
+"name": "書庫ではぐくむ探求心",
 "holomem": "シオリ・ノヴェラ",
 "genCode": "advent",
 "genLabel": "Advent",
@@ -1772,8 +1811,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 260,
+"range": 3,
 "valueByBloom": [210, 210, 210, 210, 210, 260],
-"desc": "範囲内のホロメンボード効果を260%UP"
+"desc": "3マス 範囲内のホロメンボード効果を260%UP（未開花210%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234653"
@@ -1834,8 +1874,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 160,
+"range": 6,
 "valueByBloom": [110, 110, 110, 110, 110, 160],
-"desc": "範囲内のホロメンボード効果を160%UP"
+"desc": "6マス 範囲内のホロメンボード効果を160%UP（未開花110%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234665"
@@ -1896,8 +1937,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 190,
+"range": 5,
 "valueByBloom": [140, 140, 140, 140, 140, 190],
-"desc": "範囲内のホロメンボード効果を190%UP"
+"desc": "5マス 範囲内のホロメンボード効果を190%UP（未開花140%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234668"
@@ -1958,8 +2000,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 190,
+"range": 5,
 "valueByBloom": [140, 140, 140, 140, 140, 190],
-"desc": "範囲内のホロメンボード効果を190%UP（効果マス範囲：5マス）"
+"desc": "5マス 範囲内のホロメンボード効果を190%UP（未開花140%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234671"
@@ -2020,8 +2063,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 135,
+"range": 8,
 "valueByBloom": [85, 85, 85, 85, 85, 135],
-"desc": "範囲内のホロメンボード効果を135%UP 効果マス範囲8マス"
+"desc": "8マス 範囲内のホロメンボード効果を135%UP（未開花85%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234674"
@@ -2082,8 +2126,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 190,
+"range": 5,
 "valueByBloom": [140, 140, 140, 140, 140, 190],
-"desc": "範囲内のホロメンボード効果を190%UP"
+"desc": "5マス 範囲内のホロメンボード効果を190%UP（未開花140%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234677"
@@ -2144,8 +2189,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 250,
+"range": 3,
 "valueByBloom": [200, 200, 200, 200, 200, 250],
-"desc": "範囲内のホロメンボード効果を250%UP"
+"desc": "3マス 範囲内のホロメンボード効果を250%UP（未開花200%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234518"
@@ -2206,8 +2252,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 190,
+"range": 5,
 "valueByBloom": [140, 140, 140, 140, 140, 190],
-"desc": "範囲内のホロメンボード効果を190%UP"
+"desc": "5マス 範囲内のホロメンボード効果を190%UP（未開花140%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234521"
@@ -2268,8 +2315,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 190,
+"range": 5,
 "valueByBloom": [140, 140, 140, 140, 140, 190],
-"desc": "範囲内のホロメンボード効果を190%UP"
+"desc": "5マス 範囲内のホロメンボード効果を190%UP（未開花140%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234527"
@@ -2330,8 +2378,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 270,
+"range": 3,
 "valueByBloom": [220, 220, 220, 220, 220, 270],
-"desc": "範囲内のホロメンボード効果を270%UP"
+"desc": "3マス 範囲内のホロメンボード効果を270%UP（未開花220%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234533"
@@ -2392,8 +2441,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 270,
+"range": 3,
 "valueByBloom": [220, 220, 220, 220, 220, 270],
-"desc": "範囲内のホロメンボード効果を270%UP"
+"desc": "3マス 範囲内のホロメンボード効果を270%UP（未開花220%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234536"
@@ -2454,8 +2504,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 160,
+"range": 6,
 "valueByBloom": [110, 110, 110, 110, 110, 160],
-"desc": "範囲内のホロメンボード効果を160%UP"
+"desc": "6マス 範囲内のホロメンボード効果を160%UP（未開花110%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234548"
@@ -2516,8 +2567,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 200,
+"range": 4,
 "valueByBloom": [150, 150, 150, 150, 150, 200],
-"desc": "範囲内のホロメンボード効果を200%UP"
+"desc": "4マス 範囲内のホロメンボード効果を200%UP（未開花150%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234557"
@@ -2578,15 +2630,16 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 190,
+"range": 5,
 "valueByBloom": [140, 140, 140, 140, 140, 190],
-"desc": "範囲内のホロメンボード効果を190%UP"
+"desc": "5マス 範囲内のホロメンボード効果を190%UP（未開花140%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234560"
 },
 {
 "id": "usadapekora_bitfield",
-"name": "愛嬌たっぷりビットフィールド",
+"name": "愛嬌たっぷりラビットフィールド",
 "holomem": "兎田ぺこら",
 "genCode": "3",
 "genLabel": "3期生",
@@ -2640,8 +2693,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 160,
+"range": 6,
 "valueByBloom": [110, 110, 110, 110, 110, 160],
-"desc": "範囲内のホロメンボード効果を160%UP"
+"desc": "6マス 範囲内のホロメンボード効果を160%UP（未開花110%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234563"
@@ -2702,8 +2756,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 105,
+"range": 12,
 "valueByBloom": [55, 55, 55, 55, 55, 105],
-"desc": "範囲内のホロメンボード効果を105%UP"
+"desc": "12マス 範囲内のホロメンボード効果を105%UP（未開花55%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234569"
@@ -2764,8 +2819,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 200,
+"range": 4,
 "valueByBloom": [150, 150, 150, 150, 150, 200],
-"desc": "範囲内のホロメンボード効果を200%UP"
+"desc": "4マス 範囲内のホロメンボード効果を200%UP（未開花150%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234575"
@@ -2826,8 +2882,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 160,
+"range": 6,
 "valueByBloom": [110, 110, 110, 110, 110, 160],
-"desc": "範囲内のホロメンボード効果を160%UP"
+"desc": "6マス 範囲内のホロメンボード効果を160%UP（未開花110%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234578"
@@ -2888,8 +2945,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 160,
+"range": 6,
 "valueByBloom": [110, 110, 110, 110, 110, 160],
-"desc": "範囲内のホロメンボード効果を160%UP"
+"desc": "6マス 範囲内のホロメンボード効果を160%UP（未開花110%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234593"
@@ -2950,8 +3008,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 200,
+"range": 4,
 "valueByBloom": [150, 150, 150, 150, 150, 200],
-"desc": "範囲内のホロメンボード効果を200%UP"
+"desc": "4マス 範囲内のホロメンボード効果を200%UP（未開花150%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234596"
@@ -3012,8 +3071,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 135,
+"range": 8,
 "valueByBloom": [85, 85, 85, 85, 85, 135],
-"desc": "範囲内のホロメンボード効果を135%UP"
+"desc": "8マス 範囲内のホロメンボード効果を135%UP（未開花85%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234599"
@@ -3074,8 +3134,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 200,
+"range": 4,
 "valueByBloom": [150, 150, 150, 150, 150, 200],
-"desc": "範囲内のホロメンボード効果を200%UP"
+"desc": "4マス 範囲内のホロメンボード効果を200%UP（未開花150%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234608"
@@ -3136,8 +3197,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 105,
+"range": 12,
 "valueByBloom": [55, 55, 55, 55, 55, 105],
-"desc": "範囲内のホロメンボード効果を105%UP"
+"desc": "12マス 範囲内のホロメンボード効果を105%UP（未開花55%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234611"
@@ -3198,8 +3260,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 190,
+"range": 5,
 "valueByBloom": [140, 140, 140, 140, 140, 190],
-"desc": "範囲内のホロメンボード効果を190%UP"
+"desc": "5マス 範囲内のホロメンボード効果を190%UP（未開花140%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234617"
@@ -3260,8 +3323,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 190,
+"range": 5,
 "valueByBloom": [140, 140, 140, 140, 140, 190],
-"desc": "範囲内のホロメンボード効果を190%UP"
+"desc": "5マス 範囲内のホロメンボード効果を190%UP（未開花140%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234620"
@@ -3322,8 +3386,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 190,
+"range": 5,
 "valueByBloom": [140, 140, 140, 140, 140, 190],
-"desc": "範囲内のホロメンボード効果を190%UP"
+"desc": "5マス 範囲内のホロメンボード効果を190%UP（未開花140%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234629"
@@ -3384,8 +3449,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 135,
+"range": 8,
 "valueByBloom": [85, 85, 85, 85, 85, 135],
-"desc": "範囲内のホロメンボード効果を135%UP"
+"desc": "8マス 範囲内のホロメンボード効果を135%UP（未開花85%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234632"
@@ -3446,8 +3512,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 190,
+"range": 5,
 "valueByBloom": [140, 140, 140, 140, 140, 190],
-"desc": "範囲内のホロメンボード効果を190%UP"
+"desc": "5マス 範囲内のホロメンボード効果を190%UP（未開花140%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234641"
@@ -3508,8 +3575,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 250,
+"range": 3,
 "valueByBloom": [200, 200, 200, 200, 200, 250],
-"desc": "範囲内のホロメンボード効果を250%UP"
+"desc": "3マス 範囲内のホロメンボード効果を250%UP（未開花200%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234644"
@@ -3570,8 +3638,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 250,
+"range": 3,
 "valueByBloom": [200, 200, 200, 200, 200, 250],
-"desc": "範囲内のホロメンボード効果を250%UP"
+"desc": "3マス 範囲内のホロメンボード効果を250%UP（未開花200%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234650"
@@ -3632,8 +3701,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 190,
+"range": 5,
 "valueByBloom": [140, 140, 140, 140, 140, 190],
-"desc": "範囲内のホロメンボード効果を190%UP"
+"desc": "5マス 範囲内のホロメンボード効果を190%UP（未開花140%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234656"
@@ -3694,8 +3764,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 105,
+"range": 12,
 "valueByBloom": [55, 55, 55, 55, 55, 105],
-"desc": "範囲内のホロメンボード効果を105%UP"
+"desc": "12マス 範囲内のホロメンボード効果を105%UP（未開花55%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234659"
@@ -3756,8 +3827,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 190,
+"range": 5,
 "valueByBloom": [140, 140, 140, 140, 140, 190],
-"desc": "範囲内のホロメンボード効果を190%UP"
+"desc": "5マス 範囲内のホロメンボード効果を190%UP（未開花140%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://appmedia.jp/hololive-dreams/80234662"
@@ -3818,8 +3890,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 135,
+"range": 8,
 "valueByBloom": [85, 85, 85, 85, 85, 135],
-"desc": "8マス効果 範囲内のホロメンボード効果を135%UP"
+"desc": "8マス 範囲内のホロメンボード効果を135%UP（未開花85%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://game8.jp/hololive-dreams/801998"
@@ -3880,8 +3953,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 200,
+"range": 4,
 "valueByBloom": [150, 150, 150, 150, 150, 200],
-"desc": "4マス効果 範囲内のホロメンボード効果を200%UP"
+"desc": "4マス 範囲内のホロメンボード効果を200%UP（未開花150%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://game8.jp/hololive-dreams/802000"
@@ -3942,8 +4016,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 160,
+"range": 6,
 "valueByBloom": [110, 110, 110, 110, 110, 160],
-"desc": "6マス効果 範囲内のホロメンボード効果を160%UP"
+"desc": "6マス 範囲内のホロメンボード効果を160%UP（未開花110%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://game8.jp/hololive-dreams/801999"
@@ -4004,8 +4079,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 200,
+"range": 5,
 "valueByBloom": [150, 150, 150, 150, 150, 200],
-"desc": "5マス効果 範囲内のホロメンボード効果を200%UP"
+"desc": "5マス 範囲内のホロメンボード効果を200%UP（未開花150%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://game8.jp/hololive-dreams/801997"
@@ -4066,8 +4142,9 @@ const DEFAULT_CARDS = [
 },
 "connect": {
 "value": 160,
+"range": 6,
 "valueByBloom": [110, 110, 110, 110, 110, 160],
-"desc": "6マス効果 範囲内のホロメンボード効果を160%UP"
+"desc": "6マス 範囲内のホロメンボード効果を160%UP（未開花110%）"
 },
 "board": "個別面板效果未列出",
 "source": "https://game8.jp/hololive-dreams/801996"
@@ -4336,6 +4413,11 @@ return {card:c,isLeader,leaderOutfitCol,passiveCondCol,passiveBenefitCol,passive
 // 觸發序列是「整條從t=0開始，直接套用縮短後的interval重算」，不是保留原節奏、只是插入額外次數，
 // 也不是「第一次發動不受影響」，詳見開發過程中的測試記錄。
 const FREQ_LEVELS = [0,4,8,12];
+// 頻率天賦石頭成本：依使用者實測確認，每點(+4%)固定消耗25顆頻率石頭，每位角色最多點3點(12%上限)。
+// 這代表「建議頻率天賦」不是免費調整，用這個換算率可以直接把某支隊伍的「總共要花幾顆石頭」算出來，
+// 讓你在比較不同隊伍的分數時，也能同時看到換隊/點滿頻率天賦的實際資源代價。
+const FREQ_STONE_COST_PER_POINT = 25;
+function freqStoneCost(freqPct){ return (freqPct/4) * FREQ_STONE_COST_PER_POINT; }
 function effectiveInterval(baseInterval, freqPct){
 return baseInterval / (1 + (freqPct||0)/100);
 }
@@ -5027,9 +5109,18 @@ const segs = myEvents.map(e=>`<div class="seg ${e.kind}" style="left:${e.start/s
 // 頻率天賦建議：這是scoreTeamWithBestFreq窮舉4^n種排列組合後、對「這組已定案的隊伍」找到的最佳頻率配置——
 // 只有透過搜尋功能才會有非0的建議值；手動單獨檢視某隊伍時預設全部視為0%(未點)。
 const freqPct = (result.freqAssignment && result.freqAssignment[c.holomem]) || 0;
-const freqBadge = c.active ? `<span class="small" style="display:block;color:var(--accent2);">建議頻率天賦：${freqPct}%</span>` : "";
+const stoneCost = freqStoneCost(freqPct);
+const freqBadge = c.active ? `<span class="small" style="display:block;color:var(--accent2);">建議頻率天賦：${freqPct}%${stoneCost>0?`（${stoneCost}顆藍心方塊(大藍)）`:""}</span>` : "";
 return `<div class="timeline-row"><div class="who"><div class="marquee-wrap"><span class="marquee-text">${c.holomem}</span></div><div class="marquee-wrap small"><span class="marquee-text">${c.name}</span></div>${freqBadge}</div><div class="timeline-track">${segs}</div></div>`;
 }).join("");
+
+// 整支隊伍的頻率天賦石頭總消耗：把每位隊員的建議頻率天賦換算成石頭數後加總，
+// 讓你在看Overall Score的同時，也能一眼看到「要達到這個分數，頻率天賦這塊總共要花多少稀缺資源」。
+const totalFreqStones = result.team.reduce((sum,m)=>{
+const freqPct = (result.freqAssignment && result.freqAssignment[m.card.holomem]) || 0;
+return sum + freqStoneCost(freqPct);
+}, 0);
+const freqStoneSummary = totalFreqStones>0 ? `<p class="small" style="margin-top:8px;">💎 這支隊伍要達到上述建議頻率天賦配置，總共需要 <b>${totalFreqStones} 顆藍心方塊(大藍)</b>（每點+4%固定消耗25顆，每人最多3點）。這不是免費調整，換隊或衝高頻率天賦前，建議把這筆成本也一併考慮進去。</p>` : "";
 
 const orderChips = result.order.map(id=>{
 const c=cardById(id);
@@ -5074,6 +5165,7 @@ ${scoreBar("覆蓋效率（主動技，加成強度加權）",WEIGHTS.coverage,r
 <p class="small">空檔＝100% − 主動技覆蓋率。「全曲平均有效加成」已確認遊戲規則：同類型Active Score Up效果<b>不會疊加</b>，多個主動技同時生效時只採計當下最高的%數，這個指標就是把「每個時間點實際生效的最高%數」對整首歌積分後取平均——空檔天生貢獻0，重疊時較低的那個會被正確排除、不重複計分，強度大小也直接反映在數字裡。計分時封頂100分（維持跟其他子分數一致的0-100尺度），但這裡顯示的是未封頂的原始數字，方便你看出即使兩隊都封頂在100分，實際強度仍可能有差異。SP技能不參與這裡的任何計算——實測發現同一位角色的SP技能，在不同歌曲裡第一次觸發的時間點並不固定（例如同一張卡實測過15秒／23秒兩種不同結果），且這個時間點无法透過選卡或天賦點數去改變，不是隊伍決策能影響的變數，所以覆蓋率／空檔／加成強度都只採計主動技。時間軸圖表上仍會畫出SP技能的區塊，但<b>橫向位置僅供參考</b>，實際觸發時機依歌曲而異、目前無法準確模擬；SP技能真正確定的資訊是站位順序（見上方「建議站位順序」)，不是時間點。</p>
 <div class="legend"><span><i style="background:var(--accent2)"></i>主動技</span><span><i style="background:var(--accent)"></i>SP技能（位置僅供參考）</span></div>
 <div class="timeline-wrap">${buildTimelineRulerHtml(song.duration)}${timelineRows}</div>
+${freqStoneSummary}
 <p class="small">＊「重疊（浪費）」只計算<b>主動技彼此</b>同時生效的時間（同類型 Score Up 效果不可疊加），SP技能不計入重疊率計算。</p>
 <p class="small">＊沒有時間軸資料的卡片（主動技資料為 unknown）不會顯示色塊，代表該卡目前無法納入時間軸計算，僅其服裝/被動/隊長效果仍計入評分。</p>
 </div>
@@ -5405,7 +5497,7 @@ return `<tr>
 <td class="small">${passiveTxt}</td>
 <td class="small">${activeTxt}</td>
 <td class="small">${specialTxt}</td>
-<td>${c.connect?"+"+statAtBloom(c.connect,"value",c.id)+"%":"unknown"}</td>
+<td>${c.connect?"+"+statAtBloom(c.connect,"value",c.id)+"%"+(c.connect.range?`（${c.connect.range}マス）`:""):"unknown"}</td>
 <td><a href="${c.source}" target="_blank">來源</a></td>
 </tr>`;
 }).join("");
